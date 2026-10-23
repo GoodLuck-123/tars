@@ -1,0 +1,13 @@
+# Local data and generated artifacts
+/data/
+/datasets/
+/checkpoints/
+/outputs/
+/runs/
+/build/
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
