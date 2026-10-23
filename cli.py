@@ -76,7 +76,6 @@ def doctor(c):
 
 def build(c):
     from fetch import packages
-    from build import main
     # Optional cache seeds only accelerate pinned downloads; not runtime dependencies.
     for name,target in [('toolchain','toolchain'),('ros1-sdk','sysroot'),('pcl','sysroot')]:packages(name,ROOT/'.cache'/target,c['build'].get('seed_caches',[]))
     log=ROOT/'.cache/build.log';log.parent.mkdir(exist_ok=True)
@@ -84,8 +83,11 @@ def build(c):
     with log.open('w') as f:
         result=subprocess.run([sys.executable,ROOT/'buildkit/build.py',str(c['build']['jobs'])],stdout=f,stderr=subprocess.STDOUT)
     if result.returncode:raise RuntimeError('Build failed; inspect '+str(log))
-    from bundle import main as bundle
-    bundle()
+    with log.open('a') as f:
+        result=subprocess.run([sys.executable,ROOT/'buildkit/bundle.py'],stdout=f,stderr=subprocess.STDOUT)
+    if result.returncode:raise RuntimeError('Packaging failed; inspect '+str(log))
+    release=json.loads((ROOT/'dist/release.json').read_text())
+    print(f"构建完成：{release['id']}，{release['bytes']/2**20:.1f} MiB",flush=True)
 
 
 def deploy(c):
