@@ -7,7 +7,8 @@
       "revision": "0d2c0346107b75b59934975adec9a6eeeb913c64",
       "file": "fast-livo2-0d2c0346107b75b59934975adec9a6eeeb913c64.tar.gz",
       "url": "https://codeload.github.com/hku-mars/FAST-LIVO2/tar.gz/0d2c0346107b75b59934975adec9a6eeeb913c64",
-      "sha256": "1da2652f835f2efb02c0992bc4d64e8dcde48571e538f35dddaf6ba6a61c17d1"
+      "sha256": "1da2652f835f2efb02c0992bc4d64e8dcde48571e538f35dddaf6ba6a61c17d1",
+      "directory": "third_party/FAST-LIVO2"
     },
     {
       "name": "sophus",
@@ -15,7 +16,8 @@
       "revision": "a621ff2e56c56c839a6c40418d42c3c254424b5c",
       "file": "sophus-a621ff2e56c56c839a6c40418d42c3c254424b5c.tar.gz",
       "url": "https://codeload.github.com/strasdat/Sophus/tar.gz/a621ff2e56c56c839a6c40418d42c3c254424b5c",
-      "sha256": "67deb7b0ea38ac6a44967ceee2875507ea9d64a352195080223d5ca3e1584fa4"
+      "sha256": "67deb7b0ea38ac6a44967ceee2875507ea9d64a352195080223d5ca3e1584fa4",
+      "directory": "third_party/Sophus"
     },
     {
       "name": "vikit",
@@ -23,7 +25,8 @@
       "revision": "6c886c8e5d83997806e00294826d528cea3581dd",
       "file": "vikit-6c886c8e5d83997806e00294826d528cea3581dd.tar.gz",
       "url": "https://codeload.github.com/xuankuzcr/rpg_vikit/tar.gz/6c886c8e5d83997806e00294826d528cea3581dd",
-      "sha256": "8162d0b616c443118a52e654394d3eb0807d6dac3b782f4dc3d6823c8815fede"
+      "sha256": "8162d0b616c443118a52e654394d3eb0807d6dac3b782f4dc3d6823c8815fede",
+      "directory": "third_party/rpg_vikit"
     },
     {
       "name": "livox-driver",
@@ -31,7 +34,8 @@
       "revision": "3d240d5666129e1a3052e78ee8487a04b08fdda3",
       "file": "livox-driver-3d240d5666129e1a3052e78ee8487a04b08fdda3.tar.gz",
       "url": "https://codeload.github.com/Livox-SDK/livox_ros_driver/tar.gz/3d240d5666129e1a3052e78ee8487a04b08fdda3",
-      "sha256": "e953ffe14cdb45ea4989807924c5c7360f2ecde63e93b40272159928beae0f7b"
+      "sha256": "e953ffe14cdb45ea4989807924c5c7360f2ecde63e93b40272159928beae0f7b",
+      "directory": "third_party/livox_ros_driver"
     },
     {
       "name": "perception-pcl",
@@ -39,7 +43,8 @@
       "revision": "59d81f4d66810650b54e184e279aa74423173122",
       "file": "perception-pcl-59d81f4d66810650b54e184e279aa74423173122.tar.gz",
       "url": "https://codeload.github.com/ros-perception/perception_pcl/tar.gz/59d81f4d66810650b54e184e279aa74423173122",
-      "sha256": "63680567f131146e0f7828ed70dbf7305ce9cc17ee69c9a528b59a70f222bd49"
+      "sha256": "63680567f131146e0f7828ed70dbf7305ce9cc17ee69c9a528b59a70f222bd49",
+      "directory": "third_party/perception_pcl"
     },
     {
       "name": "pcl-msgs",
@@ -47,7 +52,15 @@
       "revision": "5b640d9ae0f00d3dd6611d9bfce09c01682f568c",
       "file": "pcl-msgs-5b640d9ae0f00d3dd6611d9bfce09c01682f568c.tar.gz",
       "url": "https://codeload.github.com/ros-perception/pcl_msgs/tar.gz/5b640d9ae0f00d3dd6611d9bfce09c01682f568c",
-      "sha256": "06fd2b4ac972ce01034acf0d1f85f426cc619c5f86fbb22b9f84d5155333185e"
+      "sha256": "06fd2b4ac972ce01034acf0d1f85f426cc619c5f86fbb22b9f84d5155333185e",
+      "directory": "third_party/pcl_msgs"
+    },
+    {
+      "name": "r3live-reference",
+      "repository": "https://github.com/hku-mars/r3live",
+      "revision": "6143a38537f28cb36eb24e9bbe2e39c8f7967157",
+      "directory": "third_party/R3LIVE-reference",
+      "reference_only": true
     }
   ]
 }

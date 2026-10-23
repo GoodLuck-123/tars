@@ -1,0 +1,21 @@
+[submodule "third_party/FAST-LIVO2"]
+	path = third_party/FAST-LIVO2
+	url = https://github.com/hku-mars/FAST-LIVO2.git
+[submodule "third_party/Sophus"]
+	path = third_party/Sophus
+	url = https://github.com/strasdat/Sophus.git
+[submodule "third_party/rpg_vikit"]
+	path = third_party/rpg_vikit
+	url = https://github.com/xuankuzcr/rpg_vikit.git
+[submodule "third_party/livox_ros_driver"]
+	path = third_party/livox_ros_driver
+	url = https://github.com/Livox-SDK/livox_ros_driver.git
+[submodule "third_party/perception_pcl"]
+	path = third_party/perception_pcl
+	url = https://github.com/ros-perception/perception_pcl.git
+[submodule "third_party/pcl_msgs"]
+	path = third_party/pcl_msgs
+	url = https://github.com/ros-perception/pcl_msgs.git
+[submodule "third_party/R3LIVE-reference"]
+	path = third_party/R3LIVE-reference
+	url = https://github.com/hku-mars/r3live.git

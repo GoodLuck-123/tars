@@ -1,0 +1,88 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -21,8 +21,8 @@
+ if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm|aarch64|ARM|AARCH64)")
+   if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+     # 64-bit ARM optimizations (e.g., RK3588 and Jetson Orin NX)
+-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -mcpu=native -mtune=native -ffast-math")
+-    message(STATUS "Using 64-bit ARM optimizations: -O3 -mcpu=native -mtune=native -ffast-math")
++    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=armv8-a -ffast-math")
++    message(STATUS "Using 64-bit ARM optimizations: -O3 -march=armv8-a -ffast-math")
+   else()
+     # 32-bit ARM optimizations with NEON support
+     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -mcpu=native -mtune=native -mfpu=neon -ffast-math")
+@@ -83,10 +83,9 @@
+   roscpp
+   rospy
+   std_msgs
+-  pcl_ros
++  livox_ros_driver
+   tf
+   message_generation
+-  eigen_conversions
+   vikit_common
+   vikit_ros
+   cv_bridge
+@@ -94,12 +93,12 @@
+ )
+ 
+ find_package(Eigen3 REQUIRED)
+-find_package(PCL REQUIRED)
++find_package(PCL REQUIRED COMPONENTS common io filters kdtree search octree sample_consensus)
+ find_package(OpenCV REQUIRED)
+ find_package(Sophus REQUIRED)
+ find_package(Boost REQUIRED COMPONENTS thread)
+ 
+-set(Sophus_LIBRARIES libSophus.so)
++
+ 
+ # Define the catkin package
+ catkin_package(
+@@ -115,6 +114,7 @@
+   ${OpenCV_INCLUDE_DIRS}
+   ${Sophus_INCLUDE_DIRS}
+   include
++  ${CMAKE_CURRENT_SOURCE_DIR}/../perception_pcl/pcl_conversions/include
+ )
+ 
+ # Add libraries
+--- a/include/common_lib.h
++++ b/include/common_lib.h
+@@ -20,6 +20,10 @@
+ #include <sensor_msgs/Imu.h>
+ #include <sophus/se3.h>
+ #include <tf/transform_broadcaster.h>
++
++#include <cstdlib>
++#undef ROOT_DIR
++#define ROOT_DIR (std::getenv("LIVO_OUTPUT_DIR") ? std::getenv("LIVO_OUTPUT_DIR") : "./")
+ 
+ using namespace std;
+ using namespace Eigen;
+--- a/src/LIVMapper.cpp
++++ b/src/LIVMapper.cpp
+@@ -304,6 +304,7 @@
+ 
+   vio_manager->processFrame(LidarMeasures.measures.back().img, _pv_list, voxelmap_manager->voxel_map_, LidarMeasures.last_lio_update_time - _first_lidar_time);
+ 
++  std::cout << "LIVO_VISUAL_UPDATE" << std::endl;
+   if (imu_prop_enable) 
+   {
+     ekf_finish_once = true;
+@@ -483,7 +484,7 @@
+ 
+ void LIVMapper::savePCD() 
+ {
+-  if (pcd_save_en && (pcl_wait_save->points.size() > 0 || pcl_wait_save_intensity->points.size() > 0) && pcd_save_interval < 0) 
++  if (pcd_save_en && (pcl_wait_save->points.size() > 0 || pcl_wait_save_intensity->points.size() > 0) ) 
+   {
+     std::string raw_points_dir = std::string(ROOT_DIR) + "Log/pcd/all_raw_points.pcd";
+     std::string downsampled_points_dir = std::string(ROOT_DIR) + "Log/pcd/all_downsampled_points.pcd";
+@@ -549,6 +550,7 @@
+     // if (!p_imu->imu_time_init) continue;
+ 
+     stateEstimationAndMapping();
++    std::cout << std::fixed << std::setprecision(6) << "LIVO_PROGRESS stamp=" << LidarMeasures.last_lio_update_time << " mode=" << int(LidarMeasures.lio_vio_flg) << " lidar_queue=" << lid_raw_data_buffer.size() << " image_queue=" << img_buffer.size() << std::endl;
+   }
+   savePCD();
+ }

@@ -2,6 +2,7 @@
 import fcntl
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import signal
@@ -37,6 +38,7 @@ def run(job,lockfd):
     for d in ['logs','monitor','algorithm/Log/pcd','algorithm/Log/image','algorithm/Log/result','algorithm/Log/ref_cur_combine']:(job/d).mkdir(parents=True,exist_ok=True)
     with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
     env=os.environ.copy();env.update(ROS_MASTER_URI=f'http://127.0.0.1:{port}',ROS_IP='127.0.0.1',ROS_LOG_DIR=str(job/'logs/ros'),LIVO_OUTPUT_DIR=str(job/'algorithm')+'/')
+    status['master_uri']=env['ROS_MASTER_URI'];resources={}
     def state(phase,**kw):
         status.update(phase=phase,heartbeat=time.time(),elapsed_s=time.monotonic()-started,**kw);write_json(job/'state.json',status)
     def spawn(name,args,ros=True):
@@ -49,6 +51,15 @@ def run(job,lockfd):
         try:return json.loads((job/'monitor/state.json').read_text())
         except (OSError,ValueError):return {}
     def alive():
+        for name,p in processes.items():
+            try:
+                fields=Path(f'/proc/{p.pid}/stat').read_text().rsplit(')',1)[1].split()
+                mem=Path(f'/proc/{p.pid}/status').read_text().splitlines()
+                rss=next(int(x.split()[1]) for x in mem if x.startswith('VmRSS:'))
+                r=resources.setdefault(name,dict(peak_rss_kib=0))
+                r.update(cpu_s=(int(fields[11])+int(fields[12]))/os.sysconf('SC_CLK_TCK'),rss_kib=rss,peak_rss_kib=max(rss,r['peak_rss_kib']))
+            except (OSError,StopIteration,ValueError):pass
+        status['resources']=resources
         if (job/'stop').exists():raise InterruptedError('User requested stop')
         if shutil.disk_usage(job).free < cfg['min_free_gib']*2**30:raise RuntimeError('Insufficient free disk space')
         if time.monotonic()-started>cfg['timeout_s']:raise RuntimeError('Task timeout')
@@ -127,14 +138,18 @@ def run(job,lockfd):
                     if len(row)==8:poses.append(row)
                 except ValueError:pass
         if not poses or not pcds:failure=(failure+'; ' if failure else '')+'Missing trajectory or map'
+        if any(not all(math.isfinite(v) for v in row) for row in poses):failure=(failure+'; ' if failure else '')+'Non-finite trajectory'
+        if poses and not requested_stop and cfg['expected_end_s']-poses[-1][0]>cfg['tail_tolerance_s']:failure=(failure+'; ' if failure else '')+'Trajectory does not cover sequence end'
         exits={name:p.returncode for name,p in processes.items()}
         # ROS's normal SIGINT shutdown may return 0 or -SIGINT for helper tools.
         if exits.get('livo')!=0:failure=(failure+'; ' if failure else '')+'LIVO did not exit cleanly'
         status.update(algorithm='stopped' if requested_stop else 'failed' if failure else 'complete',reason=failure,exits=exits,progress=m,poses=len(poses),map_chunks=len(pcds),trajectory_start=poses[0][0] if poses else None,trajectory_end=poses[-1][0] if poses else None)
+        write_json(job/'metrics.json',dict(processes=resources,monitor=m,poses=len(poses),map_chunks=len(pcds),unprocessed_tail_s=status.get('unprocessed_tail_s')))
         state('finished');write_json(job/'summary.json',status)
         # Generate after all writers have stopped. state/summary stay immutable until collection.
-        files={str(p.relative_to(job)):digest(p) for p in job.rglob('*') if p.is_file() and p.name not in {'files.json','supervisor.log'}}
+        files={str(p.relative_to(job)):digest(p) for p in job.rglob('*') if p.is_file() and p.name!='files.json'}
         write_json(job/'files.json',files)
+        (job/'complete').touch()
         os.close(int(lockfd))
 
 

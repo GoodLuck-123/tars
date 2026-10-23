@@ -1,0 +1,96 @@
+{
+  "run_id": "20261023-202334-775d0a",
+  "phase": "finished",
+  "algorithm": "failed",
+  "transfer": "pending",
+  "started": 1772682089.637784,
+  "pid": 2634,
+  "heartbeat": 1772682122.895213,
+  "elapsed_s": 33.25743800800001,
+  "reason": "Command '['bash', '-c', 'source \"$1/env.sh\"; shift; exec \"$@\"', 'livo', '/home/firefly/livo2-workspace/releases/be9f7f26e8026a9e', 'rosparam', 'set', '/use_sim_time', 'true']' returned non-zero exit status 1.; master required SIGKILL; Missing trajectory or map; LIVO did not exit cleanly",
+  "exits": {
+    "monitor": 0,
+    "master": -9
+  },
+  "progress": {
+    "schema": 1,
+    "rules_version": 1,
+    "lines": 108,
+    "warnings": 0,
+    "errors": 6,
+    "visual_updates": 0,
+    "processed": 0,
+    "alerts": {
+      "839b755307730cb0": {
+        "level": "ERROR",
+        "message": "ERROR: cannot launch node of type [rosout/rosout]: Cannot locate node of type [rosout] in package [rosout]. Make sure file exists in package path and permission is set to executable (chmod +x)",
+        "count": 1,
+        "first_time": 1772682092.2830591,
+        "last_notice": 1772682092.2833717,
+        "last_time": 1772682092.2830703,
+        "source": "logs/master.log",
+        "offset": 0
+      },
+      "75dbca8bbd09c3af": {
+        "level": "ERROR",
+        "message": "[roslaunch][ERROR] 2026-03-05 03:41:32,236: Cannot locate node of type [rosout] in package [rosout]. Make sure file exists in package path and permission is set to executable (chmod +x)",
+        "count": 1,
+        "first_time": 1772682092.2868454,
+        "last_notice": 1772682092.287361,
+        "last_time": 1772682092.286851,
+        "source": "logs/ros/32eca91e-1845-11f1-98bb-6c1ff7295dee/roslaunch-firefly-2636.log",
+        "offset": 8731
+      },
+      "4b465318200422e4": {
+        "level": "ERROR",
+        "message": "[roslaunch][ERROR] 2026-03-05 03:41:32,236: ERROR: cannot launch node of type [rosout/rosout]: Cannot locate node of type [rosout] in package [rosout]. Make sure file exists in package path and permission is set to executable (chmod +x)",
+        "count": 1,
+        "first_time": 1772682092.2874916,
+        "last_notice": 1772682092.287586,
+        "last_time": 1772682092.2874956,
+        "source": "logs/ros/32eca91e-1845-11f1-98bb-6c1ff7295dee/roslaunch-firefly-2636.log",
+        "offset": 8917
+      },
+      "226bef9e562e8a1c": {
+        "level": "ERROR",
+        "message": "[roslaunch][ERROR] 2026-03-05 03:41:32,236: RLException: failed to start core service [/rosout]",
+        "count": 1,
+        "first_time": 1772682092.28767,
+        "last_notice": 1772682092.28776,
+        "last_time": 1772682092.2876737,
+        "source": "logs/ros/32eca91e-1845-11f1-98bb-6c1ff7295dee/roslaunch-firefly-2636.log",
+        "offset": 9154
+      },
+      "636bf4f114069280": {
+        "level": "ERROR",
+        "message": "[roslaunch][ERROR] 2026-03-05 03:41:32,236: The traceback for the exception was written to the log file",
+        "count": 1,
+        "first_time": 1772682092.2878447,
+        "last_notice": 1772682092.2879243,
+        "last_time": 1772682092.2878478,
+        "source": "logs/ros/32eca91e-1845-11f1-98bb-6c1ff7295dee/roslaunch-firefly-2636.log",
+        "offset": 9250
+      },
+      "7bb7a65697ea65ec": {
+        "level": "ERROR",
+        "message": "[roslaunch][ERROR] 2026-03-05 03:41:32,238: Traceback (most recent call last):",
+        "count": 1,
+        "first_time": 1772682092.2880037,
+        "last_notice": 1772682092.2880838,
+        "last_time": 1772682092.2880073,
+        "source": "logs/ros/32eca91e-1845-11f1-98bb-6c1ff7295dee/roslaunch-firefly-2636.log",
+        "offset": 9354
+      }
+    },
+    "count_basis": "log records, exact cross-source line copies removed; differently formatted mirrors may repeat",
+    "event_seq": 6,
+    "heartbeat": 1772682122.8249161,
+    "sources": 4,
+    "status": "complete",
+    "cross_source_copies": 2
+  },
+  "poses": 0,
+  "map_chunks": 0,
+  "trajectory_start": null,
+  "trajectory_end": null
+}

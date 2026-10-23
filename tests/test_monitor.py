@@ -44,6 +44,20 @@ class MonitorTests(unittest.TestCase):
             p.rename(logs/'old.log');p.write_text('[WARN] rotated\n');m.poll()
             self.assertGreaterEqual(m.state['warnings'],2)
 
+    def test_ros_mirrors_and_multiline_root_cause(self):
+        with tempfile.TemporaryDirectory() as d:
+            m=M.Monitor(d);self.addCleanup(m.events.close)
+            m.line('[WARN] [177.0, 123.1]: Reset ImuProcess','logs/livo.log',0,now=1)
+            m.line('123.1 WARN /laserMapping [source.cpp:1] [topics: /rosout] Reset ImuProcess','logs/ros/node.log',0,now=1.1)
+            self.assertEqual(m.state['warnings'],1)
+            m.line('[ERROR] Traceback (most recent call last):','logs/master.log',10)
+            m.line('  File "rpc.py", line 1, in close','logs/master.log',20)
+            m.line('xmlrpc.client.Fault: publisherUpdate unknown method','logs/master.log',30)
+            alert=next(x for x in m.state['alerts'].values() if x['level']=='ERROR')
+            self.assertIn('unknown method',alert['message'])
+            self.assertEqual(m.state['errors'],1)
+            self.assertGreater(len(alert['context']),1)
+
     def test_only_exact_cross_source_lines_are_deduplicated(self):
         with tempfile.TemporaryDirectory() as d:
             m=M.Monitor(d);self.addCleanup(m.events.close)

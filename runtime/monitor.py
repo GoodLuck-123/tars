@@ -8,7 +8,7 @@ import sys
 import time
 
 ANSI = re.compile(r'\x1b\[[0-?]*[ -/]*[@-~]')
-LEVEL = re.compile(r'\b(FATAL|ERROR|WARN(?:ING)?)\b', re.I)
+LEVEL = re.compile(r'\b(FATAL|ERROR|WARN(?:ING)?)\b|\b(Warning|Error):')
 PROGRESS = re.compile(r'LIVO_PROGRESS stamp=([\d.]+) mode=(\d+) lidar_queue=(\d+) image_queue=(\d+)')
 
 
@@ -23,6 +23,7 @@ class Monitor:
         path=self.dest/'state.json'
         self.state=json.loads(path.read_text()) if path.exists() else dict(schema=1,rules_version=1,lines=0,warnings=0,errors=0,visual_updates=0,processed=0,alerts={})
         self.state['count_basis']='log records, exact cross-source line copies removed; differently formatted mirrors may repeat'
+        self.traces=self.state.get('pending_traces',{})
         self.seq=self.state.get('event_seq',0)
         cp=self.dest/'cursors.json'
         if cp.exists():self.cursors=json.loads(cp.read_text())
@@ -36,9 +37,27 @@ class Monitor:
     def line(self, text, source, offset, now=None):
         now=time.monotonic() if now is None else now
         text=ANSI.sub('',text).strip();self.state['lines']+=1
+        pending=self.traces.get(source)
+        if pending and text and not LEVEL.search(text) and 'Traceback (most recent call last)' not in text:
+            pending['context']=(pending['context']+[text])[-20:]
+            alert=self.state['alerts'][pending['key']];alert['context']=pending['context']
+            if re.match(r'[\w.]*(?:Error|Exception|Fault):',text):
+                alert.update(message=text,last_notice=time.time(),last_time=time.time())
+                self.emit('ERROR',text,source,offset,context=pending['context'],signature=pending['key'])
+                del self.traces[source]
+            return
+        elif pending and (not text or LEVEL.search(text)):self.traces.pop(source,None)
         # Sources may contain copies of the same ROS message. Count canonical events once.
         message=re.sub(r'^(?:\[[^\]]*\]\s*)+', '',text)
-        digest=hashlib.sha256(text.encode()).hexdigest()
+        identity=text
+        # ROS console and rosout use different formats for the same timestamped event.
+        console=re.search(r'\[\s*(WARN|ERROR|FATAL)\s*\]\s*\[([\d.]+)(?:,\s*([\d.]+))?\]:\s*(.*)',text)
+        rosfile=re.match(r'([\d.]+)\s+(WARN|ERROR|FATAL)\s+(/\S+)\s+(?:\[[^\]]*\]\s*)*(.*)',text)
+        if console and source.endswith('/livo.log'):
+            message=console[4];identity=f'{console[1]}:/laserMapping:{console[3] or console[2]}:{message}'
+        elif rosfile:
+            message=rosfile[4];identity=f'{rosfile[2]}:{rosfile[3]}:{rosfile[1]}:{message}'
+        digest=hashlib.sha256(identity.encode()).hexdigest()
         previous=self.recent.get(digest)
         if previous and previous[0]!=source and now-previous[1]<2:
             self.state['cross_source_copies']=self.state.get('cross_source_copies',0)+1;return
@@ -53,16 +72,19 @@ class Monitor:
         level=LEVEL.search(text)
         if not level and any(x in text for x in ['Traceback (most recent call last)', 'Segmentation fault','terminate called','No space left on device','process has died']):
             severity='ERROR'
-        elif level:severity='WARN' if level[1].upper().startswith('WARN') else level[1].upper()
+        elif level:
+            tag=next(g for g in level.groups() if g).upper()
+            severity='WARN' if tag.startswith('WARN') else tag
         else:return
         self.state['warnings' if severity=='WARN' else 'errors']+=1
         # Normalize changing numbers only for aggregation; retain representative source text.
         signature=severity+':'+re.sub(r'[-+]?\d+(?:\.\d+)?','<n>',message)
         key=hashlib.sha256(signature.encode()).hexdigest()[:16]
-        alert=self.state['alerts'].setdefault(key,dict(level=severity,message=text,count=0,first_time=time.time(),last_notice=0))
+        alert=self.state['alerts'].setdefault(key,dict(level=severity,message=message,raw=text,count=0,first_time=time.time(),last_notice=0))
         alert.update(count=alert['count']+1,last_time=time.time(),source=source,offset=offset)
         if alert['count']==1 or time.time()-alert['last_notice']>=self.repeat_s:
-            self.emit(severity,text,source,offset,count=alert['count'],signature=key);alert['last_notice']=time.time()
+            self.emit(severity,message,source,offset,count=alert['count'],signature=key,raw=text);alert['last_notice']=time.time()
+        if 'Traceback (most recent call last)' in text:self.traces[source]=dict(key=key,context=[text])
         self.changed=True
 
     def poll(self):
@@ -79,7 +101,7 @@ class Monitor:
                         if not raw or not raw.endswith(b'\n'):break
                         self.line(raw.decode(errors='replace'),key,offset);cursor['offset']=f.tell()
                 self.cursors[key]=cursor
-        self.state.update(event_seq=self.seq,heartbeat=time.time(),sources=len(self.cursors),status='running')
+        self.state.update(event_seq=self.seq,heartbeat=time.time(),sources=len(self.cursors),status='running',pending_traces=self.traces)
         write_json(self.dest/'state.json',self.state);write_json(self.dest/'cursors.json',self.cursors)
 
 

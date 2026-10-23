@@ -64,21 +64,12 @@ def packages(name, destination, seeds=()):
 
 
 def sources(seeds=()):
-    for item in json.loads((ROOT / 'dependencies.lock').read_text())['sources']:
-        dest = CACHE / 'sources' / item['name']
-        if (dest / '.livo-source').exists():
-            if (dest / '.livo-source').read_text().strip() != item['sha256']: raise RuntimeError(f'Source lock changed: {dest}')
-            continue
-        archive = obtain(item, seeds)
-        dest.mkdir(parents=True, exist_ok=True)
-        # Archives are checksum verified; reject escaping names/links before tar extraction.
-        with tarfile.open(archive) as t:
-            for m in t.getmembers():
-                if Path(m.name).is_absolute() or '..' in Path(m.name).parts or m.isdev(): raise ValueError(m.name)
-                if m.issym() or m.islnk():
-                    if Path(m.linkname).is_absolute() or '..' in Path(m.linkname).parts: raise ValueError(m.linkname)
-        subprocess.run(['tar', '-xf', str(archive), '--strip-components=1', '-C', str(dest)], check=True)
-        (dest / '.livo-source').write_text(item['sha256'] + '\n')
+    for item in json.loads((ROOT/'dependencies.lock').read_text())['sources']:
+        dest=ROOT/item['directory']
+        if not (dest/'.git').exists():
+            subprocess.run(['git','-C',str(ROOT),'submodule','update','--init','--depth','1',item['directory']],check=True)
+        rev=subprocess.check_output(['git','-C',str(dest),'rev-parse','HEAD'],text=True).strip()
+        if rev!=item['revision']:raise RuntimeError(f"Source revision differs from lock: {dest}")
 
 
 if __name__ == '__main__':

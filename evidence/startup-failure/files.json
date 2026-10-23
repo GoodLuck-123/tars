@@ -1,0 +1,17 @@
+{
+  "config.json": "7e58e1c96dd74f4601980b72d5bf26d7b7bcb5911da58b5289d2ecd2bca9000d",
+  "config.resolved.yaml": "0a1913ac89a65ed99c44b5566e91f9f9d8199d9563623ca0468493bc5a5303da",
+  "input.json": "86a6a3e06e1d7baf01b803bd14c57f27f37b0f646dd796a18cd9d34008535551",
+  "stop-monitor": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "algorithm.yaml": "d97838bbabdeffc66565c643524d0848b74a55d63fc125bdc4dad736f95f835d",
+  "state.json": "2f4aa0576007f4c9453032afdc4dfe0efbfb62843f05ad620c8bedda1a9aae52",
+  "camera.yaml": "99fb035e95f335e047d7fd0b6a8b98bb7b74fca8564eceaa19e4dfbef0a7e84c",
+  "summary.json": "2f4aa0576007f4c9453032afdc4dfe0efbfb62843f05ad620c8bedda1a9aae52",
+  "logs/monitor.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "logs/master.log": "662c6b3e47251b28ffec41c9a3d2a1e977592482df4f5959dacacb21b84af3bd",
+  "logs/ros/32eca91e-1845-11f1-98bb-6c1ff7295dee/roslaunch-firefly-2636.log": "4835e22f103c72fa717b38b57ddc0377ae707055e7c0acb5ccec4cee188d3d7d",
+  "logs/ros/32eca91e-1845-11f1-98bb-6c1ff7295dee/master.log": "8524b35da6856e6d2cb5c2ea83fbebea238e3e63aebc8b2a7efcb23183041913",
+  "monitor/cursors.json": "76824d8fea18f63253fbe5a897ae475528638e6c822d6aa2059ede990c48b105",
+  "monitor/state.json": "46c71bc59c1d6d420c104b87dd64d33556c685d9e444f7b25c91b48e1adf5921",
+  "monitor/events.jsonl": "7ebd1b3c734a19b1621505dd5ca084155fa018d747675c096cb69e4599ff4153"
+}

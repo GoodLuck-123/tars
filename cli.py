@@ -23,6 +23,13 @@ def config(path):
     if not path.exists():raise RuntimeError(f'Create your configuration: cp {ROOT}/project.example.yaml {path}')
     c=yaml.safe_load(path.read_text())
     if c['dataset']['rate']<=0 or c['build']['jobs']<1:raise ValueError('rate and build.jobs must be positive')
+    if c['dataset']['start_s']<0 or (c['dataset']['duration_s'] is not None and c['dataset']['duration_s']<=0):raise ValueError('Invalid dataset interval')
+    if len(c['camera']['intrinsics'])!=4 or len(c['camera']['distortion']) not in {4,5,8,12,14}:raise ValueError('Invalid camera model parameters')
+    if c['camera']['scale']<=0 or min(c['camera']['width'],c['camera']['height'])<=0:raise ValueError('Invalid camera dimensions or scale')
+    import numpy as np
+    for key in ['R_camera_lidar','R_imu_lidar']:
+        r=np.asarray(c['extrinsics'][key],dtype=float).reshape(3,3)
+        if not np.isfinite(r).all() or not np.allclose(r.T@r,np.eye(3),atol=.01) or abs(np.linalg.det(r)-1)>.01:raise ValueError('Invalid rotation: '+key)
     c['_config_dir']=str(path.parent)
     for key in ['path']:
         p=Path(c['dataset'][key]).expanduser();c['dataset'][key]=str((path.parent/p).resolve())
@@ -32,7 +39,7 @@ def config(path):
 
 
 def ssh(c,command,**kw):
-    return subprocess.run(['ssh','-o','BatchMode=yes','-o','ConnectTimeout=10','-p',str(c['board']['ssh_port']),c['board']['target'],command],check=True,**kw)
+    return subprocess.run(['ssh','-o','BatchMode=yes','-o','ConnectTimeout=10','-o','ServerAliveInterval=5','-o','ServerAliveCountMax=2','-p',str(c['board']['ssh_port']),c['board']['target'],command],check=True,**kw)
 
 
 def remote(c,code,args=()):
@@ -41,22 +48,26 @@ def remote(c,code,args=()):
 
 
 def workspace(c):
-    return remote(c,'import os,sys;print(os.path.abspath(os.path.expanduser(sys.argv[1])))',[c['board']['workspace']]).strip()
+    return remote(c,'import os,sys;p=os.path.abspath(os.path.expanduser(sys.argv[1]));assert p not in ["/",os.path.expanduser("~")],"Choose a dedicated workspace";print(p)',[c['board']['workspace']]).strip()
 
 
 def sync(c,source,dest,receive=False):
-    transport=shlex.join(['ssh','-p',str(c['board']['ssh_port']),'-o','BatchMode=yes'])
+    transport=shlex.join(['ssh','-p',str(c['board']['ssh_port']),'-o','BatchMode=yes','-o','ServerAliveInterval=5','-o','ServerAliveCountMax=2'])
     target=c['board']['target']+':'+dest
     local(['rsync','-a','--partial','--protect-args','--info=progress2','-e',transport,target if receive else source,source if receive else target],stdout=subprocess.DEVNULL)
 
 
 def doctor(c):
     print('检查主机与板端…',flush=True)
-    print(remote(c,'import json,platform,shutil,os;print(json.dumps(dict(architecture=platform.machine(),python=platform.python_version(),free_gib=shutil.disk_usage(os.path.expanduser("~")).free/2**30,rsync=shutil.which("rsync"))))').strip())
+    info=json.loads(remote(c,'import json,platform,shutil,os;print(json.dumps(dict(architecture=platform.machine(),python=platform.python_version(),free_gib=shutil.disk_usage(os.path.expanduser("~")).free/2**30,rsync=shutil.which("rsync"))))'))
+    print(json.dumps(info))
+    if info['architecture']!='aarch64' or not info['rsync']:raise RuntimeError('Board requires aarch64 and rsync')
+    if info['free_gib']<c['run']['min_free_gib']:raise RuntimeError('Board disk space below configured reserve')
     p=Path(c['dataset']['path'])
     if not p.is_file():raise RuntimeError('Dataset not found: '+str(p))
     from rosbags.rosbag1 import Reader
     with Reader(p) as r:
+        if c['dataset']['start_s']>=r.duration/1e9:raise ValueError('Dataset start is past EOF')
         found={x.topic:x.msgtype for x in r.connections}
         for key,typ in [('lidar','livox_ros_driver/msg/CustomMsg'),('imu','sensor_msgs/msg/Imu'),('compressed_image','sensor_msgs/msg/CompressedImage')]:
             if found.get(c['topics'][key])!=typ:raise RuntimeError(f'Invalid or missing {key} topic/type')
@@ -79,12 +90,15 @@ def build(c):
 
 def deploy(c):
     meta=ROOT/'dist/release.json'
-    if not meta.exists():build(c)
+    from bundle import input_fingerprint
+    if not meta.exists() or json.loads(meta.read_text()).get('input_fingerprint')!=input_fingerprint():build(c)
     release=json.loads(meta.read_text());root=workspace(c)
     if root=='/' or root==str(Path.home()):raise ValueError('Refuse unsafe workspace')
     remote(c,'from pathlib import Path;import sys;p=Path(sys.argv[1]);[(p/x).mkdir(parents=True,exist_ok=True) for x in ["releases","incoming","runs","data"]]',[root])
     existing=remote(c,'from pathlib import Path;import sys;print((Path(sys.argv[1])/"releases"/sys.argv[2]/"files.json").exists())',[root,release['id']]).strip()
     dest=root+'/releases/'+release['id']
+    if existing=='True':
+        remote(c,'import sys;from pathlib import Path;p=Path(sys.argv[1]);sys.path.insert(0,str(p/"runtime"));from install import verify;verify(p)',[dest])
     if existing!='True':
         print('部署运行包…',flush=True);archive=root+'/incoming/'+Path(release['path']).name;sync(c,release['path'],archive)
         code='''import hashlib,json,sys,tarfile,os,subprocess,shutil
@@ -99,9 +113,10 @@ with tarfile.open(archive) as t:
   assert not Path(m.name).is_absolute() and '..' not in Path(m.name).parts and not m.isdev()
   assert not m.issym() and not m.islnk()
  t.extractall(stage)
-p=stage/'install';manifest=json.loads((p/'files.json').read_text())
-for name,expected in manifest.items():assert hashlib.sha256((p/name).read_bytes()).hexdigest()==expected,name
-subprocess.run(['bash','-c','source "$1/env.sh"; python3 -c "import rospy, rosbag, yaml; print(\\\"ROS imports OK\\\")"; rosversion -d','verify',str(p)],check=True)
+p=stage/'install';sys.path.insert(0,str(p/'runtime'))
+from install import verify
+assert verify(p)==ident
+subprocess.run(['bash','-ec','source \"$1/env.sh\"; python3 -c \"import rospy, rosbag, yaml\"; rosversion -d','verify',str(p)],check=True)
 p.rename(root/'releases'/ident);stage.rmdir()
 '''
         print(remote(c,code,[root,archive,release['id'],release['sha256']]).strip())
@@ -120,7 +135,7 @@ def prepare(c,job,install,root):
         start=r.start_time/1e9+c['dataset']['start_s'];end=min(r.end_time/1e9,start+c['dataset']['duration_s']) if c['dataset']['duration_s'] is not None else r.end_time/1e9
         input_info=dict(path=str(p),sha256=ident,start_s=start,end_s=end,topics=[dict(topic=x.topic,type=x.msgtype,count=x.msgcount) for x in r.connections])
     cfg=dict(workspace=root,install=install,bag=bag,rate=c['dataset']['rate'],start_s=c['dataset']['start_s'],duration_s=c['dataset']['duration_s'],expected_end_s=end,tail_tolerance_s=c['dataset']['tail_tolerance_s'],topics=c['topics'],monitoring=c['monitoring'],**{k:c['run'][k] for k in ['timeout_s','shutdown_timeout_s','drain_timeout_s','min_free_gib']})
-    upstream=yaml.safe_load((ROOT/'.cache/sources/fast-livo2/config/avia.yaml').read_text());upstream['common'].update(img_topic=c['topics']['image'],lid_topic=c['topics']['lidar'],imu_topic=c['topics']['imu'])
+    upstream=yaml.safe_load((ROOT/'third_party/FAST-LIVO2/config/avia.yaml').read_text());upstream['common'].update(img_topic=c['topics']['image'],lid_topic=c['topics']['lidar'],imu_topic=c['topics']['imu'])
     upstream['time_offset'].update(img_time_offset=0.0,imu_time_offset=0.0)
     e=c['extrinsics'];upstream['extrin_calib']=dict(extrinsic_T=e['t_imu_lidar'],extrinsic_R=e['R_imu_lidar'],Rcl=e['R_camera_lidar'],Pcl=e['t_camera_lidar'])
     upstream['evo']=dict(seq_name='trajectory',pose_output_en=True);upstream['pcd_save'].update(pcd_save_en=True,interval=c['run']['map_chunk_frames']);upstream['image_save']['img_save_en']=False
@@ -152,9 +167,11 @@ def follow(c,job):
         m=s.get('progress',{});line=f"{s['phase']} | {s.get('elapsed_s',0):.1f}s | 处理 {m.get('processed',0)} | 视觉更新 {m.get('visual_updates',0)} | WARN {m.get('warnings',0)} ERROR {m.get('errors',0)}"
         if line!=last:print(line,flush=True);last=line
         for key,a in m.get('alerts',{}).items():
-            if a['count']!=seen.get(key,0) and (key not in seen or time.time()-a.get('last_notice',0)<c['monitoring']['refresh_s']):
-                print(f"[{a['level']}] {a['message']} (累计 {a['count']})",flush=True);seen[key]=a['count']
-        if s['phase']=='finished':return s
+            if seen.get(key)!=a.get('last_notice'):
+                print(f"[{a['level']}] {a['message']} (累计 {a['count']})",flush=True);seen[key]=a.get('last_notice')
+        if s['phase']=='finished':
+            ready=remote(c,'from pathlib import Path;import sys;print((Path(sys.argv[1])/"files.json").exists())',[job]).strip()
+            if ready=='True':return s
         time.sleep(c['monitoring']['refresh_s'])
 
 
@@ -182,6 +199,11 @@ def main():
     elif a.command=='deploy':deploy(c)
     elif a.command=='ssh':
         root=workspace(c);cmd='cd '+shlex.quote(root)+'; source '+shlex.quote(root+'/current/env.sh')+'; exec bash --noprofile --norc'
+        try:
+            job=latest(c);active=state(c,job)
+            if active.get('master_uri') and active['phase']!='finished':
+                cmd='source '+shlex.quote(root+'/current/env.sh')+'; export ROS_MASTER_URI='+shlex.quote(active['master_uri'])+'; cd '+shlex.quote(job)+'; exec bash --noprofile --norc'
+        except (subprocess.CalledProcessError,ValueError,KeyError):pass
         subprocess.run(['ssh','-t','-p',str(c['board']['ssh_port']),c['board']['target'],'bash -c '+shlex.quote(cmd)],check=True)
     elif a.command=='run':
         doctor(c);root,install=deploy(c);runid=time.strftime('%Y%m%d-%H%M%S')+'-'+uuid.uuid4().hex[:6];job=Path(c['results_dir'])/runid;prepare(c,job,install,root);remotejob=root+'/runs/'+runid
@@ -193,17 +215,23 @@ def main():
             remote(c,'from pathlib import Path;import sys;(Path(sys.argv[1])/"stop").touch()',[remotejob]);s=follow(c,remotejob)
         if s:
             pull(c,remotejob)
+            if s['algorithm']=='stopped':print('任务已停止，结果已回传',flush=True);return
             if s['algorithm']!='complete':raise RuntimeError(s.get('reason') or s['algorithm'])
+        else:raise RuntimeError('Connection interrupted; job continues. Use status --follow and pull to recover.')
     elif a.command=='status':
         job=latest(c)
         if a.raw:ssh(c,'tail -n 80 '+shlex.quote(job+'/logs/livo.log'))
         elif a.follow:follow(c,job)
         else:print(json.dumps(state(c,job),ensure_ascii=False,indent=2))
     elif a.command=='stop':
-        job=latest(c);remote(c,'from pathlib import Path;import sys;(Path(sys.argv[1])/"stop").touch()',[job]);follow(c,job);pull(c,job)
+        job=latest(c)
+        if state(c,job)['phase']!='finished':remote(c,'from pathlib import Path;import sys;(Path(sys.argv[1])/"stop").touch()',[job]);follow(c,job);pull(c,job)
     elif a.command=='pull':pull(c,latest(c,a.run_id))
 
 
 if __name__=='__main__':
     try:main()
-    except (RuntimeError,ValueError,KeyError,OSError,subprocess.CalledProcessError) as e:print('错误：'+str(e),file=sys.stderr);sys.exit(1)
+    except (RuntimeError,ValueError,KeyError,OSError,subprocess.CalledProcessError) as e:
+        print('错误：'+str(e),file=sys.stderr)
+        if isinstance(e,subprocess.CalledProcessError) and e.stderr:print(e.stderr[-4000:],file=sys.stderr)
+        sys.exit(1)

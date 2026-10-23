@@ -1,4 +1,3 @@
-# 唯一用户配置。路径相对本文件；输入数据和标定来自现有 R3LIVE 数据集。
 board:
   target: firefly@10.106.0.220
   workspace: ~/livo2-workspace
@@ -16,17 +15,49 @@ camera:
   width: 1280
   height: 1024
   scale: 0.5
-  intrinsics: [863.4241, 863.4171, 640.6808, 518.3392] # fx, fy, cx, cy
-  distortion: [-0.1080, 0.1050, -0.00012872, 0.000057923, -0.0222]
-  # 解码器按全部五个系数去畸变，下游相机模型使用零畸变
+  intrinsics:
+  - 863.4241
+  - 863.4171
+  - 640.6808
+  - 518.3392
+  distortion:
+  - -0.108
+  - 0.105
+  - -0.00012872
+  - 5.7923e-05
+  - -0.0222
 extrinsics:
-  # p_camera = R_camera_lidar * p_lidar + t_camera_lidar，长度单位米
-  R_camera_lidar: [-0.00113207, -0.0158688, 0.999873, -0.9999999, -0.000486594, -0.00113994, 0.000504622, -0.999874, -0.0158682]
-  t_camera_lidar: [0.0, 0.0, 0.0]
-  # p_imu = R_imu_lidar * p_lidar + t_imu_lidar；AVIA 内置 IMU
-  R_imu_lidar: [1, 0, 0, 0, 1, 0, 0, 0, 1]
-  t_imu_lidar: [0.04165, 0.02326, -0.0284]
-  source_note: "camera: /home/eric/data/r3live_config.yaml; IMU: upstream AVIA config; functional validation, accuracy unverified"
+  R_camera_lidar:
+  - -0.00113207
+  - -0.9999999
+  - 0.000504622
+  - -0.0158688
+  - -0.000486594
+  - -0.999874
+  - 0.999873
+  - -0.00113994
+  - -0.0158682
+  t_camera_lidar:
+  - -0.023321479654300002
+  - 0.027724167903560002
+  - 0.042068852325599995
+  R_imu_lidar:
+  - 1
+  - 0
+  - 0
+  - 0
+  - 1
+  - 0
+  - 0
+  - 0
+  - 1
+  t_imu_lidar:
+  - 0.04165
+  - 0.02326
+  - -0.0284
+  source_note: R3LIVE camera_ext_R/t are T_imu_camera (verified in upstream set_image_pose);
+    T_camera_lidar = inverse(T_imu_camera) * T_imu_lidar; source local r3live_config.yaml,
+    accuracy unverified
 topics:
   lidar: /livox/lidar
   imu: /livox/imu
@@ -35,7 +66,7 @@ topics:
 run:
   timeout_s: 1800
   shutdown_timeout_s: 30
-  drain_timeout_s: 60
+  drain_timeout_s: 300
   min_free_gib: 4
   map_chunk_frames: 100
 monitoring:
