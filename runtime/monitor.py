@@ -69,8 +69,13 @@ class Monitor:
             self.state.update(processed_stamp=stamp,mode=int(m[2]),lidar_queue=int(m[3]),image_queue=int(m[4]),progress_wall=time.time())
             self.state['processed']+=1;self.changed=True
         if 'LIVO_VISUAL_UPDATE' in text:self.state['visual_updates']+=1;self.changed=True
-        level=LEVEL.search(text)
-        if not level and any(x in text for x in ['Traceback (most recent call last)', 'Segmentation fault','terminate called','No space left on device','process has died']):
+        header=re.match(r'^(?:\[[^\]]+\])?\[\s*(DEBUG|INFO|WARN(?:ING)?|ERROR|FATAL)\s*\]',text) or re.match(r'^[\d.]+\s+(DEBUG|INFO|WARN(?:ING)?|ERROR|FATAL)\s+/\S+',text)
+        level=None if header else LEVEL.search(text)
+        if header:
+            severity=header[1]
+            if severity in {'DEBUG','INFO'}:return
+            if severity=='WARNING':severity='WARN'
+        elif not level and any(x in text for x in ['Traceback (most recent call last)', 'Segmentation fault','terminate called','double free or corruption','free(): invalid pointer','No space left on device','process has died']):
             severity='ERROR'
         elif level:
             tag=next(g for g in level.groups() if g).upper()

@@ -1,0 +1,55 @@
+{
+  "run_id": "20261024-001524-9106a6",
+  "phase": "finished",
+  "algorithm": "complete",
+  "reason": null,
+  "stop_reason": null,
+  "elapsed_s": 180.44565819700074,
+  "exits": {
+    "monitor": 0,
+    "master": 0,
+    "decode": 0,
+    "livo": 0,
+    "play": 0
+  },
+  "poses": 2575,
+  "map_chunks": 27,
+  "trajectory_start": 1644736321.642097,
+  "trajectory_end": 1644736494.857495,
+  "unprocessed_tail_s": 0.09277224540710449,
+  "resources": {
+    "monitor": {
+      "peak_rss_kib": 17592,
+      "cpu_s": 1.23,
+      "rss_kib": 17216
+    },
+    "master": {
+      "peak_rss_kib": 59532,
+      "cpu_s": 1.05,
+      "rss_kib": 59532
+    },
+    "decode": {
+      "peak_rss_kib": 84008,
+      "cpu_s": 9.29,
+      "rss_kib": 80252
+    },
+    "livo": {
+      "peak_rss_kib": 2662596,
+      "cpu_s": 65.58,
+      "rss_kib": 2662596
+    },
+    "play": {
+      "peak_rss_kib": 57108,
+      "cpu_s": 0.94,
+      "rss_kib": 57108
+    }
+  },
+  "monitor": {
+    "processed": 5157,
+    "visual_updates": 2574,
+    "warnings": 1,
+    "errors": 1,
+    "cross_source_copies": 2579,
+    "count_basis": "log records, exact cross-source line copies removed; differently formatted mirrors may repeat"
+  }
+}

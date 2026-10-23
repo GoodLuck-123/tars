@@ -1,0 +1,27 @@
+diff --git a/sdk_core/CMakeLists.txt b/sdk_core/CMakeLists.txt
+index 60037f6..48f5e62 100644
+--- a/sdk_core/CMakeLists.txt
++++ b/sdk_core/CMakeLists.txt
+@@ -88,4 +88,8 @@ target_sources(${SDK_LIBRARY}
+ install(TARGETS ${SDK_LIBRARY}
+         PUBLIC_HEADER DESTINATION include
+         ARCHIVE DESTINATION lib
+-        LIBRARY DESTINATION lib)
+\ No newline at end of file
++        LIBRARY DESTINATION lib)
++# Bundled legacy fmt uses char8_t as an identifier before C++20.
++if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 10)
++  target_compile_options(${SDK_LIBRARY} PRIVATE -Wno-error=c++20-compat)
++endif()
+diff --git a/sdk_core/src/base/thread_base.h b/sdk_core/src/base/thread_base.h
+index 35f7fbd..e07ada5 100644
+--- a/sdk_core/src/base/thread_base.h
++++ b/sdk_core/src/base/thread_base.h
+@@ -24,6 +24,7 @@
+ 
+ #ifndef LIVOX_THREAD_BASE_H_
+ #define LIVOX_THREAD_BASE_H_
++#include <memory>
+ #include <atomic>
+ #include <thread>
+ #include "noncopyable.h"

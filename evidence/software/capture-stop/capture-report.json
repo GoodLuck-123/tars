@@ -1,0 +1,21 @@
+{
+  "mode": "capture_replay",
+  "hardware_verified": false,
+  "calibration_verified": false,
+  "bags": [
+    {
+      "file": "sensors_0.bag",
+      "bytes": 36561253
+    }
+  ],
+  "counts": {
+    "/camera/image_color/compressed": 70,
+    "/livox/imu": 940,
+    "/livox/lidar": 45
+  },
+  "types": {
+    "/camera/image_color/compressed": "sensor_msgs/CompressedImage",
+    "/livox/imu": "sensor_msgs/Imu",
+    "/livox/lidar": "livox_ros_driver/CustomMsg"
+  }
+}

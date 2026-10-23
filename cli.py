@@ -22,6 +22,18 @@ def config(path):
     path=Path(path).resolve()
     if not path.exists():raise RuntimeError(f'Create your configuration: cp {ROOT}/project.example.yaml {path}')
     c=yaml.safe_load(path.read_text())
+    defaults=yaml.safe_load((ROOT/'project.example.yaml').read_text())
+    for section in ['capture','calibration']:c.setdefault(section,defaults[section])
+    c['topics'].setdefault('raw_image','/camera/image_raw')
+    cap=c['capture']
+    if cap['image_transport'] not in {'raw','compressed'}:raise ValueError('capture.image_transport must be raw or compressed')
+    if not isinstance(cap['camera_command'],list) or any(not isinstance(s,str) for s in cap['camera_command']):raise ValueError('capture.camera_command must be an argument list')
+    for k in ['replay_duration_s','buffer_mib','split_mib','startup_timeout_s','stall_timeout_s']:
+        if cap[k]<=0:raise ValueError('capture.'+k+' must be positive')
+    if cap['duration_s'] is not None and cap['duration_s']<=0:raise ValueError('capture.duration_s must be positive or null')
+    if not .1<=cap['livox']['publish_hz']<=100:raise ValueError('Invalid Livox publication rate')
+    for key in ['image','pcd']:
+        if c['calibration'][key]:c['calibration'][key]=str((path.parent/Path(c['calibration'][key]).expanduser()).resolve())
     c.setdefault('runtime',dict(livo_cpus=[4,5,6,7],opencv_threads=1))
     rt=c['runtime']
     rt.setdefault('cpu_governor',None)
@@ -45,6 +57,7 @@ def config(path):
 
 
 def ssh(c,command,**kw):
+    if c.get('_host'):return subprocess.run(['bash','-c',command],check=True,**kw)
     return subprocess.run(['ssh','-o','BatchMode=yes','-o','ConnectTimeout=10','-o','ServerAliveInterval=5','-o','ServerAliveCountMax=2','-p',str(c['board']['ssh_port']),c['board']['target'],command],check=True,**kw)
 
 
@@ -58,29 +71,47 @@ def workspace(c):
 
 
 def sync(c,source,dest,receive=False):
+    if c.get('_host'):
+        local(['rsync','-a','--partial',dest if receive else source,source if receive else dest],stdout=subprocess.DEVNULL);return
     transport=shlex.join(['ssh','-p',str(c['board']['ssh_port']),'-o','BatchMode=yes','-o','ServerAliveInterval=5','-o','ServerAliveCountMax=2'])
     target=c['board']['target']+':'+dest
     local(['rsync','-a','--partial','--protect-args','--info=progress2','-e',transport,target if receive else source,source if receive else target],stdout=subprocess.DEVNULL)
 
 
-def doctor(c):
+def image_input(c,found):
+    for key,typ,transport in [('compressed_image','sensor_msgs/msg/CompressedImage','compressed'),('raw_image','sensor_msgs/msg/Image','raw')]:
+        if found.get(c['topics'][key])==typ:
+            if c['topics'][key]==c['topics']['image']:raise ValueError('Image input and rectified output topics must differ')
+            return key,transport
+    raise RuntimeError('Missing image input; check topics.raw_image / compressed_image')
+
+
+def doctor(c,sensors=False):
     print('检查主机与板端…',flush=True)
     info=json.loads(remote(c,'import json,platform,shutil,os;print(json.dumps(dict(architecture=platform.machine(),python=platform.python_version(),free_gib=shutil.disk_usage(os.path.expanduser("~")).free/2**30,rsync=shutil.which("rsync"))))'))
     print(json.dumps(info))
-    if info['architecture']!='aarch64' or not info['rsync']:raise RuntimeError('Board requires aarch64 and rsync')
+    if info['architecture']!=('x86_64' if c.get('_host') else 'aarch64') or not info['rsync']:raise RuntimeError('Wrong target architecture or missing rsync')
     if info['free_gib']<c['run']['min_free_gib']:raise RuntimeError('Board disk space below configured reserve')
+    if sensors:
+        root=workspace(c)
+        result=remote(c,'from pathlib import Path;import json,sys;root=Path(sys.argv[1]);print(json.dumps(dict(video_nodes={p.parent.name:p.read_text().strip() for p in Path("/sys/class/video4linux").glob("video*/name")},livox_driver_installed=(root/"current/bin/livox_ros_driver_node").is_file()),ensure_ascii=False))',[root])
+        print(result.strip());print('设备节点仅供识别；真实相机、雷达收数及同步仍需硬件验收',flush=True);return
     p=Path(c['dataset']['path'])
     if not p.is_file():raise RuntimeError('Dataset not found: '+str(p))
     from rosbags.rosbag1 import Reader
     with Reader(p) as r:
         if c['dataset']['start_s']>=r.duration/1e9:raise ValueError('Dataset start is past EOF')
         found={x.topic:x.msgtype for x in r.connections}
-        for key,typ in [('lidar','livox_ros_driver/msg/CustomMsg'),('imu','sensor_msgs/msg/Imu'),('compressed_image','sensor_msgs/msg/CompressedImage')]:
+        for key,typ in [('lidar','livox_ros_driver/msg/CustomMsg'),('imu','sensor_msgs/msg/Imu')]:
             if found.get(c['topics'][key])!=typ:raise RuntimeError(f'Invalid or missing {key} topic/type')
+        image_input(c,found)
         print(f'数据集：{p.name}，{r.duration/1e9:.2f} 秒，{r.message_count} 条消息',flush=True)
 
 
 def build(c):
+    if c.get('_host'):
+        from native import build as native_build
+        print('构建主机 LIVO2 / 标定工具；日志 .cache/host-build.log',flush=True);native_build(c['build']['jobs']);return
     from fetch import packages
     # Optional cache seeds only accelerate pinned downloads; not runtime dependencies.
     for name,target in [('toolchain','toolchain'),('ros1-sdk','sysroot'),('pcl','sysroot')]:packages(name,ROOT/'.cache'/target,c['build'].get('seed_caches',[]))
@@ -97,6 +128,10 @@ def build(c):
 
 
 def deploy(c):
+    if c.get('_host'):
+        from native import ensure
+        install=ensure(c['build']['jobs']);root=workspace(c)
+        remote(c,'from pathlib import Path;import sys;p=Path(sys.argv[1]);[(p/d).mkdir(parents=True,exist_ok=True) for d in ["runs","data"]]',[root]);return root,str(install)
     meta=ROOT/'dist/release.json'
     from bundle import input_fingerprint
     if not meta.exists() or json.loads(meta.read_text()).get('input_fingerprint')!=input_fingerprint():build(c)
@@ -140,9 +175,10 @@ def prepare(c,job,install,root):
     actual=remote(c,'import hashlib,sys;h=hashlib.sha256();f=open(sys.argv[1],"rb");[(h.update(b)) for b in iter(lambda:f.read(1048576),b"")];print(h.hexdigest())',[bag]).strip()
     if actual!=ident:raise RuntimeError('Remote dataset hash mismatch')
     with Reader(p) as r:
+        image_key,image_transport=image_input(c,{x.topic:x.msgtype for x in r.connections})
         start=r.start_time/1e9+c['dataset']['start_s'];end=min(r.end_time/1e9,start+c['dataset']['duration_s']) if c['dataset']['duration_s'] is not None else r.end_time/1e9
         input_info=dict(path=str(p),sha256=ident,start_s=start,end_s=end,topics=[dict(topic=x.topic,type=x.msgtype,count=x.msgcount) for x in r.connections])
-    cfg=dict(workspace=root,install=install,bag=bag,rate=c['dataset']['rate'],start_s=c['dataset']['start_s'],duration_s=c['dataset']['duration_s'],expected_end_s=end,tail_tolerance_s=c['dataset']['tail_tolerance_s'],topics=c['topics'],monitoring=c['monitoring'],runtime=c['runtime'],**{k:c['run'][k] for k in ['timeout_s','shutdown_timeout_s','drain_timeout_s','min_free_gib']})
+    cfg=task_config(c,root,install,'dataset');cfg.update(bag=bag,rate=c['dataset']['rate'],start_s=c['dataset']['start_s'],duration_s=c['dataset']['duration_s'],expected_end_s=end,tail_tolerance_s=c['dataset']['tail_tolerance_s'],image_input=image_key,image_transport=image_transport)
     upstream=yaml.safe_load((ROOT/'third_party/FAST-LIVO2/config/avia.yaml').read_text());upstream['common'].update(img_topic=c['topics']['image'],lid_topic=c['topics']['lidar'],imu_topic=c['topics']['imu'])
     upstream['runtime']=dict(opencv_threads=c['runtime']['opencv_threads'])
     upstream['time_offset'].update(img_time_offset=0.0,imu_time_offset=0.0)
@@ -151,11 +187,52 @@ def prepare(c,job,install,root):
     for section,values in c['algorithm']['overrides'].items():upstream.setdefault(section,{}).update(values)
     fx,fy,cx,cy=c['camera']['intrinsics'];w,h=c['camera']['width'],c['camera']['height'];scale=c['camera']['scale'];ow,oh=int(w*scale),int(h*scale)
     if min(ow,oh)<1:raise ValueError('Scaled camera dimensions must be positive')
-    upstream['decoder']=dict(K=[fx,0,cx,0,fy,cy,0,0,1],D=c['camera']['distortion'],width=w,height=h,output_width=ow,output_height=oh)
+    upstream['decoder']=dict(K=[fx,0,cx,0,fy,cy,0,0,1],D=c['camera']['distortion'],width=w,height=h,output_width=ow,output_height=oh,input_transport=image_transport)
     cam=dict(cam_model='Pinhole',cam_width=ow,cam_height=oh,scale=1.0,cam_fx=fx*ow/w,cam_fy=fy*oh/h,cam_cx=cx*ow/w,cam_cy=cy*oh/h,cam_d0=0.0,cam_d1=0.0,cam_d2=0.0,cam_d3=0.0)
     job.mkdir(parents=True)
     for name,value in [('config.json',cfg),('input.json',input_info)]: (job/name).write_text(json.dumps(value,indent=2)+'\n')
     for name,value in [('algorithm.yaml',upstream),('camera.yaml',cam),('config.resolved.yaml',c)]: (job/name).write_text(yaml.safe_dump(value,allow_unicode=True,sort_keys=False))
+    return cfg
+
+
+def task_config(c,root,install,mode):
+    rt=dict(c['runtime'])
+    if c.get('_host') or mode!='dataset':rt.update(livo_cpus=[],cpu_governor=None)
+    return dict(mode=mode,workspace=root,install=install,topics=c['topics'],monitoring=c['monitoring'],runtime=rt,**{k:c['run'][k] for k in ['timeout_s','shutdown_timeout_s','drain_timeout_s','min_free_gib']})
+
+
+def prepare_capture(c,job,install,root,replay):
+    cap=c['capture'];cfg=prepare(c,job,install,root) if replay else task_config(c,root,install,'capture')
+    cfg.update(mode='capture_replay' if replay else 'capture',capture=cap,calibration_verified=cap['calibration_verified'])
+    cfg['runtime'].update(livo_cpus=[],cpu_governor=None)
+    image_key=cfg['image_input'] if replay else 'compressed_image' if cap['image_transport']=='compressed' else 'raw_image'
+    cfg['capture_topics']={k:dict(topic=c['topics'][key],type=typ) for k,key,typ in [('lidar','lidar','livox_ros_driver/CustomMsg'),('imu','imu','sensor_msgs/Imu'),('image',image_key,'sensor_msgs/CompressedImage' if image_key=='compressed_image' else 'sensor_msgs/Image')]}
+    job.mkdir(parents=True,exist_ok=True)
+    if not replay:
+        codes=cap['livox']['broadcast_codes'];raw=dict(lidar_config=[dict(broadcast_code=s,enable_connect=True,return_mode=0,coordinate=0,imu_rate=1,extrinsic_parameter_source=0,enable_high_sensitivity=False) for s in codes],timesync_config=dict(enable_timesync=False))
+        (job/'livox.json').write_text(json.dumps(raw,indent=2)+'\n')
+        settings=dict(xfer_format=1,multi_topic=0,data_src=0,publish_freq=cap['livox']['publish_hz'],output_data_type=0,user_config_path=root+'/runs/'+job.name+'/livox.json',frame_id='livox_frame',enable_lidar_bag=False,enable_imu_bag=False)
+        (job/'livox.yaml').write_text(yaml.safe_dump(settings));(job/'config.resolved.yaml').write_text(yaml.safe_dump(c,allow_unicode=True))
+    (job/'config.json').write_text(json.dumps(cfg,indent=2)+'\n')
+    return cfg
+
+
+def prepare_calibration(c,job,install,root):
+    import re
+    cal=c['calibration'];cfg=task_config(c,root,install,'calibrate');cfg['timeout_s']=cal['timeout_s'];job.mkdir(parents=True)
+    fx,fy,cx,cy=c['camera']['intrinsics'];dist=c['camera']['distortion']
+    if len(dist) not in {4,5}:raise ValueError('livox_camera_calib requires the pinhole 4/5 coefficient distortion model')
+    settings=(ROOT/'third_party/livox_camera_calib/config/config_outdoor.yaml').read_text()
+    r=c['extrinsics']['R_camera_lidar'];t=c['extrinsics']['t_camera_lidar'];matrix=[v for i in range(3) for v in [*r[i*3:i*3+3],t[i]]]+[0,0,0,1]
+    settings=re.sub(r'data:\s*\[.*?\]','data: '+str(matrix),settings,count=1,flags=re.S)
+    for k,v in cal['overrides'].items():
+        settings,n=re.subn(r'^'+re.escape(k)+r':.*$',k+': '+str(v),settings,flags=re.M)
+        if n!=1:raise ValueError('Unknown calibration setting: '+k)
+    (job/'calibration-settings.yaml').write_text(settings)
+    params=dict(common=dict(image_file=str(Path(cal['image']).expanduser().resolve()),pcd_file=str(Path(cal['pcd']).expanduser().resolve()),result_file=str(job/'extrinsic.txt')),camera=dict(camera_matrix=[fx,0,cx,0,fy,cy,0,0,1],dist_coeffs=dist+[0]*(5-len(dist))),calib=dict(use_rough_calib=cal['use_rough_calib'],calib_config_file=str(job/'calibration-settings.yaml')))
+    # Host job paths are distinct from the collected results directory.
+    for section,key in [('common','result_file'),('calib','calib_config_file')]:params[section][key]=root+'/runs/'+job.name+'/'+Path(params[section][key]).name
+    (job/'calibration.yaml').write_text(yaml.safe_dump(params));(job/'config.json').write_text(json.dumps(cfg,indent=2)+'\n');(job/'config.resolved.yaml').write_text(yaml.safe_dump(c,allow_unicode=True))
     return cfg
 
 
@@ -172,6 +249,9 @@ def state(c,job):return json.loads(remote(c,'from pathlib import Path;import sys
 
 def status_line(s):
     m=s.get('progress',{})
+    if s.get('capture'):
+        streams=s['capture'].get('streams',{})
+        return f"{s['phase']} | {s.get('elapsed_s',0):.1f}s | "+' | '.join(f"{k} {v['messages']} 条 {v['hz']:.1f}Hz" for k,v in streams.items())+f" | WARN {m.get('warnings',0)} ERROR {m.get('errors',0)}"
     return f"{s['phase']} | {s.get('elapsed_s',0):.1f}s | 处理 {m.get('processed',0)} | 视觉更新 {m.get('visual_updates',0)} | WARN {m.get('warnings',0)} ERROR {m.get('errors',0)}"
 
 
@@ -203,26 +283,47 @@ def pull(c,job):
 
 
 def main():
-    p=argparse.ArgumentParser(description='LIVO2：主机一键运行 RK3588 数据集实验')
-    p.add_argument('--config',default=str(ROOT/'project.yaml'))
+    p=argparse.ArgumentParser(prog='./livo',description='LIVO：板端采集 / 主机 LIVO2 与免标定板标定',epilog='现在可用：./livo record --replay；./livo --host run。用户参数统一编辑 project.yaml。')
+    p.add_argument('--config',default=str(ROOT/'project.yaml'),help='选择完整配置文件，默认 project.yaml')
+    p.add_argument('--host',action='store_true',help='在主机私有环境运行；默认连接板端')
     sub=p.add_subparsers(dest='command',required=True)
-    for name in ['doctor','build','deploy','ssh','run','stop']:sub.add_parser(name)
-    sp=sub.add_parser('status');sp.add_argument('--follow',action='store_true');sp.add_argument('--raw',action='store_true')
-    sp=sub.add_parser('pull');sp.add_argument('run_id',nargs='?')
+    for name,help_text in [('build','仅构建 SDK/驱动/算法；--host 构建主机工具'),('deploy','仅部署运行环境'),('ssh','进入私有 ROS 环境和当前任务'),('run','运行配置中的数据集并回传；--host 在电脑处理'),('stop','正常停止当前任务并回传')]:sub.add_parser(name,help=help_text)
+    sp=sub.add_parser('doctor',help='检查环境与数据；--sensors 只检查采集端');sp.add_argument('--sensors',action='store_true',help='检查采集端环境与设备节点，不依赖示例数据集')
+    sp=sub.add_parser('record',help='录制传感器数据并回传');sp.add_argument('--replay',action='store_true',help='无硬件演练，使用配置中的现有 bag')
+    sub.add_parser('calibrate',help='在主机运行免标定板外参标定，输出候选结果')
+    sp=sub.add_parser('status',help='查看摘要/告警；--follow 持续查看，--raw 看原始日志');sp.add_argument('--follow',action='store_true');sp.add_argument('--raw',action='store_true')
+    sp=sub.add_parser('pull',help='补收最近一次或指定任务，校验全部文件');sp.add_argument('run_id',nargs='?')
+    if len(sys.argv)==1:p.print_help();return
     a=p.parse_args();c=config(a.config)
-    if a.command=='doctor':doctor(c)
+    if a.host or a.command=='calibrate':c['_host']=True;c['board']['workspace']=str(ROOT/'.cache/host-workspace');c['board']['target']='local'
+    if a.command=='record' and not a.replay and not c['capture']['camera_command']:raise RuntimeError('相机尚未配置；硬件到位后在 project.yaml 设置 capture.camera_command。当前可用 record --replay 演练')
+    if a.command=='calibrate':
+        for key in ['image','pcd']:
+            if not c['calibration'][key] or not Path(c['calibration'][key]).expanduser().is_file():raise RuntimeError('请在 project.yaml 设置 calibration.'+key+' 输入文件')
+    if a.command=='doctor':doctor(c,a.sensors)
     elif a.command=='build':build(c)
     elif a.command=='deploy':deploy(c)
     elif a.command=='ssh':
-        root=workspace(c);cmd='cd '+shlex.quote(root)+'; source '+shlex.quote(root+'/current/env.sh')+'; exec bash --noprofile --norc'
+        root=workspace(c)
+        if c.get('_host'):
+            from native import ensure
+            prefix=str(ensure(c['build']['jobs']))
+        else:prefix=root+'/current'
+        cmd='cd '+shlex.quote(root)+'; source '+shlex.quote(prefix+'/env.sh')+'; exec bash --noprofile --norc'
         try:
             job=latest(c);active=state(c,job)
             if active.get('master_uri') and active['phase']!='finished':
-                cmd='source '+shlex.quote(root+'/current/env.sh')+'; export ROS_MASTER_URI='+shlex.quote(active['master_uri'])+'; cd '+shlex.quote(job)+'; exec bash --noprofile --norc'
+                cmd='source '+shlex.quote(prefix+'/env.sh')+'; export ROS_MASTER_URI='+shlex.quote(active['master_uri'])+'; cd '+shlex.quote(job)+'; exec bash --noprofile --norc'
         except (subprocess.CalledProcessError,ValueError,KeyError):pass
-        subprocess.run(['ssh','-t','-p',str(c['board']['ssh_port']),c['board']['target'],'bash -c '+shlex.quote(cmd)],check=True)
-    elif a.command=='run':
-        doctor(c);root,install=deploy(c);runid=time.strftime('%Y%m%d-%H%M%S')+'-'+uuid.uuid4().hex[:6];job=Path(c['results_dir'])/runid;prepare(c,job,install,root);remotejob=root+'/runs/'+runid
+        if c.get('_host'):local(['bash','-c',cmd])
+        else:subprocess.run(['ssh','-t','-p',str(c['board']['ssh_port']),c['board']['target'],'bash -c '+shlex.quote(cmd)],check=True)
+    elif a.command in {'run','record','calibrate'}:
+        if a.command=='run' or (a.command=='record' and a.replay):doctor(c)
+        root,install=deploy(c);runid=time.strftime('%Y%m%d-%H%M%S')+'-'+uuid.uuid4().hex[:6];job=Path(c['results_dir'])/runid
+        if a.command=='record':prepare_capture(c,job,install,root,a.replay)
+        elif a.command=='calibrate':prepare_calibration(c,job,install,root)
+        else:prepare(c,job,install,root)
+        remotejob=root+'/runs/'+runid
         remote(c,'from pathlib import Path;import sys;Path(sys.argv[1]).mkdir(exist_ok=False)',[remotejob]);sync(c,str(job)+'/',remotejob+'/')
         command=shlex.join(['/usr/bin/python3',install+'/runtime/agent.py','start',remotejob]);print(ssh(c,command,capture_output=True,text=True).stdout.strip())
         time.sleep(1)
@@ -236,7 +337,10 @@ def main():
         else:raise RuntimeError('Connection interrupted; job continues. Use status --follow and pull to recover.')
     elif a.command=='status':
         job=latest(c)
-        if a.raw:ssh(c,'tail -n 80 '+shlex.quote(job+'/logs/livo.log'))
+        if a.raw:
+            cfg=json.loads(remote(c,'from pathlib import Path;import sys;print((Path(sys.argv[1])/"config.json").read_text())',[job]));mode=cfg.get('mode','dataset')
+            log='record' if mode.startswith('capture') else 'calibration' if mode=='calibrate' else 'livo'
+            ssh(c,'tail -n 80 '+shlex.quote(job+'/logs/'+log+'.log'))
         elif a.follow:follow(c,job)
         else:
             s=state(c,job);print(Path(job).name+' | '+status_line(s))

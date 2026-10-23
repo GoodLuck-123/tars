@@ -1,0 +1,43 @@
+{
+  "run_id": "20261024-001004-2bdeaa",
+  "phase": "finished",
+  "algorithm": "complete",
+  "reason": null,
+  "stop_reason": null,
+  "elapsed_s": 4.0575463750028575,
+  "exits": {
+    "monitor": 0,
+    "master": 0,
+    "calibration": 0
+  },
+  "poses": 0,
+  "map_chunks": 0,
+  "trajectory_start": null,
+  "trajectory_end": null,
+  "unprocessed_tail_s": null,
+  "resources": {
+    "monitor": {
+      "peak_rss_kib": 14728,
+      "cpu_s": 0.01,
+      "rss_kib": 14728
+    },
+    "master": {
+      "peak_rss_kib": 59576,
+      "cpu_s": 0.99,
+      "rss_kib": 59576
+    },
+    "calibration": {
+      "peak_rss_kib": 226908,
+      "cpu_s": 6.19,
+      "rss_kib": 173592
+    }
+  },
+  "monitor": {
+    "processed": 0,
+    "visual_updates": 0,
+    "warnings": 0,
+    "errors": 0,
+    "cross_source_copies": null,
+    "count_basis": "log records, exact cross-source line copies removed; differently formatted mirrors may repeat"
+  }
+}

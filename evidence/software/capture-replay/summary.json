@@ -1,0 +1,55 @@
+{
+  "run_id": "20261024-000654-43a9ff",
+  "phase": "finished",
+  "algorithm": "complete",
+  "reason": null,
+  "stop_reason": null,
+  "elapsed_s": 20.995752068,
+  "exits": {
+    "monitor": 0,
+    "master": 0,
+    "probe": 0,
+    "record": 0,
+    "play": 0
+  },
+  "poses": 0,
+  "map_chunks": 0,
+  "trajectory_start": null,
+  "trajectory_end": null,
+  "unprocessed_tail_s": null,
+  "resources": {
+    "monitor": {
+      "peak_rss_kib": 13564,
+      "cpu_s": 0.62,
+      "rss_kib": 13564
+    },
+    "master": {
+      "peak_rss_kib": 43180,
+      "cpu_s": 0.85,
+      "rss_kib": 43180
+    },
+    "probe": {
+      "peak_rss_kib": 44924,
+      "cpu_s": 2.63,
+      "rss_kib": 44924
+    },
+    "record": {
+      "peak_rss_kib": 42660,
+      "cpu_s": 0.56,
+      "rss_kib": 42660
+    },
+    "play": {
+      "peak_rss_kib": 42664,
+      "cpu_s": 0.59,
+      "rss_kib": 42664
+    }
+  },
+  "monitor": {
+    "processed": 0,
+    "visual_updates": 0,
+    "warnings": 2,
+    "errors": 1,
+    "cross_source_copies": 1,
+    "count_basis": "log records, exact cross-source line copies removed; differently formatted mirrors may repeat"
+  }
+}

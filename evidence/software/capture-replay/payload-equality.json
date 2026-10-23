@@ -1,0 +1,44 @@
+{
+  "/camera/image_color/compressed": {
+    "messages": 151,
+    "all_payloads_equal": true,
+    "first_header": [
+      0,
+      1644736321,
+      154218576
+    ],
+    "last_header": [
+      328,
+      1644736331,
+      155713368
+    ]
+  },
+  "/livox/imu": {
+    "messages": 2042,
+    "all_payloads_equal": true,
+    "first_header": [
+      2977,
+      1644736321,
+      200799704
+    ],
+    "last_header": [
+      5018,
+      1644736331,
+      195750475
+    ]
+  },
+  "/livox/lidar": {
+    "messages": 99,
+    "all_payloads_equal": true,
+    "first_header": [
+      147,
+      1644736321,
+      296877623
+    ],
+    "last_header": [
+      245,
+      1644736331,
+      97200871
+    ]
+  }
+}

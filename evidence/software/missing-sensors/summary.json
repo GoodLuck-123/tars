@@ -1,0 +1,14 @@
+{
+  "run_id": "20261024-001135-801f9b",
+  "algorithm": "failed",
+  "reason": "Sensor startup timeout; missing: lidar, imu, image; Bag validation failed: Command '['bash', '-c', 'source \"$1/env.sh\"; shift; exec \"$@\"', 'livo', '/home/firefly/livo2-workspace/releases/420138ed4532575a', 'python3', '/home/firefly/livo2-workspace/releases/420138ed4532575a/runtime/capture_probe.py', 'verify', '/home/firefly/livo2-workspace/runs/20261024-001135-801f9b']' returned non-zero exit status 1.",
+  "elapsed_s": 9.457643576000919,
+  "exits": {
+    "monitor": 0,
+    "master": 0,
+    "probe": 0,
+    "record": 0,
+    "livox": 0,
+    "camera": -2
+  }
+}

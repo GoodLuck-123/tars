@@ -19,3 +19,9 @@
 [submodule "third_party/R3LIVE-reference"]
 	path = third_party/R3LIVE-reference
 	url = https://github.com/hku-mars/r3live.git
+[submodule "third_party/Livox-SDK"]
+	path = third_party/Livox-SDK
+	url = https://github.com/Livox-SDK/Livox-SDK.git
+[submodule "third_party/livox_camera_calib"]
+	path = third_party/livox_camera_calib
+	url = https://github.com/hku-mars/livox_camera_calib.git

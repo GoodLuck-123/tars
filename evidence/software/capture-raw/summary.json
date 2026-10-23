@@ -1,0 +1,17 @@
+{
+  "run_id": "20261024-001518-d9418c",
+  "phase": "finished",
+  "algorithm": "complete",
+  "reason": null,
+  "elapsed_s": 19.081677583999408,
+  "exits": {
+    "monitor": 0,
+    "master": 0,
+    "probe": 0,
+    "record": 0,
+    "play": 0
+  },
+  "poses": 0,
+  "map_chunks": 0,
+  "unprocessed_tail_s": null
+}

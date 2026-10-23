@@ -24,11 +24,18 @@ def apply_patch(name,dest):
     marker.write_text(sha(patch)+'\n')
 
 
-def main(jobs=4):
-    for name,d in [('toolchain',TOOL),('ros1-sdk',SDK),('pcl',SDK)]:packages(name,d)
-    sources();relocate(SDK);BUILD.mkdir(exist_ok=True);STAGE.mkdir(exist_ok=True)
+def main(jobs=4,target='board'):
+    global BUILD,SDK,STAGE
+    native=target=='host'
+    if native:BUILD=ROOT/'.build/host';SDK=ROOT/'.cache/host-env';STAGE=BUILD/'stage'
+    else:
+        for name,d in [('toolchain',TOOL),('ros1-sdk',SDK),('pcl',SDK)]:packages(name,d)
+    sources()
+    if not native:relocate(SDK)
+    BUILD.mkdir(exist_ok=True,parents=True);STAGE.mkdir(exist_ok=True)
     records=json.loads((ROOT/'dependencies.lock').read_text())['sources'];src={r['name']:ROOT/r['directory'] for r in records}
-    for name in ['fast-livo2','sophus','vikit']:apply_patch(name,src[name])
+    for name in ['fast-livo2','sophus','vikit','livox-driver','livox-sdk']:apply_patch(name,src[name])
+    if native:apply_patch('camera-calib',src['camera-calib'])
     changes={name:subprocess.check_output(['git','-C',src[name],'diff'],text=True) for name in src}
     write(BUILD/'patches.json',json.dumps(changes,indent=2)+'\n')
     hostlibs=CACHE/'host-libs';hostlibs.mkdir(exist_ok=True)
@@ -36,21 +43,30 @@ def main(jobs=4):
         for p in (TOOL/'usr/lib/x86_64-linux-gnu').glob(pattern):
             d=hostlibs/p.name
             if not d.exists():d.symlink_to(p)
-    os.environ.update(LIVO_SYSROOT=str(SDK),LIVO_TOOLCHAIN=str(TOOL),LIVO_STAGE=str(STAGE),LD_LIBRARY_PATH=str(hostlibs),PYTHONPATH=str(SDK/'opt/ros/noetic/lib/python3/dist-packages')+':'+str(SDK/'usr/lib/python3/dist-packages'),PKG_CONFIG_SYSROOT_DIR=str(SDK),PKG_CONFIG_LIBDIR=str(SDK/'usr/lib/aarch64-linux-gnu/pkgconfig'))
-    os.environ.pop('CONDA_PREFIX',None)
-    common=['-DCMAKE_TOOLCHAIN_FILE='+str(ROOT/'buildkit/aarch64.cmake'),'-DCMAKE_BUILD_TYPE=Release','-DCATKIN_ENABLE_TESTING=OFF','-DPYTHON_EXECUTABLE=/usr/bin/python3','-DCATKIN_DEVEL_PREFIX='+str(STAGE),'-DCMAKE_INSTALL_PREFIX='+str(STAGE),'-DCMAKE_PREFIX_PATH='+str(STAGE)+';'+str(SDK/'opt/ros/noetic')+';'+str(SDK/'usr'),'-DEigen3_DIR='+str(SDK/'usr/share/eigen3/cmake'),'-DCMAKE_EXPORT_COMPILE_COMMANDS=ON','-DPKG_CONFIG_EXECUTABLE=/usr/bin/pkg-config','-DSophus_DIR='+str(BUILD/'sophus')]
+    if not native:
+        os.environ.update(LIVO_SYSROOT=str(SDK),LIVO_TOOLCHAIN=str(TOOL),LIVO_STAGE=str(STAGE),LD_LIBRARY_PATH=str(hostlibs),PYTHONPATH=str(SDK/'opt/ros/noetic/lib/python3/dist-packages')+':'+str(SDK/'usr/lib/python3/dist-packages'),PKG_CONFIG_SYSROOT_DIR=str(SDK),PKG_CONFIG_LIBDIR=str(SDK/'usr/lib/aarch64-linux-gnu/pkgconfig'))
+        os.environ.pop('CONDA_PREFIX',None)
+    common=['-DCMAKE_BUILD_TYPE=Release','-DCATKIN_ENABLE_TESTING=OFF','-DPYTHON_EXECUTABLE='+str(SDK/'bin/python' if native else '/usr/bin/python3'),'-DCATKIN_DEVEL_PREFIX='+str(STAGE),'-DCMAKE_INSTALL_PREFIX='+str(STAGE),'-DCMAKE_PREFIX_PATH='+str(STAGE)+';'+str(SDK if native else SDK/'opt/ros/noetic')+';'+str(SDK/'usr'),'-DEigen3_DIR='+str(SDK/('share/eigen3/cmake' if native else 'usr/share/eigen3/cmake')),'-DCMAKE_EXPORT_COMPILE_COMMANDS=ON','-DPKG_CONFIG_EXECUTABLE='+str(SDK/'bin/pkg-config' if native else '/usr/bin/pkg-config'),'-DSophus_DIR='+str(BUILD/'sophus')]
+    if not native:common+=['-DCMAKE_TOOLCHAIN_FILE='+str(ROOT/'buildkit/aarch64.cmake')]
+    else:common+=['-DCMAKE_PROJECT_INCLUDE='+str(ROOT/'buildkit/native-compat.cmake')]
     def build(name,source,target=None,install=False):
         path=BUILD/name;run(['cmake','-S',source,'-B',path,*common])
         run(['cmake','--build',path,'-j',jobs]+(['--target',target] if target else []))
         if install:run(['cmake','--install',path])
     build('sophus',src['sophus'],'Sophus',True)
-    for name,msgsrc in [('livox_ros_driver',src['livox-driver']/'livox_ros_driver/msg'),('pcl_msgs',src['pcl-msgs']/'msg')]:
+    if not native:
+        build('livox-sdk',src['livox-sdk'],'livox_sdk_static',True)
+        build('livox-driver',src['livox-driver']/'livox_ros_driver','livox_ros_driver_node')
+    messages=[('pcl_msgs',src['pcl-msgs']/'msg')]
+    if native:messages.insert(0,('livox_ros_driver',src['livox-driver']/'livox_ros_driver/msg'))
+    for name,msgsrc in messages:
         d=BUILD/'messages'/name;d.mkdir(parents=True,exist_ok=True);shutil.copytree(msgsrc,d/'msg',dirs_exist_ok=True)
         write(d/'package.xml',f'<package><name>{name}</name><version>0.0.1</version><description>Unmodified upstream message definitions</description><maintainer email="local@example.invalid">livo2</maintainer><license>BSD</license><buildtool_depend>catkin</buildtool_depend><build_depend>message_generation</build_depend><build_depend>std_msgs</build_depend><build_depend>sensor_msgs</build_depend><run_depend>message_runtime</run_depend><run_depend>std_msgs</run_depend><run_depend>sensor_msgs</run_depend></package>')
         write(d/'CMakeLists.txt','cmake_minimum_required(VERSION 3.5)\nproject('+name+')\nfind_package(catkin REQUIRED COMPONENTS std_msgs sensor_msgs message_generation)\nadd_message_files(FILES '+' '.join(p.name for p in (d/'msg').glob('*.msg'))+')\ngenerate_messages(DEPENDENCIES std_msgs sensor_msgs)\ncatkin_package(CATKIN_DEPENDS message_runtime std_msgs sensor_msgs)\n')
         build(name,d)
     for name in ['vikit_common','vikit_ros']:build(name,src['vikit']/name,name)
     build('fast-livo2',src['fast-livo2'],'fastlivo_mapping');build('image-decode',ROOT/'runtime/decode')
+    if native:build('camera-calib',src['camera-calib'])
 
 
-if __name__=='__main__':main(int(sys.argv[1]) if len(sys.argv)>1 else 4)
+if __name__=='__main__':main(int(sys.argv[1]) if len(sys.argv)>1 else 4,sys.argv[2] if len(sys.argv)>2 else 'board')

@@ -1,0 +1,5 @@
+[INFO] [1772695751.382382304]: Livox Ros Driver Version: 2.6.0
+Livox SDK version 2.3.0
+Disable auto connect mode!
+[INFO] [1772695751.387531096]: Init lds lidar success!
+Livox SDK Deinit completely!

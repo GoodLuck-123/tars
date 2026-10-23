@@ -42,6 +42,7 @@ def main():
     (OUT/'install.sh').write_text('#!/usr/bin/env bash\nset -euo pipefail\nroot=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)\nexec /usr/bin/python3 "$root/runtime/install.py" "$root" "${1:-$HOME/livo2-workspace}"\n')
     (OUT/'install.sh').chmod(0o755)
     (OUT/'bin').mkdir();shutil.copy2(BUILD/'stage/lib/fast_livo/fastlivo_mapping',OUT/'bin/fastlivo_mapping');shutil.copy2(BUILD/'image-decode/livo_image_decode',OUT/'bin/livo_image_decode')
+    shutil.copy2(BUILD/'stage/lib/livox_ros_driver/livox_ros_driver_node',OUT/'bin/livox_ros_driver_node')
     for name in ['livox_ros_driver','pcl_msgs']:
         copytree(BUILD/'stage/lib/python3/dist-packages'/name,OUT/'ros/lib/python3/dist-packages'/name)
     copytree(ROOT/'runtime',OUT/'runtime')

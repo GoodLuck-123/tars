@@ -17,23 +17,35 @@ int main(int argc, char** argv) {
   if (std::min({width,height,ow,oh})<1) { ROS_FATAL("Invalid decoder dimensions"); return 2; }
   cv::Mat map1, map2;
   auto pub = nh.advertise<sensor_msgs::Image>("image", 20);
-  auto sub = nh.subscribe<sensor_msgs::CompressedImage>("compressed", 20,
-    [&](const sensor_msgs::CompressedImageConstPtr& msg) {
+  auto publish = [&](const cv::Mat& image, const std_msgs::Header& header) {
+    if (image.empty()) { ROS_ERROR("Image decode returned an empty frame"); return; }
+    if (map1.empty()) {
+      cv::Mat K = cv::Mat(k).reshape(1,3);
+      cv::Mat inputK=K.clone(), outputK=K.clone();
+      inputK.row(0)*=double(image.cols)/width; inputK.row(1)*=double(image.rows)/height;
+      outputK.row(0)*=double(ow)/width; outputK.row(1)*=double(oh)/height;
+      cv::initUndistortRectifyMap(inputK, cv::Mat(d), cv::Mat(), outputK, cv::Size(ow,oh), CV_16SC2, map1, map2);
+      ROS_INFO("Decoded %dx%d, rectified output %dx%d; full distortion model applied", image.cols, image.rows,ow,oh);
+    }
+    cv::Mat rectified; cv::remap(image, rectified, map1, map2, cv::INTER_LINEAR);
+    pub.publish(cv_bridge::CvImage(header, "bgr8", rectified).toImageMsg());
+  };
+  ros::Subscriber sub;
+  if (nh.param<std::string>("/decoder/input_transport", "compressed")=="raw") {
+    sub=nh.subscribe<sensor_msgs::Image>("raw",20,[&](const sensor_msgs::ImageConstPtr& msg) {
+      try {
+        if (int(msg->width)!=width || int(msg->height)!=height) { ROS_ERROR("Raw image dimensions do not match camera configuration"); return; }
+        publish(cv_bridge::toCvShare(msg,"bgr8")->image,msg->header);
+      } catch (const cv_bridge::Exception& e) { ROS_ERROR("Image conversion failed: %s",e.what()); }
+        catch (const cv::Exception& e) { ROS_ERROR("Image rectify failed: %s",e.what()); }
+    });
+  } else {
+    sub=nh.subscribe<sensor_msgs::CompressedImage>("compressed",20,[&](const sensor_msgs::CompressedImageConstPtr& msg) {
       try {
         int mode=(ow*2==width && oh*2==height) ? cv::IMREAD_REDUCED_COLOR_2 : cv::IMREAD_COLOR;
-        auto image = cv::imdecode(msg->data, mode);
-        if (image.empty()) { ROS_ERROR("Image decode returned an empty frame"); return; }
-        if (map1.empty()) {
-          cv::Mat K = cv::Mat(k).reshape(1,3);
-          cv::Mat inputK=K.clone(), outputK=K.clone();
-          inputK.row(0)*=double(image.cols)/width; inputK.row(1)*=double(image.rows)/height;
-          outputK.row(0)*=double(ow)/width; outputK.row(1)*=double(oh)/height;
-          cv::initUndistortRectifyMap(inputK, cv::Mat(d), cv::Mat(), outputK, cv::Size(ow,oh), CV_16SC2, map1, map2);
-          ROS_INFO("Decoded %dx%d, rectified output %dx%d; full distortion model applied", image.cols, image.rows,ow,oh);
-        }
-        cv::Mat rectified; cv::remap(image, rectified, map1, map2, cv::INTER_LINEAR);
-        pub.publish(cv_bridge::CvImage(msg->header, "bgr8", rectified).toImageMsg());
-      } catch (const cv::Exception& e) { ROS_ERROR("Image decode failed: %s", e.what()); }
+        publish(cv::imdecode(msg->data,mode),msg->header);
+      } catch (const cv::Exception& e) { ROS_ERROR("Image decode failed: %s",e.what()); }
     });
+  }
   ros::spin();
 }

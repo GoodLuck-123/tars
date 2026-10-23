@@ -61,6 +61,19 @@
       "revision": "6143a38537f28cb36eb24e9bbe2e39c8f7967157",
       "directory": "third_party/R3LIVE-reference",
       "reference_only": true
+    },
+    {
+      "name": "livox-sdk",
+      "repository": "https://github.com/Livox-SDK/Livox-SDK",
+      "revision": "9306596a2bf15c1343bc023b497465ed0a32909d",
+      "directory": "third_party/Livox-SDK"
+    },
+    {
+      "name": "camera-calib",
+      "repository": "https://github.com/hku-mars/livox_camera_calib",
+      "revision": "061fdaa647fc806e59d73a8505a05a10dfcfdaa1",
+      "directory": "third_party/livox_camera_calib",
+      "host_only": true
     }
   ]
 }

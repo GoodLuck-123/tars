@@ -1,0 +1,189 @@
+diff --git a/include/lidar_camera_calib.hpp b/include/lidar_camera_calib.hpp
+index 59170f2..2141c84 100644
+--- a/include/lidar_camera_calib.hpp
++++ b/include/lidar_camera_calib.hpp
+@@ -31,6 +31,16 @@
+ #include <time.h>
+ #include <unordered_map>
+ 
++#include <cstdlib>
++namespace livo_ui {
++inline void imshow(const std::string& name, const cv::Mat& image) {
++  if (!std::getenv("LIVO_HEADLESS")) cv::imshow(name, image);
++}
++inline int waitKey(int delay=0) {
++  return std::getenv("LIVO_HEADLESS") ? -1 : cv::waitKey(delay);
++}
++}
++
+ #define calib
+ #define online
+ class Calibration {
+@@ -393,9 +403,9 @@ void Calibration::edgeDetector(
+   }
+   edge_cloud->width = edge_cloud->points.size();
+   edge_cloud->height = 1;
+-  // cv::imshow("canny result", canny_result);
+-  // cv::imshow("edge result", edge_img);
+-  // cv::waitKey();
++  // livo_ui::imshow("canny result", canny_result);
++  // livo_ui::imshow("edge result", edge_img);
++  // livo_ui::waitKey();
+ }
+ 
+ void Calibration::projection(
+@@ -1080,8 +1090,8 @@ void Calibration::buildVPnp(
+   if (show_residual) {
+     cv::Mat residual_img =
+         getConnectImg(dis_threshold, cam_edge_cloud_2d, line_edge_cloud_2d);
+-    cv::imshow("residual", residual_img);
+-    cv::waitKey(100);
++    livo_ui::imshow("residual", residual_img);
++    livo_ui::waitKey(100);
+   }
+   pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(
+       new pcl::search::KdTree<pcl::PointXYZ>());
+@@ -1250,8 +1260,8 @@ void Calibration::buildPnp(
+   if (show_residual) {
+     cv::Mat residual_img =
+         getConnectImg(dis_threshold, cam_edge_cloud_2d, line_edge_cloud_2d);
+-    cv::imshow("residual", residual_img);
+-    cv::waitKey(100);
++    livo_ui::imshow("residual", residual_img);
++    livo_ui::waitKey(100);
+   }
+   pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(
+       new pcl::search::KdTree<pcl::PointXYZ>());
+diff --git a/src/lidar_camera_calib.cpp b/src/lidar_camera_calib.cpp
+index a801a0c..ce2ebe3 100644
+--- a/src/lidar_camera_calib.cpp
++++ b/src/lidar_camera_calib.cpp
+@@ -180,8 +180,8 @@ void roughCalib(Calibration &calibra, Vector6d &calib_params,
+                             calibra.rgb_egde_cloud_, calibra.plane_line_cloud_,
+                             pnp_list);
+           cv::Mat projection_img = calibra.getProjectionImg(calib_params);
+-          cv::imshow("Rough Optimization", projection_img);
+-          cv::waitKey(50);
++          livo_ui::imshow("Rough Optimization", projection_img);
++          livo_ui::waitKey(50);
+         }
+       }
+     }
+@@ -253,16 +253,16 @@ int main(int argc, char **argv) {
+   pub_cloud.header.frame_id = "livox";
+   calibra.init_rgb_cloud_pub_.publish(pub_cloud);
+   cv::Mat init_img = calibra.getProjectionImg(calib_params);
+-  cv::imshow("Initial extrinsic", init_img);
+-  cv::imwrite("/home/ycj/data/calib/init.png", init_img);
+-  cv::waitKey(1000);
++  livo_ui::imshow("Initial extrinsic", init_img);
++  cv::imwrite(result_file + ".initial.png", init_img);
++  livo_ui::waitKey(1000);
+ 
+   if (use_rough_calib) {
+     roughCalib(calibra, calib_params, DEG2RAD(0.1), 50);
+   }
+   cv::Mat test_img = calibra.getProjectionImg(calib_params);
+-  cv::imshow("After rough extrinsic", test_img);
+-  cv::waitKey(1000);
++  livo_ui::imshow("After rough extrinsic", test_img);
++  livo_ui::waitKey(1000);
+   int iter = 0;
+   // Maximum match distance threshold: 15 pixels
+   // If initial extrinsic lead to error over 15 pixels, the algorithm will not
+@@ -287,8 +287,8 @@ int main(int argc, char **argv) {
+                 << " pnp size:" << vpnp_list.size() << std::endl;
+ 
+       cv::Mat projection_img = calibra.getProjectionImg(calib_params);
+-      cv::imshow("Optimization", projection_img);
+-      cv::waitKey(100);
++      livo_ui::imshow("Optimization", projection_img);
++      livo_ui::waitKey(100);
+       Eigen::Vector3d euler_angle(calib_params[0], calib_params[1],
+                                   calib_params[2]);
+       Eigen::Matrix3d opt_init_R;
+@@ -380,9 +380,9 @@ int main(int argc, char **argv) {
+   }
+   outfile << 0 << "," << 0 << "," << 0 << "," << 1 << std::endl;
+   cv::Mat opt_img = calibra.getProjectionImg(calib_params);
+-  cv::imshow("Optimization result", opt_img);
+-  cv::imwrite("/home/ycj/data/calib/opt.png", opt_img);
+-  cv::waitKey(1000);
++  livo_ui::imshow("Optimization result", opt_img);
++  cv::imwrite(result_file + ".optimized.png", opt_img);
++  livo_ui::waitKey(1000);
+   Eigen::Matrix3d init_rotation;
+   init_rotation << 0, -1.0, 0, 0, 0, -1.0, 1, 0, 0;
+   Eigen::Matrix3d adjust_rotation;
+@@ -392,6 +392,7 @@ int main(int argc, char **argv) {
+   // ","
+   //         << RAD2DEG(adjust_euler[2]) << "," << 0 << "," << 0 << "," << 0
+   //         << std::endl;
++  if (std::getenv("LIVO_HEADLESS")) return 0;
+   while (ros::ok()) {
+     sensor_msgs::PointCloud2 pub_cloud;
+     pcl::PointCloud<pcl::PointXYZRGB>::Ptr rgb_cloud(
+diff --git a/src/lidar_camera_multi_calib.cpp b/src/lidar_camera_multi_calib.cpp
+index c10403b..6c927c1 100644
+--- a/src/lidar_camera_multi_calib.cpp
++++ b/src/lidar_camera_multi_calib.cpp
+@@ -183,8 +183,8 @@ void roughCalib(std::vector<Calibration> &calibs, Vector6d &calib_params,
+                               calibs[0].rgb_egde_cloud_,
+                               calibs[0].plane_line_cloud_, pnp_list);
+           cv::Mat projection_img = calibs[0].getProjectionImg(calib_params);
+-          cv::imshow("Rough Optimization", projection_img);
+-          cv::waitKey(50);
++          livo_ui::imshow("Rough Optimization", projection_img);
++          livo_ui::waitKey(50);
+         }
+       }
+     }
+@@ -255,14 +255,14 @@ int main(int argc, char **argv) {
+   calib_params[4] = T[1];
+   calib_params[5] = T[2];
+   cv::Mat init_img = calibs[0].getProjectionImg(calib_params);
+-  cv::imshow("Initial extrinsic", init_img);
+-  cv::waitKey(1000);
++  livo_ui::imshow("Initial extrinsic", init_img);
++  livo_ui::waitKey(1000);
+   if (use_rough_calib) {
+     roughCalib(calibs, calib_params, DEG2RAD(0.2), 40);
+   }
+   cv::Mat test_img = calibs[0].getProjectionImg(calib_params);
+-  cv::imshow("After rough extrinsic", test_img);
+-  cv::waitKey(1000);
++  livo_ui::imshow("After rough extrinsic", test_img);
++  livo_ui::waitKey(1000);
+   int iter = 0;
+   // Maximum match distance threshold: 15 pixels
+   // If initial extrinsic lead to error over 15 pixels, the algorithm will not
+@@ -288,8 +288,8 @@ int main(int argc, char **argv) {
+       std::cout << "Iteration:" << iter++ << " Dis:" << dis_threshold
+                 << " pnp size: " << vpnp_size << std::endl;
+       cv::Mat projection_img = calibs[0].getProjectionImg(calib_params);
+-      cv::imshow("Optimization", projection_img);
+-      cv::waitKey(100);
++      livo_ui::imshow("Optimization", projection_img);
++      livo_ui::waitKey(100);
+       Eigen::Vector3d euler_angle(calib_params[0], calib_params[1],
+                                   calib_params[2]);
+       Eigen::Matrix3d opt_init_R;
+@@ -376,8 +376,8 @@ int main(int argc, char **argv) {
+   }
+   outfile << 0 << "," << 0 << "," << 0 << "," << 1 << std::endl;
+   cv::Mat opt_img = calibs[0].getProjectionImg(calib_params);
+-  cv::imshow("Optimization result", opt_img);
+-  cv::waitKey(1000);
++  livo_ui::imshow("Optimization result", opt_img);
++  livo_ui::waitKey(1000);
+   Eigen::Matrix3d init_rotation;
+   init_rotation << 0, -1.0, 0, 0, 0, -1.0, 1, 0, 0;
+   Eigen::Matrix3d adjust_rotation;
+@@ -388,6 +388,7 @@ int main(int argc, char **argv) {
+   // ","
+   //         << RAD2DEG(adjust_euler[2]) << "," << 0 << "," << 0 << "," << 0
+   //         << std::endl;
++  if (std::getenv("LIVO_HEADLESS")) return 0;
+   while (ros::ok()) {
+     sensor_msgs::PointCloud2 pub_cloud;
+     pcl::PointCloud<pcl::PointXYZRGB>::Ptr rgb_cloud(

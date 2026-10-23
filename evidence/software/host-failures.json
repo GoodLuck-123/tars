@@ -1,0 +1,32 @@
+[
+  {
+    "run_id": "20261023-234850-da2494",
+    "algorithm": "failed",
+    "reason": "livo exited unexpectedly: -6; Trajectory does not cover sequence end; LIVO did not exit cleanly",
+    "elapsed_s": 45.40454457300075,
+    "exits": {
+      "monitor": 0,
+      "master": 0,
+      "decode": 0,
+      "livo": -6,
+      "play": 0
+    },
+    "poses": 621,
+    "map_chunks": 6
+  },
+  {
+    "run_id": "20261023-235330-c70cdb",
+    "algorithm": "failed",
+    "reason": "livo exited unexpectedly: -6; Trajectory does not cover sequence end; LIVO did not exit cleanly",
+    "elapsed_s": 45.392914004001796,
+    "exits": {
+      "monitor": 0,
+      "master": 0,
+      "decode": 0,
+      "livo": -6,
+      "play": 0
+    },
+    "poses": 621,
+    "map_chunks": 6
+  }
+]

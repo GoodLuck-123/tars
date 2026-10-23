@@ -1,0 +1,182 @@
+diff --git a/livox_ros_driver/CMakeLists.txt b/livox_ros_driver/CMakeLists.txt
+index 0b10d19..fd94b19 100644
+--- a/livox_ros_driver/CMakeLists.txt
++++ b/livox_ros_driver/CMakeLists.txt
+@@ -29,11 +29,10 @@ find_package(catkin REQUIRED COMPONENTS
+ 	std_msgs
+ 	message_generation
+ 	rosbag
+-	pcl_ros
+ 	)
+ 
+ ## Find pcl lib
+-find_package(PCL REQUIRED)
++find_package(PCL REQUIRED COMPONENTS common io)
+ 
+ ## Generate messages in the 'msg' folder
+ add_message_files(FILES
+@@ -65,7 +64,6 @@ endif (APR_FOUND)
+ ## DEPENDS: system dependencies of this project that dependent projects also n    eed
+ catkin_package(CATKIN_DEPENDS
+ 	roscpp rospy std_msgs message_runtime
+-	pcl_ros
+ 	)
+ 
+ #---------------------------------------------------------------------------------------
+@@ -78,57 +76,13 @@ endif()
+ #---------------------------------------------------------------------------------------
+ # Compiler config
+ #---------------------------------------------------------------------------------------
+-set(CMAKE_CXX_STANDARD 11)
++set(CMAKE_CXX_STANDARD 14)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+ 
+-## make sure the livox_sdk_static library is installed
+-find_library(LIVOX_SDK_LIBRARY liblivox_sdk_static.a /usr/local/lib)
+-
+-if((NOT LIVOX_SDK_LIBRARY) OR (NOT EXISTS ${LIVOX_SDK_LIBRARY}))
+-	# couldn't find the livox sdk library
+-	message("Coudn't find livox sdk library!")
+-	message("Download Livox-SDK from github and build&install it please!")
+-	message("Download Livox-SDK from github and build&install it please!")
+-	message("Download Livox-SDK from github and build&install it please!")
+-
+-	message("git clone Livox-SDK from github temporarily, only for ROS distro jenkins build!")
+-
+-	# clone livox sdk source code from github
+-	execute_process(COMMAND rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK OUTPUT_VARIABLE cmd_res)
+-	message("Try to pull the livox sdk source code from github")
+-	FOREACH(res ${cmd_res})
+-		MESSAGE(${res})
+-	ENDFOREACH()
+-
+-	execute_process(COMMAND git clone https://github.com/Livox-SDK/Livox-SDK.git ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK OUTPUT_VARIABLE cmd_res)
+-	FOREACH(res ${cmd_res})
+-		MESSAGE(${res})
+-	ENDFOREACH()
+-
+-	execute_process(COMMAND cmake .. WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK/build OUTPUT_VARIABLE cmd_res)
+-	FOREACH(res ${cmd_res})
+-		MESSAGE(${res})
+-	ENDFOREACH()
+-
+-	execute_process(COMMAND make WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK/build OUTPUT_VARIABLE cmd_res)
+-	FOREACH(res ${cmd_res})
+-		MESSAGE(${res})
+-	ENDFOREACH()
+-
+-	include_directories(
+-		./
+-		${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK/sdk_core/include
+-	)
+-
+-	link_directories(
+-		./
+-		${CMAKE_CURRENT_SOURCE_DIR}/Livox-SDK/build/sdk_core
+-	)
+-
+-else()
+-	message("find livox sdk library success")
+-endif()
++# Resolve only the SDK installed into this project's private build stage.
++find_library(LIVOX_SDK_LIBRARY NAMES livox_sdk_static PATHS "${CMAKE_INSTALL_PREFIX}/lib" NO_DEFAULT_PATH REQUIRED)
++find_path(LIVOX_SDK_INCLUDE_DIR livox_sdk.h PATHS "${CMAKE_INSTALL_PREFIX}/include" NO_DEFAULT_PATH REQUIRED)
+ 
+ ## PCL library
+ link_directories(${PCL_LIBRARY_DIRS})
+@@ -181,6 +135,9 @@ target_include_directories(${PROJECT_NAME}_node
+     ${catkin_INCLUDE_DIRS}
+     ${PCL_INCLUDE_DIRS}
+     ${APR_INCLUDE_DIRS}
++    ${LIVOX_SDK_INCLUDE_DIR}
++    ${CMAKE_CURRENT_SOURCE_DIR}/../../perception_pcl/pcl_ros/include
++    ${CMAKE_CURRENT_SOURCE_DIR}/../../perception_pcl/pcl_conversions/include
+     common
+     common/rapidjson
+     comon/rapdidxml
+@@ -194,8 +151,8 @@ target_include_directories(${PROJECT_NAME}_node
+ # link libraries
+ #---------------------------------------------------------------------------------------
+ target_link_libraries(${PROJECT_NAME}_node
+-	livox_sdk_static.a
+-	${Boost_LIBRARY}
++	${LIVOX_SDK_LIBRARY}
++	${Boost_LIBRARIES}
+ 	${catkin_LIBRARIES}
+ 	${PCL_LIBRARIES}
+ 	${APR_LIBRARIES}
+diff --git a/livox_ros_driver/livox_ros_driver/lds.h b/livox_ros_driver/livox_ros_driver/lds.h
+index 2e89459..6424bcc 100644
+--- a/livox_ros_driver/livox_ros_driver/lds.h
++++ b/livox_ros_driver/livox_ros_driver/lds.h
+@@ -35,6 +35,7 @@
+ #include <vector>
+ #include <mutex>
+ #include <condition_variable>
++#include <chrono>
+ 
+ #include "ldq.h"
+ 
+@@ -409,8 +410,8 @@ class Semaphore {
+ 
+   void Wait() {
+     std::unique_lock<std::mutex> lock(mutex_);
+-    cv_.wait(lock, [=] { return count_ > 0; });
+-    --count_;
++    cv_.wait_for(lock, std::chrono::milliseconds(100), [=] { return count_ > 0; });
++    if (count_ > 0) --count_;
+   }
+ 
+   int GetCount() {
+diff --git a/livox_ros_driver/livox_ros_driver/lds_lidar.cpp b/livox_ros_driver/livox_ros_driver/lds_lidar.cpp
+index 09c6362..cf3f60a 100644
+--- a/livox_ros_driver/livox_ros_driver/lds_lidar.cpp
++++ b/livox_ros_driver/livox_ros_driver/lds_lidar.cpp
+@@ -136,11 +136,11 @@ int LdsLidar::InitLdsLidar(std::vector<std::string> &broadcast_code_strs,
+ 
+ int LdsLidar::DeInitLdsLidar(void) {
+   if (!is_initialized_) {
+-    printf("LiDAR data source is not exit");
+-    return -1;
++    return 0;
+   }
+ 
+   Uninit();
++  is_initialized_ = false;
+   printf("Livox SDK Deinit completely!\n");
+ 
+   if (timesync_) {
+diff --git a/livox_ros_driver/livox_ros_driver/livox_ros_driver.cpp b/livox_ros_driver/livox_ros_driver/livox_ros_driver.cpp
+index 2268f52..f02da3c 100644
+--- a/livox_ros_driver/livox_ros_driver/livox_ros_driver.cpp
++++ b/livox_ros_driver/livox_ros_driver/livox_ros_driver.cpp
+@@ -39,12 +39,6 @@ using namespace livox_ros;
+ 
+ const int32_t kSdkVersionMajorLimit = 2;
+ 
+-inline void SignalHandler(int signum) {
+-  printf("livox ros driver will exit\r\n");
+-  ros::shutdown();
+-  exit(signum);
+-}
+-
+ int main(int argc, char **argv) {
+   /** Ros related */
+   if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME,
+@@ -55,7 +49,6 @@ int main(int argc, char **argv) {
+   ros::NodeHandle livox_node;
+ 
+   ROS_INFO("Livox Ros Driver Version: %s", LIVOX_ROS_DRIVER_VERSION_STRING);
+-  signal(SIGINT, SignalHandler);
+   /** Check sdk version */
+   LivoxSdkVersion _sdkversion;
+   GetLivoxSdkVersion(&_sdkversion);
+@@ -173,5 +166,7 @@ int main(int argc, char **argv) {
+     lddc->DistributeLidarData();
+   }
+ 
++  lddc->PrepareExit();
++  delete lddc;
+   return 0;
+ }

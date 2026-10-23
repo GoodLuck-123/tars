@@ -27,17 +27,20 @@ def start(job):
     guard=(root/'run.lock').open('a');fcntl.flock(guard,fcntl.LOCK_EX|fcntl.LOCK_NB)
     # Transfer lock ownership via inherited descriptor, so concurrent starts cannot race.
     os.set_inheritable(guard.fileno(),True)
-    with (job/'supervisor.log').open('ab') as log:
+    (job/'logs').mkdir(exist_ok=True)
+    with (job/'logs/supervisor.log').open('ab') as log:
         p=subprocess.Popen(['/usr/bin/python3',__file__,'run',str(job),str(guard.fileno())],stdin=subprocess.DEVNULL,stdout=log,stderr=log,start_new_session=True,pass_fds=(guard.fileno(),))
     write_json(root/'latest.json',dict(job=str(job),pid=p.pid));print(json.dumps(dict(job=str(job),pid=p.pid)))
 
 
 def run(job,lockfd):
     job=Path(job);cfg=json.loads((job/'config.json').read_text());install=Path(cfg['install']);processes={};handles=[];started=time.monotonic();failure=None;requested_stop=False
+    capture_mode=cfg.get('mode','dataset').startswith('capture');calibration_mode=cfg.get('mode')=='calibrate'
     status=dict(run_id=job.name,phase='starting',algorithm='running',transfer='pending',started=time.time(),pid=os.getpid())
     for d in ['logs','monitor','algorithm/Log/pcd','algorithm/Log/image','algorithm/Log/result','algorithm/Log/ref_cur_combine']:(job/d).mkdir(parents=True,exist_ok=True)
     with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
-    env=os.environ.copy();env.update(ROS_MASTER_URI=f'http://127.0.0.1:{port}',ROS_IP='127.0.0.1',ROS_LOG_DIR=str(job/'logs/ros'),LIVO_OUTPUT_DIR=str(job/'algorithm')+'/')
+    env=os.environ.copy();env.update(ROS_MASTER_URI=f'http://127.0.0.1:{port}',ROS_IP='127.0.0.1',ROS_HOME=str(job/'ros-home'),ROS_LOG_DIR=str(job/'logs/ros'),LIVO_OUTPUT_DIR=str(job/'algorithm')+'/')
+    if calibration_mode:env['LIVO_HEADLESS']='1'
     status['master_uri']=env['ROS_MASTER_URI'];resources={}
     rt=cfg.get('runtime',dict(livo_cpus=[4,5,6,7],opencv_threads=1))
     cpu_policies=list(Path('/sys/devices/system/cpu/cpufreq').glob('policy*'))
@@ -76,7 +79,7 @@ def run(job,lockfd):
         if shutil.disk_usage(job).free < cfg['min_free_gib']*2**30:raise RuntimeError('Insufficient free disk space')
         if time.monotonic()-started>cfg['timeout_s']:raise RuntimeError('Task timeout')
         for name,p in processes.items():
-            if name!='play' and p.poll() is not None:raise RuntimeError(f'{name} exited unexpectedly: {p.returncode}')
+            if name not in {'play','calibration'} and p.poll() is not None:raise RuntimeError(f'{name} exited unexpectedly: {p.returncode}')
         m=monitor()
         if m and time.time()-m.get('heartbeat',0)>10:raise RuntimeError('Monitoring heartbeat expired')
         if status['phase']=='running' and m.get('progress_wall') and time.time()-m['progress_wall']>cfg['monitoring']['progress_stall_s']:raise RuntimeError('Algorithm processing stalled')
@@ -105,13 +108,22 @@ def run(job,lockfd):
             except OSError:pass
             if time.monotonic()>deadline:raise RuntimeError('ROS master startup timeout')
             time.sleep(.2)
+        if capture_mode:
+            import capture
+            capture.run(cfg,job,install,spawn,ros,alive,state,processes,master)
+            return
+        if calibration_mode:
+            import calibration
+            calibration.run(cfg,job,install,spawn,ros,alive,state,processes)
+            return
         ros(['rosparam','set','/use_sim_time','true']);ros(['rosparam','load',job/'algorithm.yaml']);ros(['rosparam','load',job/'camera.yaml','/laserMapping'])
-        spawn('decode',[install/'bin/livo_image_decode','compressed:='+cfg['topics']['compressed_image'],'image:='+cfg['topics']['image']])
+        image_key=cfg.get('image_input','compressed_image');input_name='raw' if cfg.get('image_transport')=='raw' else 'compressed'
+        spawn('decode',[install/'bin/livo_image_decode',input_name+':='+cfg['topics'][image_key],'image:='+cfg['topics']['image']])
         spawn('livo',[install/'bin/fastlivo_mapping'])
         state('waiting for subscribers');deadline=time.monotonic()+30
         while True:
             alive();pubs,subs,services=master.getSystemState('/livo-supervisor')[2];submap=dict(subs)
-            required=[cfg['topics'][k] for k in ['lidar','imu','image','compressed_image']]
+            required=[cfg['topics'][k] for k in ['lidar','imu','image',image_key]]
             if all(submap.get(t) for t in required):break
             if time.monotonic()>deadline:raise RuntimeError('Input subscriptions not ready: '+repr(required))
             time.sleep(.2)
@@ -131,14 +143,17 @@ def run(job,lockfd):
             if time.monotonic()>deadline:raise RuntimeError(f'Drain timeout; remaining sensor-time tail {tail:.3f}s')
             time.sleep(.5)
         if m.get('visual_updates',0)<1:raise RuntimeError('No visual updates observed; LIO alone is not LIVO')
-    except InterruptedError as e:requested_stop=True;failure=str(e)
+    except InterruptedError as e:requested_stop=True;status['stop_reason']=str(e)
     except Exception as e:failure=str(e)
     finally:
         state('saving')
         # Stop producers before the algorithm. Master remains available for shutdown.
-        for name in ['play','decode','livo']:
+        for name in ['play','camera','livox','decode','livo','record','probe','calibration']:
             try:stop(name)
             except Exception as e:failure=(failure+'; ' if failure else '')+str(e)
+        if capture_mode:
+            try:ros(['python3',install/'runtime/capture_probe.py','verify',job])
+            except Exception as e:failure=(failure+'; ' if failure else '')+'Bag validation failed: '+str(e)
         try:stop('master')
         except Exception as e:failure=(failure+'; ' if failure else '')+str(e)
         if original_governors:
@@ -158,13 +173,14 @@ def run(job,lockfd):
                     row=list(map(float,line.split()))
                     if len(row)==8:poses.append(row)
                 except ValueError:pass
-        if not poses or not pcds:failure=(failure+'; ' if failure else '')+'Missing trajectory or map'
+        if not capture_mode and not calibration_mode and (not poses or not pcds):failure=(failure+'; ' if failure else '')+'Missing trajectory or map'
         if any(not all(math.isfinite(v) for v in row) for row in poses):failure=(failure+'; ' if failure else '')+'Non-finite trajectory'
         if poses and not requested_stop and cfg['expected_end_s']-poses[-1][0]>cfg['tail_tolerance_s']:failure=(failure+'; ' if failure else '')+'Trajectory does not cover sequence end'
         exits={name:p.returncode for name,p in processes.items()}
         # ROS's normal SIGINT shutdown may return 0 or -SIGINT for helper tools.
-        if exits.get('livo')!=0:failure=(failure+'; ' if failure else '')+'LIVO did not exit cleanly'
-        status.update(algorithm='stopped' if requested_stop else 'failed' if failure else 'complete',reason=failure,exits=exits,progress=m,poses=len(poses),map_chunks=len(pcds),trajectory_start=poses[0][0] if poses else None,trajectory_end=poses[-1][0] if poses else None)
+        if not capture_mode and not calibration_mode and exits.get('livo')!=0:failure=(failure+'; ' if failure else '')+'LIVO did not exit cleanly'
+        if capture_mode and exits.get('record')!=0:failure=(failure+'; ' if failure else '')+'Recorder did not exit cleanly'
+        status.update(algorithm='failed' if failure else 'stopped' if requested_stop else 'complete',reason=failure,exits=exits,progress=m,poses=len(poses),map_chunks=len(pcds),trajectory_start=poses[0][0] if poses else None,trajectory_end=poses[-1][0] if poses else None)
         write_json(job/'metrics.json',dict(processes=resources,monitor=m,poses=len(poses),map_chunks=len(pcds),unprocessed_tail_s=status.get('unprocessed_tail_s')))
         state('finished');write_json(job/'summary.json',status)
         # Generate after all writers have stopped. state/summary stay immutable until collection.

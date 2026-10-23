@@ -1,0 +1,14 @@
+{
+  "/camera/image_raw": {
+    "messages": 120,
+    "all_payloads_equal": true
+  },
+  "/livox/imu": {
+    "messages": 1634,
+    "all_payloads_equal": true
+  },
+  "/livox/lidar": {
+    "messages": 79,
+    "all_payloads_equal": true
+  }
+}
