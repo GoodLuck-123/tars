@@ -1,0 +1,8 @@
+{
+  "interactive_ssh": true,
+  "python": "/home/firefly/livo2-workspace/current/python/bin/python3",
+  "cwd": "/home/firefly/livo2-workspace/runs/20261023-205433-4ce8e9",
+  "ros": "noetic",
+  "active_master": "http://127.0.0.1:58029",
+  "monitor_detach_keeps_job_running": true
+}

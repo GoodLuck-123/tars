@@ -161,12 +161,17 @@ def latest(c,run_id=None):
 def state(c,job):return json.loads(remote(c,'from pathlib import Path;import sys;print((Path(sys.argv[1])/"state.json").read_text())',[job]))
 
 
+def status_line(s):
+    m=s.get('progress',{})
+    return f"{s['phase']} | {s.get('elapsed_s',0):.1f}s | 处理 {m.get('processed',0)} | 视觉更新 {m.get('visual_updates',0)} | WARN {m.get('warnings',0)} ERROR {m.get('errors',0)}"
+
+
 def follow(c,job):
     last=None;seen={}
     while True:
         try:s=state(c,job)
         except subprocess.CalledProcessError:print('连接中断；板端任务继续，使用 status --follow 重连',flush=True);return None
-        m=s.get('progress',{});line=f"{s['phase']} | {s.get('elapsed_s',0):.1f}s | 处理 {m.get('processed',0)} | 视觉更新 {m.get('visual_updates',0)} | WARN {m.get('warnings',0)} ERROR {m.get('errors',0)}"
+        m=s.get('progress',{});line=status_line(s)
         if line!=last:print(line,flush=True);last=line
         for key,a in m.get('alerts',{}).items():
             if seen.get(key)!=a.get('last_notice'):
@@ -224,15 +229,19 @@ def main():
         job=latest(c)
         if a.raw:ssh(c,'tail -n 80 '+shlex.quote(job+'/logs/livo.log'))
         elif a.follow:follow(c,job)
-        else:print(json.dumps(state(c,job),ensure_ascii=False,indent=2))
+        else:
+            s=state(c,job);print(Path(job).name+' | '+status_line(s))
+            for alert in s.get('progress',{}).get('alerts',{}).values():print(f"[{alert['level']}] {alert['message']} (累计 {alert['count']})")
     elif a.command=='stop':
         job=latest(c)
-        if state(c,job)['phase']!='finished':remote(c,'from pathlib import Path;import sys;(Path(sys.argv[1])/"stop").touch()',[job]);follow(c,job);pull(c,job)
+        if state(c,job)['phase']!='finished':remote(c,'from pathlib import Path;import sys;(Path(sys.argv[1])/"stop").touch()',[job])
+        follow(c,job);pull(c,job)
     elif a.command=='pull':pull(c,latest(c,a.run_id))
 
 
 if __name__=='__main__':
     try:main()
+    except KeyboardInterrupt:print('已退出终端查看；任务状态可用 status 查询',file=sys.stderr);sys.exit(130)
     except (RuntimeError,ValueError,KeyError,OSError,subprocess.CalledProcessError) as e:
         print('错误：'+str(e),file=sys.stderr)
         if isinstance(e,subprocess.CalledProcessError) and e.stderr:print(e.stderr[-4000:],file=sys.stderr)

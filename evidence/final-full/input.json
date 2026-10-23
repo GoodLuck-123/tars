@@ -1,0 +1,28 @@
+{
+  "path": "/home/eric/data/hku_campus_seq_03.bag",
+  "sha256": "f46c44f583525b52167da8b3b00d3c6973e24e4811d62b9bba5e0caebb4f0f0f",
+  "start_s": 1644736321.196768,
+  "end_s": 1644736494.9502673,
+  "topics": [
+    {
+      "topic": "/camera/image_color_frame_info",
+      "type": "sensor_msgs/msg/CameraInfo",
+      "count": 2582
+    },
+    {
+      "topic": "/camera/image_color/compressed",
+      "type": "sensor_msgs/msg/CompressedImage",
+      "count": 2582
+    },
+    {
+      "topic": "/livox/imu",
+      "type": "sensor_msgs/msg/Imu",
+      "count": 35425
+    },
+    {
+      "topic": "/livox/lidar",
+      "type": "livox_ros_driver/msg/CustomMsg",
+      "count": 1737
+    }
+  ]
+}

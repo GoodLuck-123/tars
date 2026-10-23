@@ -1,0 +1,15 @@
+{
+  "run_id": "20261023-210512-600f5b",
+  "algorithm": "stopped",
+  "exits": {
+    "monitor": 0,
+    "master": 0,
+    "decode": 0,
+    "livo": 0,
+    "play": 0
+  },
+  "poses": 37,
+  "map_files": 2,
+  "transfer": "complete",
+  "repeat_stop_ok": true
+}

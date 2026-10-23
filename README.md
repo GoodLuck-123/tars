@@ -1,6 +1,6 @@
 # LIVO2：RK3588 数据集实验
 
-本项目位于 `grad/实验/livo2`，独立 Git。当前已完成板端短片段与完整序列基线回放，正在验收源码布局整理后的正式交付包；真实设备与录包后续接入。
+本项目位于 `grad/实验/livo2`，独立 Git。当前已通过远控基础功能及板端完整数据集回放验收；真实设备与录包后续接入。
 
 ```bash
 cp project.example.yaml project.yaml   # 已有配置时跳过；用户只修改此文件
@@ -34,4 +34,6 @@ cp project.example.yaml project.yaml   # 已有配置时跳过；用户只修改
 
 正式产物在 `dist/livo2-<id>-arm64.tar.gz`；也可在板端解压后执行 `install/install.sh ~/livo2-workspace` 独立安装。常规使用不需要手动操作产物。
 
-已有完整基线：173.75 秒输入，2575 个位姿和视觉更新，27 个点云块，全部进程正常退出，结果重收校验通过。处理用时约 556 秒，属于功能验收，不是实时通过；原始结果位于 results/20261023-203612-f62a97，小型证据见 evidence/full-baseline。回放退出时 ROS master 出现一次 publisherUpdate XMLRPC 错误，未导致数据末段覆盖缺失或节点退出失败，原始错误完整保留。
+正式验收：173.75 秒输入，2575 个位姿和视觉更新，27 个 PCD 文件，全部进程正常退出，自动回传与校验通过。处理约 528 秒，属于功能验收，不是实时通过；原始结果位于 results/20261023-205433-4ce8e9，小型证据见 [evidence/README.md](evidence/README.md)。回放退出时 ROS master 出现一次 publisherUpdate XMLRPC 错误，未导致数据末段覆盖缺失或节点退出失败，原始错误完整保留。
+
+验收版本标记为 `v0.1.0`，候选基线保留 `v0.1.0-rc1`。正式包约 149 MiB，不包含输入数据集。
