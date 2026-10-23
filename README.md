@@ -34,6 +34,8 @@ cp project.example.yaml project.yaml   # 已有配置时跳过；用户只修改
 
 正式产物在 `dist/livo2-<id>-arm64.tar.gz`；也可在板端解压后执行 `install/install.sh ~/livo2-workspace` 独立安装。常规使用不需要手动操作产物。
 
-正式验收：173.75 秒输入，2575 个位姿和视觉更新，27 个 PCD 文件，全部进程正常退出，自动回传与校验通过。处理约 528 秒，属于功能验收，不是实时通过；原始结果位于 results/20261023-205433-4ce8e9，小型证据见 [evidence/README.md](evidence/README.md)。回放退出时 ROS master 出现一次 publisherUpdate XMLRPC 错误，未导致数据末段覆盖缺失或节点退出失败，原始错误完整保留。
+当前版本 `v0.1.1`：同一完整序列处理约 250 秒（原 `v0.1.0` 约 528 秒），2575 个位姿/视觉更新、27 个非空 PCD，末端差 0.093 秒，进程退出和结果回传校验通过。默认按 1 倍速输入，随后排空积压；本数据约 15 Hz，当前配置仍未达到实时。核查来源、对照与边界见 [性能记录](evidence/performance/README.md)。
 
-验收版本标记为 `v0.1.0`，候选基线保留 `v0.1.0-rc1`。正式包约 149 MiB，不包含输入数据集。
+`project.yaml` 的 `runtime` 集中设置 A76 核绑定、OpenCV 线程数和临时调频策略。默认 `cpu_governor: performance` 在任务期间使用板子支持的最高频率，需要板端 `sudo -n`；完成、stop 或受控异常后恢复原值，`null` 可关闭。运行期间 CPU 频率、原调频器和配置随结果保存。图像在解码端按 camera.scale 输出，模型内参同步缩放。
+
+回放退出时 ROS master 的 publisherUpdate XMLRPC 错误仍完整保留；此次未造成末段覆盖缺失或节点退出失败。未做真值精度评测，硬件传感器模式尚未接入。旧版功能证据保留在 [evidence/README.md](evidence/README.md)，tag `v0.1.0` 与 `v0.1.0-rc1` 保留。正式包约 149 MiB，不包含数据集。

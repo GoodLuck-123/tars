@@ -1,0 +1,122 @@
+{
+  "run_id": "20261023-224739-ac0f88",
+  "phase": "finished",
+  "algorithm": "complete",
+  "transfer": "pending",
+  "started": 1772690715.939007,
+  "pid": 62749,
+  "master_uri": "http://127.0.0.1:48437",
+  "heartbeat": 1772690966.3913522,
+  "elapsed_s": 250.45235383100044,
+  "resources": {
+    "monitor": {
+      "peak_rss_kib": 16296,
+      "cpu_s": 13.4,
+      "rss_kib": 16036
+    },
+    "master": {
+      "peak_rss_kib": 42720,
+      "cpu_s": 1.73,
+      "rss_kib": 42720
+    },
+    "decode": {
+      "peak_rss_kib": 64888,
+      "cpu_s": 65.63,
+      "rss_kib": 64888
+    },
+    "livo": {
+      "peak_rss_kib": 3391856,
+      "cpu_s": 344.77,
+      "rss_kib": 3350676
+    },
+    "play": {
+      "peak_rss_kib": 42668,
+      "cpu_s": 0.38,
+      "rss_kib": 42668
+    }
+  },
+  "cpu_freq_khz": {
+    "policy6": 2352000,
+    "policy4": 2352000,
+    "policy0": 1800000
+  },
+  "progress": {
+    "schema": 1,
+    "rules_version": 1,
+    "lines": 173653,
+    "warnings": 1,
+    "errors": 1,
+    "visual_updates": 2575,
+    "processed": 5160,
+    "alerts": {
+      "7ada6b9f21aa0df0": {
+        "level": "WARN",
+        "message": "Reset ImuProcess",
+        "raw": "[WARN] [1772690719.576301552, 1644736321.464170573]: Reset ImuProcess",
+        "count": 1,
+        "first_time": 1772690719.5873837,
+        "last_notice": 1772690719.5878077,
+        "last_time": 1772690719.5873954,
+        "source": "logs/livo.log",
+        "offset": 2256
+      },
+      "7bb7a65697ea65ec": {
+        "level": "ERROR",
+        "message": "xmlrpc.client.Fault: <Fault -1: 'publisherUpdate: unknown method name'>",
+        "raw": "[rosmaster.threadpool][ERROR] 2026-03-05 06:08:13,188: Traceback (most recent call last):",
+        "count": 1,
+        "first_time": 1772690893.4885867,
+        "last_notice": 1772690893.489211,
+        "last_time": 1772690893.4892113,
+        "source": "logs/ros/48183600-1859-11f1-95f3-6c1ff7295dee/master.log",
+        "offset": 20184,
+        "context": [
+          "[rosmaster.threadpool][ERROR] 2026-03-05 06:08:13,188: Traceback (most recent call last):",
+          "File \"/home/firefly/livo2-workspace/releases/4a9c6e8b63e4ea7f/ros/lib/python3/dist-packages/rosmaster/threadpool.py\", line 218, in run",
+          "result = cmd(*args)",
+          "File \"/home/firefly/livo2-workspace/releases/4a9c6e8b63e4ea7f/ros/lib/python3/dist-packages/rosmaster/master_api.py\", line 210, in publisher_update_task",
+          "ret = xmlrpcapi(api).publisherUpdate('/master', topic, pub_uris)",
+          "File \"/home/firefly/livo2-workspace/releases/4a9c6e8b63e4ea7f/python/lib/python3.8/xmlrpc/client.py\", line 1109, in __call__",
+          "return self.__send(self.__name, args)",
+          "File \"/home/firefly/livo2-workspace/releases/4a9c6e8b63e4ea7f/python/lib/python3.8/xmlrpc/client.py\", line 1450, in __request",
+          "response = self.__transport.request(",
+          "File \"/home/firefly/livo2-workspace/releases/4a9c6e8b63e4ea7f/python/lib/python3.8/xmlrpc/client.py\", line 1153, in request",
+          "return self.single_request(host, handler, request_body, verbose)",
+          "File \"/home/firefly/livo2-workspace/releases/4a9c6e8b63e4ea7f/python/lib/python3.8/xmlrpc/client.py\", line 1169, in single_request",
+          "return self.parse_response(resp)",
+          "File \"/home/firefly/livo2-workspace/releases/4a9c6e8b63e4ea7f/python/lib/python3.8/xmlrpc/client.py\", line 1341, in parse_response",
+          "return u.close()",
+          "File \"/home/firefly/livo2-workspace/releases/4a9c6e8b63e4ea7f/python/lib/python3.8/xmlrpc/client.py\", line 655, in close",
+          "raise Fault(**self._stack[0])",
+          "xmlrpc.client.Fault: <Fault -1: 'publisherUpdate: unknown method name'>"
+        ]
+      }
+    },
+    "count_basis": "log records, exact cross-source line copies removed; differently formatted mirrors may repeat",
+    "event_seq": 3,
+    "heartbeat": 1772690966.2684822,
+    "sources": 14,
+    "status": "complete",
+    "pending_traces": {},
+    "processed_stamp": 1644736494.857495,
+    "mode": 1,
+    "lidar_queue": 1,
+    "image_queue": 0,
+    "progress_wall": 1772690960.1212828,
+    "cross_source_copies": 2579
+  },
+  "unprocessed_tail_s": 0.09277224540710449,
+  "cpu_governor_restored": true,
+  "reason": null,
+  "exits": {
+    "monitor": 0,
+    "master": 0,
+    "decode": 0,
+    "livo": 0,
+    "play": 0
+  },
+  "poses": 2575,
+  "map_chunks": 27,
+  "trajectory_start": 1644736321.642097,
+  "trajectory_end": 1644736494.857495
+}

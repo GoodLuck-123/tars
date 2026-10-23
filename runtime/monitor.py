@@ -52,7 +52,7 @@ class Monitor:
         identity=text
         # ROS console and rosout use different formats for the same timestamped event.
         console=re.search(r'\[\s*(WARN|ERROR|FATAL)\s*\]\s*\[([\d.]+)(?:,\s*([\d.]+))?\]:\s*(.*)',text)
-        rosfile=re.match(r'([\d.]+)\s+(WARN|ERROR|FATAL)\s+(/\S+)\s+(?:\[[^\]]*\]\s*)*(.*)',text)
+        rosfile=re.match(r'([\d.]+)\s+(WARN|ERROR|FATAL)\s+(/\S+)\s+(?:\[(?:[^\]]*:\d+(?:\([^)]*\))?|topics:[^\]]*)\]\s*)*(.*)',text)
         if console and source.endswith('/livo.log'):
             message=console[4];identity=f'{console[1]}:/laserMapping:{console[3] or console[2]}:{message}'
         elif rosfile:

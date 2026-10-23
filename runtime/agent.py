@@ -39,12 +39,23 @@ def run(job,lockfd):
     with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
     env=os.environ.copy();env.update(ROS_MASTER_URI=f'http://127.0.0.1:{port}',ROS_IP='127.0.0.1',ROS_LOG_DIR=str(job/'logs/ros'),LIVO_OUTPUT_DIR=str(job/'algorithm')+'/')
     status['master_uri']=env['ROS_MASTER_URI'];resources={}
+    rt=cfg.get('runtime',dict(livo_cpus=[4,5,6,7],opencv_threads=1))
+    cpu_policies=list(Path('/sys/devices/system/cpu/cpufreq').glob('policy*'))
+    original_governors={}
+    def governors(values):
+        code='import json,sys;from pathlib import Path;[(Path(p).write_text(v)) for p,v in json.loads(sys.argv[1]).items()]'
+        subprocess.run(['sudo','-n','/usr/bin/python3','-c',code,json.dumps(values)],check=True,timeout=10)
     def state(phase,**kw):
         status.update(phase=phase,heartbeat=time.time(),elapsed_s=time.monotonic()-started,**kw);write_json(job/'state.json',status)
     def spawn(name,args,ros=True):
         log=(job/'logs'/f'{name}.log').open('ab');handles.append(log)
         cmd=['bash','-c','source "$1/env.sh"; shift; exec "$@"','livo',str(install),*map(str,args)] if ros else list(map(str,args))
-        p=subprocess.Popen(cmd,cwd=job,env=env,stdin=subprocess.DEVNULL,stdout=log,stderr=log,start_new_session=True);processes[name]=p;return p
+        child_env=env.copy()
+        if name=='livo':
+            child_env.update(OMP_WAIT_POLICY='PASSIVE',OPENBLAS_NUM_THREADS='1')
+            if rt['livo_cpus']:child_env['GOMP_CPU_AFFINITY']=' '.join(map(str,rt['livo_cpus']))
+            else:child_env.pop('GOMP_CPU_AFFINITY',None)
+        p=subprocess.Popen(cmd,cwd=job,env=child_env,stdin=subprocess.DEVNULL,stdout=log,stderr=log,start_new_session=True);processes[name]=p;return p
     def ros(args):
         subprocess.run(['bash','-c','source "$1/env.sh"; shift; exec "$@"','livo',str(install),*map(str,args)],env=env,stdout=subprocess.DEVNULL,check=True)
     def monitor():
@@ -60,6 +71,7 @@ def run(job,lockfd):
                 r.update(cpu_s=(int(fields[11])+int(fields[12]))/os.sysconf('SC_CLK_TCK'),rss_kib=rss,peak_rss_kib=max(rss,r['peak_rss_kib']))
             except (OSError,StopIteration,ValueError):pass
         status['resources']=resources
+        status['cpu_freq_khz']={p.name:int((p/'scaling_cur_freq').read_text()) for p in cpu_policies}
         if (job/'stop').exists():raise InterruptedError('User requested stop')
         if shutil.disk_usage(job).free < cfg['min_free_gib']*2**30:raise RuntimeError('Insufficient free disk space')
         if time.monotonic()-started>cfg['timeout_s']:raise RuntimeError('Task timeout')
@@ -77,7 +89,13 @@ def run(job,lockfd):
         except subprocess.TimeoutExpired:
             os.killpg(p.pid,signal.SIGKILL);p.wait();raise RuntimeError(f'{name} required SIGKILL')
     try:
+        if not set(rt['livo_cpus']).issubset(os.sched_getaffinity(0)):raise ValueError('Configured LIVO CPU is unavailable on this board')
+        write_json(job/'cpu-environment.json',dict(affinity=sorted(os.sched_getaffinity(0)),runtime=rt,policies={p.name:{k:(p/k).read_text().strip() for k in ['scaling_governor','scaling_min_freq','scaling_max_freq']} for p in cpu_policies}))
         spawn('monitor',['/usr/bin/python3',install/'runtime/monitor.py',job,str(cfg['monitoring']['repeat_notice_s'])],False)
+        if rt.get('cpu_governor'):
+            original_governors={str(p/'scaling_governor'):(p/'scaling_governor').read_text().strip() for p in cpu_policies}
+            if not original_governors:raise RuntimeError('CPU frequency policies unavailable; set runtime.cpu_governor to null')
+            state('configuring CPU');governors({p:rt['cpu_governor'] for p in original_governors})
         state('starting ROS');spawn('master',['roscore','-p',str(port)])
         master=xmlrpc.client.ServerProxy(env['ROS_MASTER_URI']);deadline=time.monotonic()+20
         while True:
@@ -123,6 +141,9 @@ def run(job,lockfd):
             except Exception as e:failure=(failure+'; ' if failure else '')+str(e)
         try:stop('master')
         except Exception as e:failure=(failure+'; ' if failure else '')+str(e)
+        if original_governors:
+            try:governors(original_governors);status['cpu_governor_restored']=True
+            except Exception as e:failure=(failure+'; ' if failure else '')+'Failed to restore CPU governor: '+str(e)
         (job/'stop-monitor').touch()
         try:
             if 'monitor' in processes:processes['monitor'].wait(timeout=10)

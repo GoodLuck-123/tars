@@ -1,0 +1,39 @@
+{
+  "affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "runtime": {
+    "cpu_governor": "performance",
+    "livo_cpus": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "opencv_threads": 1
+  },
+  "policies": {
+    "policy6": {
+      "scaling_governor": "interactive",
+      "scaling_min_freq": "408000",
+      "scaling_max_freq": "2352000"
+    },
+    "policy4": {
+      "scaling_governor": "interactive",
+      "scaling_min_freq": "408000",
+      "scaling_max_freq": "2352000"
+    },
+    "policy0": {
+      "scaling_governor": "interactive",
+      "scaling_min_freq": "1100000",
+      "scaling_max_freq": "1800000"
+    }
+  }
+}

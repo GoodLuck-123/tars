@@ -1,0 +1,14 @@
+{
+  "run_id": "20261023-225329-818cbe",
+  "algorithm": "failed",
+  "reason": "Task timeout; Trajectory does not cover sequence end",
+  "elapsed_s": 10.948824224999044,
+  "exits": {
+    "monitor": 0,
+    "master": 0,
+    "decode": 0,
+    "livo": 0,
+    "play": 0
+  },
+  "cpu_governor_restored": true
+}

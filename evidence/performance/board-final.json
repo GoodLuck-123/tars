@@ -1,0 +1,11 @@
+{
+  "timeout_run": "20261023-225329-818cbe",
+  "expected_failure": "Task timeout; Trajectory does not cover sequence end",
+  "cpu_governor_restored": true,
+  "final_governors": {
+    "policy6": "interactive",
+    "policy4": "interactive",
+    "policy0": "interactive"
+  },
+  "leftover_processes": []
+}

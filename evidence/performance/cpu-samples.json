@@ -1,0 +1,580 @@
+{
+  "job": "/home/firefly/livo2-workspace/runs/20261023-224739-ac0f88",
+  "samples": [
+    {
+      "elapsed_s": 18.678058793000673,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736332.954763,
+        "lidar_queue": 32,
+        "image_queue": 48
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 58.23,
+        "thermal_zone0": 56.384,
+        "thermal_zone5": 53.615,
+        "thermal_zone3": 57.307,
+        "thermal_zone1": 58.23,
+        "thermal_zone6": 54.538,
+        "thermal_zone4": 55.461
+      }
+    },
+    {
+      "elapsed_s": 20.199104404000536,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736334.113473,
+        "lidar_queue": 36,
+        "image_queue": 54
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 58.23,
+        "thermal_zone0": 56.384,
+        "thermal_zone5": 53.615,
+        "thermal_zone3": 57.307,
+        "thermal_zone1": 58.23,
+        "thermal_zone6": 54.538,
+        "thermal_zone4": 54.538
+      }
+    },
+    {
+      "elapsed_s": 22.227371815999504,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736335.821045,
+        "lidar_queue": 40,
+        "image_queue": 60
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 59.153,
+        "thermal_zone0": 56.384,
+        "thermal_zone5": 54.538,
+        "thermal_zone3": 57.307,
+        "thermal_zone1": 59.153,
+        "thermal_zone6": 54.538,
+        "thermal_zone4": 55.461
+      }
+    },
+    {
+      "elapsed_s": 24.25472747799904,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736337.437141,
+        "lidar_queue": 44,
+        "image_queue": 65
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 60.076,
+        "thermal_zone0": 58.23,
+        "thermal_zone5": 54.538,
+        "thermal_zone3": 59.153,
+        "thermal_zone1": 60.076,
+        "thermal_zone6": 55.461,
+        "thermal_zone4": 55.461
+      }
+    },
+    {
+      "elapsed_s": 26.265716554999017,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736338.626343,
+        "lidar_queue": 49,
+        "image_queue": 73
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 58.23,
+        "thermal_zone0": 56.384,
+        "thermal_zone5": 53.615,
+        "thermal_zone3": 57.307,
+        "thermal_zone1": 58.23,
+        "thermal_zone6": 54.538,
+        "thermal_zone4": 55.461
+      }
+    },
+    {
+      "elapsed_s": 28.280018090999874,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736340.242438,
+        "lidar_queue": 55,
+        "image_queue": 80
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 59.153,
+        "thermal_zone0": 57.307,
+        "thermal_zone5": 54.538,
+        "thermal_zone3": 58.23,
+        "thermal_zone1": 59.153,
+        "thermal_zone6": 55.461,
+        "thermal_zone4": 56.384
+      }
+    },
+    {
+      "elapsed_s": 30.312906086999647,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736341.950011,
+        "lidar_queue": 60,
+        "image_queue": 88
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 59.153,
+        "thermal_zone0": 58.23,
+        "thermal_zone5": 55.461,
+        "thermal_zone3": 58.23,
+        "thermal_zone1": 59.153,
+        "thermal_zone6": 56.384,
+        "thermal_zone4": 56.384
+      }
+    },
+    {
+      "elapsed_s": 32.336983123999744,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736343.291675,
+        "lidar_queue": 62,
+        "image_queue": 93
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 59.153,
+        "thermal_zone0": 57.307,
+        "thermal_zone5": 55.461,
+        "thermal_zone3": 58.23,
+        "thermal_zone1": 59.153,
+        "thermal_zone6": 55.461,
+        "thermal_zone4": 56.384
+      }
+    },
+    {
+      "elapsed_s": 34.363317952000216,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736344.999247,
+        "lidar_queue": 66,
+        "image_queue": 99
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 60.076,
+        "thermal_zone0": 58.23,
+        "thermal_zone5": 56.384,
+        "thermal_zone3": 59.153,
+        "thermal_zone1": 60.076,
+        "thermal_zone6": 56.384,
+        "thermal_zone4": 58.23
+      }
+    },
+    {
+      "elapsed_s": 36.39576028100055,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736346.798296,
+        "lidar_queue": 70,
+        "image_queue": 105
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 61.0,
+        "thermal_zone0": 59.153,
+        "thermal_zone5": 56.384,
+        "thermal_zone3": 60.076,
+        "thermal_zone1": 60.076,
+        "thermal_zone6": 56.384,
+        "thermal_zone4": 57.307
+      }
+    },
+    {
+      "elapsed_s": 38.42820815199957,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736348.26193,
+        "lidar_queue": 77,
+        "image_queue": 115
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 60.076,
+        "thermal_zone0": 58.23,
+        "thermal_zone5": 55.461,
+        "thermal_zone3": 59.153,
+        "thermal_zone1": 60.076,
+        "thermal_zone6": 56.384,
+        "thermal_zone4": 57.307
+      }
+    },
+    {
+      "elapsed_s": 40.45870914800071,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736349.725564,
+        "lidar_queue": 84,
+        "image_queue": 125
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 60.076,
+        "thermal_zone0": 58.23,
+        "thermal_zone5": 56.384,
+        "thermal_zone3": 59.153,
+        "thermal_zone1": 61.0,
+        "thermal_zone6": 56.384,
+        "thermal_zone4": 57.307
+      }
+    },
+    {
+      "elapsed_s": 42.49048414400022,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736350.792796,
+        "lidar_queue": 90,
+        "image_queue": 133
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 61.0,
+        "thermal_zone0": 58.23,
+        "thermal_zone5": 56.384,
+        "thermal_zone3": 59.153,
+        "thermal_zone1": 60.076,
+        "thermal_zone6": 56.384,
+        "thermal_zone4": 58.23
+      }
+    },
+    {
+      "elapsed_s": 44.5114015550007,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736352.195445,
+        "lidar_queue": 98,
+        "image_queue": 145
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 61.923,
+        "thermal_zone0": 59.153,
+        "thermal_zone5": 56.384,
+        "thermal_zone3": 60.076,
+        "thermal_zone1": 61.0,
+        "thermal_zone6": 57.307,
+        "thermal_zone4": 58.23
+      }
+    },
+    {
+      "elapsed_s": 46.52194525699997,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736353.537109,
+        "lidar_queue": 105,
+        "image_queue": 156
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 61.0,
+        "thermal_zone0": 59.153,
+        "thermal_zone5": 56.384,
+        "thermal_zone3": 60.076,
+        "thermal_zone1": 61.0,
+        "thermal_zone6": 57.307,
+        "thermal_zone4": 58.23
+      }
+    },
+    {
+      "elapsed_s": 48.546760793999056,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736354.817789,
+        "lidar_queue": 113,
+        "image_queue": 168
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 61.0,
+        "thermal_zone0": 60.076,
+        "thermal_zone5": 57.307,
+        "thermal_zone3": 60.076,
+        "thermal_zone1": 61.0,
+        "thermal_zone6": 58.23,
+        "thermal_zone4": 58.23
+      }
+    },
+    {
+      "elapsed_s": 50.578527331999794,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736355.793544,
+        "lidar_queue": 120,
+        "image_queue": 178
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 62.846,
+        "thermal_zone0": 61.0,
+        "thermal_zone5": 57.307,
+        "thermal_zone3": 61.0,
+        "thermal_zone1": 61.923,
+        "thermal_zone6": 58.23,
+        "thermal_zone4": 58.23
+      }
+    },
+    {
+      "elapsed_s": 52.61167899400061,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736357.135208,
+        "lidar_queue": 128,
+        "image_queue": 190
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 61.923,
+        "thermal_zone0": 59.153,
+        "thermal_zone5": 57.307,
+        "thermal_zone3": 60.076,
+        "thermal_zone1": 61.0,
+        "thermal_zone6": 57.307,
+        "thermal_zone4": 58.23
+      }
+    },
+    {
+      "elapsed_s": 54.64826007400006,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736358.537856,
+        "lidar_queue": 136,
+        "image_queue": 202
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 61.923,
+        "thermal_zone0": 60.076,
+        "thermal_zone5": 57.307,
+        "thermal_zone3": 61.0,
+        "thermal_zone1": 61.0,
+        "thermal_zone6": 57.307,
+        "thermal_zone4": 58.23
+      }
+    },
+    {
+      "elapsed_s": 56.67545765199975,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736359.970998,
+        "lidar_queue": 143,
+        "image_queue": 214
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 61.923,
+        "thermal_zone0": 60.076,
+        "thermal_zone5": 57.307,
+        "thermal_zone3": 61.0,
+        "thermal_zone1": 61.923,
+        "thermal_zone6": 58.23,
+        "thermal_zone4": 59.153
+      }
+    },
+    {
+      "elapsed_s": 58.7018201890005,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736361.648078,
+        "lidar_queue": 147,
+        "image_queue": 220
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 61.923,
+        "thermal_zone0": 60.076,
+        "thermal_zone5": 57.307,
+        "thermal_zone3": 61.0,
+        "thermal_zone1": 61.923,
+        "thermal_zone6": 58.23,
+        "thermal_zone4": 59.153
+      }
+    },
+    {
+      "elapsed_s": 60.73053239299952,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736362.776295,
+        "lidar_queue": 152,
+        "image_queue": 226
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 61.923,
+        "thermal_zone0": 61.0,
+        "thermal_zone5": 58.23,
+        "thermal_zone3": 61.0,
+        "thermal_zone1": 61.923,
+        "thermal_zone6": 58.23,
+        "thermal_zone4": 59.153
+      }
+    },
+    {
+      "elapsed_s": 62.76313047199983,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736364.026482,
+        "lidar_queue": 160,
+        "image_queue": 233
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 62.846,
+        "thermal_zone0": 61.0,
+        "thermal_zone5": 58.23,
+        "thermal_zone3": 61.0,
+        "thermal_zone1": 62.846,
+        "thermal_zone6": 59.153,
+        "thermal_zone4": 59.153
+      }
+    },
+    {
+      "elapsed_s": 64.28695362600047,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736365.1547,
+        "lidar_queue": 165,
+        "image_queue": 235
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 61.923,
+        "thermal_zone0": 60.076,
+        "thermal_zone5": 58.23,
+        "thermal_zone3": 61.0,
+        "thermal_zone1": 61.923,
+        "thermal_zone6": 58.23,
+        "thermal_zone4": 59.153
+      }
+    },
+    {
+      "elapsed_s": 66.3191162460007,
+      "phase": "running",
+      "progress": {
+        "processed_stamp": 1644736367.014734,
+        "lidar_queue": 167,
+        "image_queue": 235
+      },
+      "freq_khz": {
+        "policy6": 2352000,
+        "policy4": 2352000,
+        "policy0": 1800000
+      },
+      "temperature_c": {
+        "thermal_zone2": 61.923,
+        "thermal_zone0": 61.0,
+        "thermal_zone5": 58.23,
+        "thermal_zone3": 61.0,
+        "thermal_zone1": 61.923,
+        "thermal_zone6": 59.153,
+        "thermal_zone4": 60.076
+      }
+    }
+  ]
+}

@@ -22,6 +22,12 @@ def config(path):
     path=Path(path).resolve()
     if not path.exists():raise RuntimeError(f'Create your configuration: cp {ROOT}/project.example.yaml {path}')
     c=yaml.safe_load(path.read_text())
+    c.setdefault('runtime',dict(livo_cpus=[4,5,6,7],opencv_threads=1))
+    rt=c['runtime']
+    rt.setdefault('cpu_governor',None)
+    if rt['cpu_governor'] not in {None,'performance'}:raise ValueError('runtime.cpu_governor must be null or performance')
+    if not isinstance(rt['livo_cpus'],list) or any(type(n) is not int or n<0 for n in rt['livo_cpus']):raise ValueError('runtime.livo_cpus must be a list of CPU numbers')
+    if type(rt['opencv_threads']) is not int or rt['opencv_threads']<1:raise ValueError('runtime.opencv_threads must be positive')
     if c['dataset']['rate']<=0 or c['build']['jobs']<1:raise ValueError('rate and build.jobs must be positive')
     if c['dataset']['start_s']<0 or (c['dataset']['duration_s'] is not None and c['dataset']['duration_s']<=0):raise ValueError('Invalid dataset interval')
     if len(c['camera']['intrinsics'])!=4 or len(c['camera']['distortion']) not in {4,5,8,12,14}:raise ValueError('Invalid camera model parameters')
@@ -136,14 +142,17 @@ def prepare(c,job,install,root):
     with Reader(p) as r:
         start=r.start_time/1e9+c['dataset']['start_s'];end=min(r.end_time/1e9,start+c['dataset']['duration_s']) if c['dataset']['duration_s'] is not None else r.end_time/1e9
         input_info=dict(path=str(p),sha256=ident,start_s=start,end_s=end,topics=[dict(topic=x.topic,type=x.msgtype,count=x.msgcount) for x in r.connections])
-    cfg=dict(workspace=root,install=install,bag=bag,rate=c['dataset']['rate'],start_s=c['dataset']['start_s'],duration_s=c['dataset']['duration_s'],expected_end_s=end,tail_tolerance_s=c['dataset']['tail_tolerance_s'],topics=c['topics'],monitoring=c['monitoring'],**{k:c['run'][k] for k in ['timeout_s','shutdown_timeout_s','drain_timeout_s','min_free_gib']})
+    cfg=dict(workspace=root,install=install,bag=bag,rate=c['dataset']['rate'],start_s=c['dataset']['start_s'],duration_s=c['dataset']['duration_s'],expected_end_s=end,tail_tolerance_s=c['dataset']['tail_tolerance_s'],topics=c['topics'],monitoring=c['monitoring'],runtime=c['runtime'],**{k:c['run'][k] for k in ['timeout_s','shutdown_timeout_s','drain_timeout_s','min_free_gib']})
     upstream=yaml.safe_load((ROOT/'third_party/FAST-LIVO2/config/avia.yaml').read_text());upstream['common'].update(img_topic=c['topics']['image'],lid_topic=c['topics']['lidar'],imu_topic=c['topics']['imu'])
+    upstream['runtime']=dict(opencv_threads=c['runtime']['opencv_threads'])
     upstream['time_offset'].update(img_time_offset=0.0,imu_time_offset=0.0)
     e=c['extrinsics'];upstream['extrin_calib']=dict(extrinsic_T=e['t_imu_lidar'],extrinsic_R=e['R_imu_lidar'],Rcl=e['R_camera_lidar'],Pcl=e['t_camera_lidar'])
     upstream['evo']=dict(seq_name='trajectory',pose_output_en=True);upstream['pcd_save'].update(pcd_save_en=True,interval=c['run']['map_chunk_frames']);upstream['image_save']['img_save_en']=False
     for section,values in c['algorithm']['overrides'].items():upstream.setdefault(section,{}).update(values)
-    fx,fy,cx,cy=c['camera']['intrinsics'];upstream['decoder']=dict(K=[fx,0,cx,0,fy,cy,0,0,1],D=c['camera']['distortion'])
-    cam=dict(cam_model='Pinhole',cam_width=c['camera']['width'],cam_height=c['camera']['height'],scale=c['camera']['scale'],cam_fx=fx,cam_fy=fy,cam_cx=cx,cam_cy=cy,cam_d0=0.0,cam_d1=0.0,cam_d2=0.0,cam_d3=0.0)
+    fx,fy,cx,cy=c['camera']['intrinsics'];w,h=c['camera']['width'],c['camera']['height'];scale=c['camera']['scale'];ow,oh=int(w*scale),int(h*scale)
+    if min(ow,oh)<1:raise ValueError('Scaled camera dimensions must be positive')
+    upstream['decoder']=dict(K=[fx,0,cx,0,fy,cy,0,0,1],D=c['camera']['distortion'],width=w,height=h,output_width=ow,output_height=oh)
+    cam=dict(cam_model='Pinhole',cam_width=ow,cam_height=oh,scale=1.0,cam_fx=fx*ow/w,cam_fy=fy*oh/h,cam_cx=cx*ow/w,cam_cy=cy*oh/h,cam_d0=0.0,cam_d1=0.0,cam_d2=0.0,cam_d3=0.0)
     job.mkdir(parents=True)
     for name,value in [('config.json',cfg),('input.json',input_info)]: (job/name).write_text(json.dumps(value,indent=2)+'\n')
     for name,value in [('algorithm.yaml',upstream),('camera.yaml',cam),('config.resolved.yaml',c)]: (job/name).write_text(yaml.safe_dump(value,allow_unicode=True,sort_keys=False))

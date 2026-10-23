@@ -1,6 +1,8 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0652aab..d7b2fbc 100755
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -21,8 +21,8 @@
+@@ -21,8 +21,8 @@ message(STATUS "Current CPU architecture: ${CMAKE_SYSTEM_PROCESSOR}")
  if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm|aarch64|ARM|AARCH64)")
    if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
      # 64-bit ARM optimizations (e.g., RK3588 and Jetson Orin NX)
@@ -11,7 +13,7 @@
    else()
      # 32-bit ARM optimizations with NEON support
      set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -mcpu=native -mtune=native -mfpu=neon -ffast-math")
-@@ -83,10 +83,9 @@
+@@ -83,10 +83,9 @@ find_package(catkin REQUIRED COMPONENTS
    roscpp
    rospy
    std_msgs
@@ -23,7 +25,7 @@
    vikit_common
    vikit_ros
    cv_bridge
-@@ -94,12 +93,12 @@
+@@ -94,12 +93,12 @@ find_package(catkin REQUIRED COMPONENTS
  )
  
  find_package(Eigen3 REQUIRED)
@@ -38,7 +40,7 @@
  
  # Define the catkin package
  catkin_package(
-@@ -115,6 +114,7 @@
+@@ -115,6 +114,7 @@ include_directories(
    ${OpenCV_INCLUDE_DIRS}
    ${Sophus_INCLUDE_DIRS}
    include
@@ -46,22 +48,26 @@
  )
  
  # Add libraries
+diff --git a/include/common_lib.h b/include/common_lib.h
+index 9de8a90..6d47f35 100755
 --- a/include/common_lib.h
 +++ b/include/common_lib.h
-@@ -20,6 +20,10 @@
- #include <sensor_msgs/Imu.h>
+@@ -21,6 +21,10 @@ which is included as part of this source code package.
  #include <sophus/se3.h>
  #include <tf/transform_broadcaster.h>
-+
+ 
 +#include <cstdlib>
 +#undef ROOT_DIR
 +#define ROOT_DIR (std::getenv("LIVO_OUTPUT_DIR") ? std::getenv("LIVO_OUTPUT_DIR") : "./")
- 
++
  using namespace std;
  using namespace Eigen;
+ using namespace Sophus;
+diff --git a/src/LIVMapper.cpp b/src/LIVMapper.cpp
+index 15af354..923e289 100755
 --- a/src/LIVMapper.cpp
 +++ b/src/LIVMapper.cpp
-@@ -304,6 +304,7 @@
+@@ -304,6 +304,7 @@ void LIVMapper::handleVIO()
  
    vio_manager->processFrame(LidarMeasures.measures.back().img, _pv_list, voxelmap_manager->voxel_map_, LidarMeasures.last_lio_update_time - _first_lidar_time);
  
@@ -69,7 +75,7 @@
    if (imu_prop_enable) 
    {
      ekf_finish_once = true;
-@@ -483,7 +484,7 @@
+@@ -483,7 +484,7 @@ void LIVMapper::handleLIO()
  
  void LIVMapper::savePCD() 
  {
@@ -78,7 +84,7 @@
    {
      std::string raw_points_dir = std::string(ROOT_DIR) + "Log/pcd/all_raw_points.pcd";
      std::string downsampled_points_dir = std::string(ROOT_DIR) + "Log/pcd/all_downsampled_points.pcd";
-@@ -549,6 +550,7 @@
+@@ -549,6 +550,7 @@ void LIVMapper::run()
      // if (!p_imu->imu_time_init) continue;
  
      stateEstimationAndMapping();
@@ -86,3 +92,21 @@
    }
    savePCD();
  }
+diff --git a/src/main.cpp b/src/main.cpp
+index 135b336..63e0256 100755
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -4,9 +4,11 @@ int main(int argc, char **argv)
+ {
+   ros::init(argc, argv, "laserMapping");
+   ros::NodeHandle nh;
++  cv::setNumThreads(nh.param("/runtime/opencv_threads", 1));
++  ROS_INFO("OpenCV threads: %d", cv::getNumThreads());
+   image_transport::ImageTransport it(nh);
+   LIVMapper mapper(nh); 
+   mapper.initializeSubscribersAndPublishers(nh, it);
+   mapper.run();
+   return 0;
+-}
+\ No newline at end of file
++}

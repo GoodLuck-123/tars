@@ -1,0 +1,22 @@
+{
+  "algorithm_parameters_equal": true,
+  "effective_camera_geometry_equal": true,
+  "resampling_pixels_equal": false,
+  "raw_camera": [
+    1280,
+    1024
+  ],
+  "working_camera": [
+    640,
+    512
+  ],
+  "note": "JPEG reduced decoding changes pixel samples; no ground truth accuracy claim.",
+  "trajectory_stamp_max_diff_s": 0.0,
+  "trajectory_position_diff_m": {
+    "mean": 0.015786077689589336,
+    "p95": 0.03007405130156503,
+    "max": 0.04747508840434068,
+    "end": 0.022120328614195585
+  },
+  "comparison_note": "Direct unaligned difference from previous estimate, not ground-truth error; parallel computation and image resampling both differ."
+}

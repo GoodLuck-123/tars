@@ -7,7 +7,7 @@ build:
   seed_caches: []
 dataset:
   path: /home/eric/data/hku_campus_seq_03.bag
-  rate: 0.5
+  rate: 1.0
   start_s: 0
   duration_s: null
   tail_tolerance_s: 1.0
@@ -76,3 +76,9 @@ monitoring:
 results_dir: results
 algorithm:
   overrides: {}
+
+# RK3588: A76 为 CPU 4–7；[] 表示交给系统调度。限制 OpenCV 线程以避免与算法抢核。
+runtime:
+  livo_cpus: [4, 5, 6, 7]
+  opencv_threads: 1
+  cpu_governor: performance  # 任务期间临时启用，结束/停止/异常后恢复；需板端 sudo -n，null 为不修改

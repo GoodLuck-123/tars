@@ -1,0 +1,530 @@
+[
+  {
+    "run_id": "20261023-205433-4ce8e9",
+    "label": "v0.1.0 full, 0.5x",
+    "install": "/home/firefly/livo2-workspace/releases/46f505a61c48bfb7",
+    "rate": 0.5,
+    "duration_s": null,
+    "elapsed_s": 528.2618620360004,
+    "poses": 2575,
+    "visual_updates": 2575,
+    "tail_s": 0.09277224540710449,
+    "exits": {
+      "monitor": 0,
+      "master": 0,
+      "decode": 0,
+      "livo": 0,
+      "play": 0
+    },
+    "resources": {
+      "monitor": {
+        "peak_rss_kib": 16508,
+        "cpu_s": 25.83,
+        "rss_kib": 16252
+      },
+      "master": {
+        "peak_rss_kib": 43184,
+        "cpu_s": 3.89,
+        "rss_kib": 43184
+      },
+      "decode": {
+        "peak_rss_kib": 79256,
+        "cpu_s": 388.23,
+        "rss_kib": 63288
+      },
+      "livo": {
+        "peak_rss_kib": 5674080,
+        "cpu_s": 966.21,
+        "rss_kib": 5606036
+      },
+      "play": {
+        "peak_rss_kib": 42668,
+        "cpu_s": 0.69,
+        "rss_kib": 42668
+      }
+    },
+    "cpu_governor_restored": null,
+    "stages": {
+      "lio:ICP": {
+        "count": 2575,
+        "mean_ms": 140.58868932038834,
+        "p95_ms": 245.048,
+        "total_s": 362.0158750000008
+      },
+      "lio:Current Total Time": {
+        "count": 2575,
+        "mean_ms": 159.61685009708737,
+        "p95_ms": 275.654,
+        "total_s": 411.01338899999996
+      },
+      "vio:Current Total Time": {
+        "count": 2575,
+        "mean_ms": 16.92591495145631,
+        "p95_ms": 29.080000000000002,
+        "total_s": 43.58423099999993
+      }
+    }
+  },
+  {
+    "run_id": "20261023-223427-ec41e0",
+    "label": "old package, stock scheduling, 0.5x",
+    "install": "/home/firefly/livo2-workspace/releases/46f505a61c48bfb7",
+    "rate": 0.5,
+    "duration_s": 30,
+    "elapsed_s": 93.04052084900104,
+    "poses": 443,
+    "visual_updates": 442,
+    "tail_s": 0.06855607032775879,
+    "exits": {
+      "monitor": 0,
+      "master": 0,
+      "decode": 0,
+      "livo": 0,
+      "play": 0
+    },
+    "resources": {
+      "monitor": {
+        "peak_rss_kib": 16188,
+        "cpu_s": 4.16,
+        "rss_kib": 16012
+      },
+      "master": {
+        "peak_rss_kib": 42728,
+        "cpu_s": 1.05,
+        "rss_kib": 42728
+      },
+      "decode": {
+        "peak_rss_kib": 79004,
+        "cpu_s": 69.25,
+        "rss_kib": 63308
+      },
+      "livo": {
+        "peak_rss_kib": 985616,
+        "cpu_s": 155.15,
+        "rss_kib": 941056
+      },
+      "play": {
+        "peak_rss_kib": 42668,
+        "cpu_s": 0.86,
+        "rss_kib": 42668
+      }
+    },
+    "cpu_governor_restored": null,
+    "stages": {
+      "lio:ICP": {
+        "count": 443,
+        "mean_ms": 127.58833182844242,
+        "p95_ms": 218.004,
+        "total_s": 56.521631000000056
+      },
+      "lio:Current Total Time": {
+        "count": 443,
+        "mean_ms": 143.76725959367946,
+        "p95_ms": 245.24699999999999,
+        "total_s": 63.68889599999999
+      },
+      "vio:Current Total Time": {
+        "count": 442,
+        "mean_ms": 16.90758597285068,
+        "p95_ms": 28.732,
+        "total_s": 7.473153000000005
+      }
+    }
+  },
+  {
+    "run_id": "20261023-223620-efbf6b",
+    "label": "old package, A76 affinity/passive/BLAS1, interactive, 0.5x",
+    "install": "/home/firefly/livo2-workspace/releases/46f505a61c48bfb7",
+    "rate": 0.5,
+    "duration_s": 30,
+    "elapsed_s": 71.18880619400079,
+    "poses": 442,
+    "visual_updates": 441,
+    "tail_s": 0.06855607032775879,
+    "exits": {
+      "monitor": 0,
+      "master": 0,
+      "decode": 0,
+      "livo": 0,
+      "play": 0
+    },
+    "resources": {
+      "monitor": {
+        "peak_rss_kib": 16184,
+        "cpu_s": 2.89,
+        "rss_kib": 16024
+      },
+      "master": {
+        "peak_rss_kib": 42724,
+        "cpu_s": 0.94,
+        "rss_kib": 42724
+      },
+      "decode": {
+        "peak_rss_kib": 76776,
+        "cpu_s": 60.27,
+        "rss_kib": 63596
+      },
+      "livo": {
+        "peak_rss_kib": 536164,
+        "cpu_s": 79.07,
+        "rss_kib": 536164
+      },
+      "play": {
+        "peak_rss_kib": 42652,
+        "cpu_s": 0.84,
+        "rss_kib": 42652
+      }
+    },
+    "cpu_governor_restored": null,
+    "stages": {
+      "lio:ICP": {
+        "count": 442,
+        "mean_ms": 84.20876696832579,
+        "p95_ms": 138.22799999999998,
+        "total_s": 37.22027500000001
+      },
+      "lio:Current Total Time": {
+        "count": 442,
+        "mean_ms": 95.31487104072397,
+        "p95_ms": 154.775,
+        "total_s": 42.12917300000003
+      },
+      "vio:Current Total Time": {
+        "count": 441,
+        "mean_ms": 16.189836734693877,
+        "p95_ms": 32.63,
+        "total_s": 7.139718000000005
+      }
+    }
+  },
+  {
+    "run_id": "20261023-223750-0e9680",
+    "label": "previous plus temporary performance governor, 0.5x",
+    "install": "/home/firefly/livo2-workspace/releases/46f505a61c48bfb7",
+    "rate": 0.5,
+    "duration_s": 30,
+    "elapsed_s": 69.42588039200018,
+    "poses": 442,
+    "visual_updates": 441,
+    "tail_s": 0.06855607032775879,
+    "exits": {
+      "monitor": 0,
+      "master": 0,
+      "decode": 0,
+      "livo": 0,
+      "play": 0
+    },
+    "resources": {
+      "monitor": {
+        "peak_rss_kib": 16168,
+        "cpu_s": 2.19,
+        "rss_kib": 15996
+      },
+      "master": {
+        "peak_rss_kib": 42732,
+        "cpu_s": 0.85,
+        "rss_kib": 42732
+      },
+      "decode": {
+        "peak_rss_kib": 78984,
+        "cpu_s": 41.88,
+        "rss_kib": 63996
+      },
+      "livo": {
+        "peak_rss_kib": 518576,
+        "cpu_s": 59.02,
+        "rss_kib": 518576
+      },
+      "play": {
+        "peak_rss_kib": 42668,
+        "cpu_s": 0.48,
+        "rss_kib": 42668
+      }
+    },
+    "cpu_governor_restored": null,
+    "stages": {
+      "lio:ICP": {
+        "count": 442,
+        "mean_ms": 62.61123303167421,
+        "p95_ms": 104.03099999999999,
+        "total_s": 27.67416499999999
+      },
+      "lio:Current Total Time": {
+        "count": 442,
+        "mean_ms": 71.48610407239819,
+        "p95_ms": 116.539,
+        "total_s": 31.596858
+      },
+      "vio:Current Total Time": {
+        "count": 441,
+        "mean_ms": 9.538015873015874,
+        "p95_ms": 21.796,
+        "total_s": 4.206265
+      }
+    }
+  },
+  {
+    "run_id": "20261023-224028-128a5e",
+    "label": "OpenCV1, affinity/passive, interactive, 1x",
+    "install": "/home/firefly/livo2-workspace/releases/289b30192a8a0709",
+    "rate": 1.0,
+    "duration_s": 30,
+    "elapsed_s": 68.20586089500102,
+    "poses": 442,
+    "visual_updates": 441,
+    "tail_s": 0.06855607032775879,
+    "exits": {
+      "monitor": 0,
+      "master": 0,
+      "decode": 0,
+      "livo": 0,
+      "play": 0
+    },
+    "resources": {
+      "monitor": {
+        "peak_rss_kib": 16168,
+        "cpu_s": 3.87,
+        "rss_kib": 15996
+      },
+      "master": {
+        "peak_rss_kib": 43176,
+        "cpu_s": 1.17,
+        "rss_kib": 43176
+      },
+      "decode": {
+        "peak_rss_kib": 80284,
+        "cpu_s": 30.07,
+        "rss_kib": 64720
+      },
+      "livo": {
+        "peak_rss_kib": 1297408,
+        "cpu_s": 85.71,
+        "rss_kib": 1253124
+      },
+      "play": {
+        "peak_rss_kib": 42668,
+        "cpu_s": 0.72,
+        "rss_kib": 42668
+      }
+    },
+    "cpu_governor_restored": null,
+    "stages": {
+      "lio:ICP": {
+        "count": 442,
+        "mean_ms": 84.57016968325792,
+        "p95_ms": 136.018,
+        "total_s": 37.380015000000036
+      },
+      "lio:Current Total Time": {
+        "count": 442,
+        "mean_ms": 95.80953167420815,
+        "p95_ms": 153.41,
+        "total_s": 42.34781299999998
+      },
+      "vio:Current Total Time": {
+        "count": 441,
+        "mean_ms": 14.775124716553288,
+        "p95_ms": 23.106,
+        "total_s": 6.515829999999999
+      }
+    }
+  },
+  {
+    "run_id": "20261023-224219-915e7b",
+    "label": "previous plus temporary performance governor, 1x",
+    "install": "/home/firefly/livo2-workspace/releases/289b30192a8a0709",
+    "rate": 1.0,
+    "duration_s": 30,
+    "elapsed_s": 46.27867502499976,
+    "poses": 442,
+    "visual_updates": 441,
+    "tail_s": 0.06855607032775879,
+    "exits": {
+      "monitor": 0,
+      "master": 0,
+      "decode": 0,
+      "livo": 0,
+      "play": 0
+    },
+    "resources": {
+      "monitor": {
+        "peak_rss_kib": 16104,
+        "cpu_s": 2.53,
+        "rss_kib": 15960
+      },
+      "master": {
+        "peak_rss_kib": 42676,
+        "cpu_s": 0.64,
+        "rss_kib": 42676
+      },
+      "decode": {
+        "peak_rss_kib": 78096,
+        "cpu_s": 27.17,
+        "rss_kib": 63860
+      },
+      "livo": {
+        "peak_rss_kib": 901712,
+        "cpu_s": 52.05,
+        "rss_kib": 856620
+      },
+      "play": {
+        "peak_rss_kib": 42652,
+        "cpu_s": 0.53,
+        "rss_kib": 42652
+      }
+    },
+    "cpu_governor_restored": null,
+    "stages": {
+      "lio:ICP": {
+        "count": 442,
+        "mean_ms": 53.79408823529411,
+        "p95_ms": 82.652,
+        "total_s": 23.776986999999984
+      },
+      "lio:Current Total Time": {
+        "count": 442,
+        "mean_ms": 62.49633031674208,
+        "p95_ms": 95.193,
+        "total_s": 27.62337800000002
+      },
+      "vio:Current Total Time": {
+        "count": 441,
+        "mean_ms": 7.518503401360544,
+        "p95_ms": 10.59,
+        "total_s": 3.31566
+      }
+    }
+  },
+  {
+    "run_id": "20261023-224612-ed94aa",
+    "label": "production scaled decoder, performance, 1x",
+    "install": "/home/firefly/livo2-workspace/releases/4a9c6e8b63e4ea7f",
+    "rate": 1.0,
+    "duration_s": 30,
+    "elapsed_s": 47.32590021299984,
+    "poses": 442,
+    "visual_updates": 441,
+    "tail_s": 0.06855607032775879,
+    "exits": {
+      "monitor": 0,
+      "master": 0,
+      "decode": 0,
+      "livo": 0,
+      "play": 0
+    },
+    "resources": {
+      "monitor": {
+        "peak_rss_kib": 16160,
+        "cpu_s": 2.13,
+        "rss_kib": 16020
+      },
+      "master": {
+        "peak_rss_kib": 43172,
+        "cpu_s": 0.77,
+        "rss_kib": 43172
+      },
+      "decode": {
+        "peak_rss_kib": 64880,
+        "cpu_s": 11.71,
+        "rss_kib": 64880
+      },
+      "livo": {
+        "peak_rss_kib": 637504,
+        "cpu_s": 53.07,
+        "rss_kib": 627708
+      },
+      "play": {
+        "peak_rss_kib": 42668,
+        "cpu_s": 0.44,
+        "rss_kib": 42668
+      }
+    },
+    "cpu_governor_restored": true,
+    "stages": {
+      "lio:ICP": {
+        "count": 442,
+        "mean_ms": 57.540002262443444,
+        "p95_ms": 86.851,
+        "total_s": 25.432681
+      },
+      "lio:Current Total Time": {
+        "count": 442,
+        "mean_ms": 66.5357330316742,
+        "p95_ms": 102.557,
+        "total_s": 29.408793999999983
+      },
+      "vio:Current Total Time": {
+        "count": 441,
+        "mean_ms": 7.681195011337868,
+        "p95_ms": 11.373,
+        "total_s": 3.387407000000003
+      }
+    }
+  },
+  {
+    "run_id": "20261023-224739-ac0f88",
+    "label": "production full sequence, performance, 1x",
+    "install": "/home/firefly/livo2-workspace/releases/4a9c6e8b63e4ea7f",
+    "rate": 1.0,
+    "duration_s": null,
+    "elapsed_s": 250.45235383100044,
+    "poses": 2575,
+    "visual_updates": 2575,
+    "tail_s": 0.09277224540710449,
+    "exits": {
+      "monitor": 0,
+      "master": 0,
+      "decode": 0,
+      "livo": 0,
+      "play": 0
+    },
+    "resources": {
+      "monitor": {
+        "peak_rss_kib": 16296,
+        "cpu_s": 13.4,
+        "rss_kib": 16036
+      },
+      "master": {
+        "peak_rss_kib": 42720,
+        "cpu_s": 1.73,
+        "rss_kib": 42720
+      },
+      "decode": {
+        "peak_rss_kib": 64888,
+        "cpu_s": 65.63,
+        "rss_kib": 64888
+      },
+      "livo": {
+        "peak_rss_kib": 3391856,
+        "cpu_s": 344.77,
+        "rss_kib": 3350676
+      },
+      "play": {
+        "peak_rss_kib": 42668,
+        "cpu_s": 0.38,
+        "rss_kib": 42668
+      }
+    },
+    "cpu_governor_restored": true,
+    "stages": {
+      "lio:ICP": {
+        "count": 2575,
+        "mean_ms": 63.39646368932039,
+        "p95_ms": 108.473,
+        "total_s": 163.24589400000025
+      },
+      "lio:Current Total Time": {
+        "count": 2575,
+        "mean_ms": 73.8649254368932,
+        "p95_ms": 125.612,
+        "total_s": 190.2021830000001
+      },
+      "vio:Current Total Time": {
+        "count": 2575,
+        "mean_ms": 8.313576699029126,
+        "p95_ms": 12.031,
+        "total_s": 21.407459999999986
+      }
+    }
+  }
+]
