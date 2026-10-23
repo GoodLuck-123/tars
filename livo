@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+root=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+export UV_CACHE_DIR="$root/.cache/uv"
+exec uv run --frozen --project "$root" python "$root/cli.py" "$@"

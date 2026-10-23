@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.5)
+project(livo_image_decode)
+find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs cv_bridge)
+find_package(OpenCV REQUIRED)
+include_directories(${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
+add_executable(livo_image_decode main.cpp)
+target_link_libraries(livo_image_decode ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})

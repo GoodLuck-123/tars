@@ -1,0 +1,5 @@
+[project]
+name = "livo2-platform"
+version = "0.0.1"
+requires-python = ">=3.10"
+dependencies = ["PyYAML==6.0.3", "rosbags==0.11.9"]

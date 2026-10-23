@@ -1,0 +1,295 @@
+{
+  "schema": 1,
+  "id": "toolchain",
+  "provenance": "Private authenticated Focal/Noetic final APT resolution on 2026-10-14; ROS 1 branch based on master 8c7c8d2",
+  "packages": [
+    {
+      "Package": "gcc-10-base",
+      "Version": "10.5.0-1ubuntu1~20.04",
+      "Architecture": "amd64",
+      "file": "gcc-10-base_10.5.0-1ubuntu1~20.04_amd64.deb",
+      "sha256": "8fac06791057b1bba6178466e160bb3ec2a795297f10e88e34daf762572ed5c0",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-10/gcc-10-base_10.5.0-1ubuntu1%7e20.04_amd64.deb"
+    },
+    {
+      "Package": "libgcc-s1",
+      "Version": "10.5.0-1ubuntu1~20.04",
+      "Architecture": "amd64",
+      "file": "libgcc-s1_10.5.0-1ubuntu1~20.04_amd64.deb",
+      "sha256": "4aa7b9c9f3225df65a750ae0ff5c890fc6108c82a609b3c5abd45d211838bf3c",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-10/libgcc-s1_10.5.0-1ubuntu1%7e20.04_amd64.deb"
+    },
+    {
+      "Package": "libcrypt1",
+      "Version": "1:4.4.10-10ubuntu4",
+      "Architecture": "amd64",
+      "file": "libcrypt1_1:4.4.10-10ubuntu4_amd64.deb",
+      "sha256": "231b4dbbe5865775f118cfa61394f1e16fa7102b6953a327e672499a20876d73",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/libx/libxcrypt/libcrypt1_4.4.10-10ubuntu4_amd64.deb"
+    },
+    {
+      "Package": "libc6",
+      "Version": "2.31-0ubuntu9.18",
+      "Architecture": "amd64",
+      "file": "libc6_2.31-0ubuntu9.18_amd64.deb",
+      "sha256": "1b2281aac4935dfea1f89dfc19e445fdbb45303202af60679ccb8bf035f081a0",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/libc6_2.31-0ubuntu9.18_amd64.deb"
+    },
+    {
+      "Package": "zlib1g",
+      "Version": "1:1.2.11.dfsg-2ubuntu1.5",
+      "Architecture": "amd64",
+      "file": "zlib1g_1:1.2.11.dfsg-2ubuntu1.5_amd64.deb",
+      "sha256": "bf67018f5303466eb468680b637a5d3f3bb17b9d44decf3d82d40b35babcd3e0",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/z/zlib/zlib1g_1.2.11.dfsg-2ubuntu1.5_amd64.deb"
+    },
+    {
+      "Package": "libgmp10",
+      "Version": "2:6.2.0+dfsg-4ubuntu0.1",
+      "Architecture": "amd64",
+      "file": "libgmp10_2:6.2.0+dfsg-4ubuntu0.1_amd64.deb",
+      "sha256": "541dc5050b0cecdecbfe155641588ba08da645b61b11fc4bcb045f2f4773da43",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gmp/libgmp10_6.2.0%2bdfsg-4ubuntu0.1_amd64.deb"
+    },
+    {
+      "Package": "libstdc++6",
+      "Version": "10.5.0-1ubuntu1~20.04",
+      "Architecture": "amd64",
+      "file": "libstdc++6_10.5.0-1ubuntu1~20.04_amd64.deb",
+      "sha256": "7f9222342d3551d063bf651319ec397c39278eeeb9ab5950ae0e8c28ef0af431",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-10/libstdc%2b%2b6_10.5.0-1ubuntu1%7e20.04_amd64.deb"
+    },
+    {
+      "Package": "binutils-common",
+      "Version": "2.34-6ubuntu1.11",
+      "Architecture": "amd64",
+      "file": "binutils-common_2.34-6ubuntu1.11_amd64.deb",
+      "sha256": "0a0dbd1ab3be5b81bf5cb3c5e4b542f4790d929696274e46e3fafa09bded3a26",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/b/binutils/binutils-common_2.34-6ubuntu1.11_amd64.deb"
+    },
+    {
+      "Package": "gcc-9-aarch64-linux-gnu-base",
+      "Version": "9.4.0-1ubuntu1~20.04.2cross2",
+      "Architecture": "amd64",
+      "file": "gcc-9-aarch64-linux-gnu-base_9.4.0-1ubuntu1~20.04.2cross2_amd64.deb",
+      "sha256": "7b792a351d671367b1053af3325a26b36fed01d193f0d9ebc3b8d52af50773f7",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-9-cross/gcc-9-aarch64-linux-gnu-base_9.4.0-1ubuntu1%7e20.04.2cross2_amd64.deb"
+    },
+    {
+      "Package": "libisl22",
+      "Version": "0.22.1-1",
+      "Architecture": "amd64",
+      "file": "libisl22_0.22.1-1_amd64.deb",
+      "sha256": "67cadab06a50a29cde11c1c1d02847afbae6f0465686481c9106577777b88a44",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/i/isl/libisl22_0.22.1-1_amd64.deb"
+    },
+    {
+      "Package": "libmpfr6",
+      "Version": "4.0.2-1",
+      "Architecture": "amd64",
+      "file": "libmpfr6_4.0.2-1_amd64.deb",
+      "sha256": "d098b67c3e1492a1c21a6a0d9befc88344e59a0d0eb6109384f85d8524a608cb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/m/mpfr4/libmpfr6_4.0.2-1_amd64.deb"
+    },
+    {
+      "Package": "libmpc3",
+      "Version": "1.1.0-1",
+      "Architecture": "amd64",
+      "file": "libmpc3_1.1.0-1_amd64.deb",
+      "sha256": "3c3c45aa50ce1ff753107766c6fea35a82c52ad11afcab0abfd0cd0c76730f87",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/m/mpclib3/libmpc3_1.1.0-1_amd64.deb"
+    },
+    {
+      "Package": "cpp-9-aarch64-linux-gnu",
+      "Version": "9.4.0-1ubuntu1~20.04.2cross2",
+      "Architecture": "amd64",
+      "file": "cpp-9-aarch64-linux-gnu_9.4.0-1ubuntu1~20.04.2cross2_amd64.deb",
+      "sha256": "d8593273831b6c4a355f7e6c117e3a40624d23aa4b5343c7d4064344d203d551",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-9-cross/cpp-9-aarch64-linux-gnu_9.4.0-1ubuntu1%7e20.04.2cross2_amd64.deb"
+    },
+    {
+      "Package": "cpp-aarch64-linux-gnu",
+      "Version": "4:9.3.0-1ubuntu2",
+      "Architecture": "amd64",
+      "file": "cpp-aarch64-linux-gnu_4:9.3.0-1ubuntu2_amd64.deb",
+      "sha256": "e107061312b651239aa930a4ec0e8ede306b8ab84875758bd5a48708b4022ebd",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-defaults/cpp-aarch64-linux-gnu_9.3.0-1ubuntu2_amd64.deb"
+    },
+    {
+      "Package": "libcc1-0",
+      "Version": "10.5.0-1ubuntu1~20.04",
+      "Architecture": "amd64",
+      "file": "libcc1-0_10.5.0-1ubuntu1~20.04_amd64.deb",
+      "sha256": "b9b31f671eb35a20235b4478f232c2939a41737d12660b3b38e340b82a25a9b3",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-10/libcc1-0_10.5.0-1ubuntu1%7e20.04_amd64.deb"
+    },
+    {
+      "Package": "binutils-aarch64-linux-gnu",
+      "Version": "2.34-6ubuntu1.11",
+      "Architecture": "amd64",
+      "file": "binutils-aarch64-linux-gnu_2.34-6ubuntu1.11_amd64.deb",
+      "sha256": "27ee1bc01c8eaaeccba1aa212b08442a76c69fe528a11c0cf1ceafaa453c4ab0",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/b/binutils/binutils-aarch64-linux-gnu_2.34-6ubuntu1.11_amd64.deb"
+    },
+    {
+      "Package": "gcc-9-cross-base",
+      "Version": "9.4.0-1ubuntu1~20.04.2cross2",
+      "Architecture": "all",
+      "file": "gcc-9-cross-base_9.4.0-1ubuntu1~20.04.2cross2_all.deb",
+      "sha256": "ff94669c131bdca8c9dfd43e2dd8b6ba84a429f181bac9b8dedad26336d26dc6",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-9-cross/gcc-9-cross-base_9.4.0-1ubuntu1%7e20.04.2cross2_all.deb"
+    },
+    {
+      "Package": "gcc-10-cross-base",
+      "Version": "10.5.0-1ubuntu1~20.04cross1",
+      "Architecture": "all",
+      "file": "gcc-10-cross-base_10.5.0-1ubuntu1~20.04cross1_all.deb",
+      "sha256": "bca1c5ce9390d0db1d6ea805e47194b5bb0a509a5261b479af2f5c34ee052cad",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-10-cross/gcc-10-cross-base_10.5.0-1ubuntu1%7e20.04cross1_all.deb"
+    },
+    {
+      "Package": "libc6-arm64-cross",
+      "Version": "2.31-0ubuntu9.9cross1",
+      "Architecture": "all",
+      "file": "libc6-arm64-cross_2.31-0ubuntu9.9cross1_all.deb",
+      "sha256": "d37029619ca1d94c37e787c4d7f08274dea82f3061f6d2a8239bd14e7371c99f",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/c/cross-toolchain-base/libc6-arm64-cross_2.31-0ubuntu9.9cross1_all.deb"
+    },
+    {
+      "Package": "libgcc-s1-arm64-cross",
+      "Version": "10.5.0-1ubuntu1~20.04cross1",
+      "Architecture": "all",
+      "file": "libgcc-s1-arm64-cross_10.5.0-1ubuntu1~20.04cross1_all.deb",
+      "sha256": "9065f00c2a8dc8baf4584355f7eb3b18840212e62ea7eff68dab30a0ab250d59",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-10-cross/libgcc-s1-arm64-cross_10.5.0-1ubuntu1%7e20.04cross1_all.deb"
+    },
+    {
+      "Package": "libgomp1-arm64-cross",
+      "Version": "10.5.0-1ubuntu1~20.04cross1",
+      "Architecture": "all",
+      "file": "libgomp1-arm64-cross_10.5.0-1ubuntu1~20.04cross1_all.deb",
+      "sha256": "fc98a28900588ea1ea21ebd329771f5e0024cfc4f6c43c086fee85e6e34efd7a",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-10-cross/libgomp1-arm64-cross_10.5.0-1ubuntu1%7e20.04cross1_all.deb"
+    },
+    {
+      "Package": "libitm1-arm64-cross",
+      "Version": "10.5.0-1ubuntu1~20.04cross1",
+      "Architecture": "all",
+      "file": "libitm1-arm64-cross_10.5.0-1ubuntu1~20.04cross1_all.deb",
+      "sha256": "a5127fc614252de889382b779107375d16ab882cea9e5f115179324e9562c70c",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-10-cross/libitm1-arm64-cross_10.5.0-1ubuntu1%7e20.04cross1_all.deb"
+    },
+    {
+      "Package": "libatomic1-arm64-cross",
+      "Version": "10.5.0-1ubuntu1~20.04cross1",
+      "Architecture": "all",
+      "file": "libatomic1-arm64-cross_10.5.0-1ubuntu1~20.04cross1_all.deb",
+      "sha256": "1926501fe47c9a6f58760d2718118e2db9239ed3422f5407bf5a4f975d1989a6",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-10-cross/libatomic1-arm64-cross_10.5.0-1ubuntu1%7e20.04cross1_all.deb"
+    },
+    {
+      "Package": "libasan5-arm64-cross",
+      "Version": "9.4.0-1ubuntu1~20.04.2cross2",
+      "Architecture": "all",
+      "file": "libasan5-arm64-cross_9.4.0-1ubuntu1~20.04.2cross2_all.deb",
+      "sha256": "5feee905a053c9ee300d2914fd0f28fbfb753865da242c6ce4231a2d3c9c849e",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-9-cross/libasan5-arm64-cross_9.4.0-1ubuntu1%7e20.04.2cross2_all.deb"
+    },
+    {
+      "Package": "liblsan0-arm64-cross",
+      "Version": "10.5.0-1ubuntu1~20.04cross1",
+      "Architecture": "all",
+      "file": "liblsan0-arm64-cross_10.5.0-1ubuntu1~20.04cross1_all.deb",
+      "sha256": "8fa5b852a5d2f26204743b317b9c928d374c1a56e238cfe74cb78c10790adc8c",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-10-cross/liblsan0-arm64-cross_10.5.0-1ubuntu1%7e20.04cross1_all.deb"
+    },
+    {
+      "Package": "libtsan0-arm64-cross",
+      "Version": "10.5.0-1ubuntu1~20.04cross1",
+      "Architecture": "all",
+      "file": "libtsan0-arm64-cross_10.5.0-1ubuntu1~20.04cross1_all.deb",
+      "sha256": "2e29cc15f344929244a8e7d79c6f16c0488e242cfa6070aa8d5390c65ecef23c",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-10-cross/libtsan0-arm64-cross_10.5.0-1ubuntu1%7e20.04cross1_all.deb"
+    },
+    {
+      "Package": "libstdc++6-arm64-cross",
+      "Version": "10.5.0-1ubuntu1~20.04cross1",
+      "Architecture": "all",
+      "file": "libstdc++6-arm64-cross_10.5.0-1ubuntu1~20.04cross1_all.deb",
+      "sha256": "d5f1881cf793ee93416befce61cf25b79dbaedbfe98863ecc7a1260e694f5b86",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-10-cross/libstdc%2b%2b6-arm64-cross_10.5.0-1ubuntu1%7e20.04cross1_all.deb"
+    },
+    {
+      "Package": "libubsan1-arm64-cross",
+      "Version": "10.5.0-1ubuntu1~20.04cross1",
+      "Architecture": "all",
+      "file": "libubsan1-arm64-cross_10.5.0-1ubuntu1~20.04cross1_all.deb",
+      "sha256": "8801408fdae1833ea054c3813ee60234a7ad7d9bec086f20c29298c6513aeb37",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-10-cross/libubsan1-arm64-cross_10.5.0-1ubuntu1%7e20.04cross1_all.deb"
+    },
+    {
+      "Package": "libgcc-9-dev-arm64-cross",
+      "Version": "9.4.0-1ubuntu1~20.04.2cross2",
+      "Architecture": "all",
+      "file": "libgcc-9-dev-arm64-cross_9.4.0-1ubuntu1~20.04.2cross2_all.deb",
+      "sha256": "efdab974d7271864bedf5f6cd74cd7236bce02e293174f57c54fbbed19736899",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-9-cross/libgcc-9-dev-arm64-cross_9.4.0-1ubuntu1%7e20.04.2cross2_all.deb"
+    },
+    {
+      "Package": "gcc-9-aarch64-linux-gnu",
+      "Version": "9.4.0-1ubuntu1~20.04.2cross2",
+      "Architecture": "amd64",
+      "file": "gcc-9-aarch64-linux-gnu_9.4.0-1ubuntu1~20.04.2cross2_amd64.deb",
+      "sha256": "24e295b3d52aebde609a4fd9e7a3ca942c02f7be110d69e6a3d6bd6d775e005e",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-9-cross/gcc-9-aarch64-linux-gnu_9.4.0-1ubuntu1%7e20.04.2cross2_amd64.deb"
+    },
+    {
+      "Package": "linux-libc-dev-arm64-cross",
+      "Version": "5.4.0-110.124cross1",
+      "Architecture": "all",
+      "file": "linux-libc-dev-arm64-cross_5.4.0-110.124cross1_all.deb",
+      "sha256": "fc4ae3b72715906727565d29042bbac08ce4e46ca43b4b3d16a372e3813bf45f",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/c/cross-toolchain-base/linux-libc-dev-arm64-cross_5.4.0-110.124cross1_all.deb"
+    },
+    {
+      "Package": "libc6-dev-arm64-cross",
+      "Version": "2.31-0ubuntu9.9cross1",
+      "Architecture": "all",
+      "file": "libc6-dev-arm64-cross_2.31-0ubuntu9.9cross1_all.deb",
+      "sha256": "fea8e2c2c74360e2ddc53bd4dfefbbbecc089c1def2eaf5a0eb1d5f04b59388c",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/c/cross-toolchain-base/libc6-dev-arm64-cross_2.31-0ubuntu9.9cross1_all.deb"
+    },
+    {
+      "Package": "libstdc++-9-dev-arm64-cross",
+      "Version": "9.4.0-1ubuntu1~20.04.2cross2",
+      "Architecture": "all",
+      "file": "libstdc++-9-dev-arm64-cross_9.4.0-1ubuntu1~20.04.2cross2_all.deb",
+      "sha256": "17b0294c70127eeeaa38a334f4fd13971bdf9c6a26a26489f9ea3e049a0fc848",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-9-cross/libstdc%2b%2b-9-dev-arm64-cross_9.4.0-1ubuntu1%7e20.04.2cross2_all.deb"
+    },
+    {
+      "Package": "g++-9-aarch64-linux-gnu",
+      "Version": "9.4.0-1ubuntu1~20.04.2cross2",
+      "Architecture": "amd64",
+      "file": "g++-9-aarch64-linux-gnu_9.4.0-1ubuntu1~20.04.2cross2_amd64.deb",
+      "sha256": "755249c3ed36e075f3d38a5e55bb9f451e5268a0aa6a41a4b7c7f8bb20b0b76e",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-9-cross/g%2b%2b-9-aarch64-linux-gnu_9.4.0-1ubuntu1%7e20.04.2cross2_amd64.deb"
+    },
+    {
+      "Package": "gcc-aarch64-linux-gnu",
+      "Version": "4:9.3.0-1ubuntu2",
+      "Architecture": "amd64",
+      "file": "gcc-aarch64-linux-gnu_4:9.3.0-1ubuntu2_amd64.deb",
+      "sha256": "aab6daa6ffcce913e148a0c07719dc918cb1bdc1e27fbb05fb3d3b85c518a0de",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-defaults/gcc-aarch64-linux-gnu_9.3.0-1ubuntu2_amd64.deb"
+    },
+    {
+      "Package": "g++-aarch64-linux-gnu",
+      "Version": "4:9.3.0-1ubuntu2",
+      "Architecture": "amd64",
+      "file": "g++-aarch64-linux-gnu_4:9.3.0-1ubuntu2_amd64.deb",
+      "sha256": "73ed71eb84570ce3f8b3d2e5217866c31216fef73530de6c4e672884ef953881",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-defaults/g%2b%2b-aarch64-linux-gnu_9.3.0-1ubuntu2_amd64.deb"
+    }
+  ]
+}
