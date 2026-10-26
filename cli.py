@@ -298,6 +298,7 @@ def main():
     sp=sub.add_parser('record',help='录制传感器数据并回传');sp.add_argument('--replay',action='store_true',help='无硬件演练，使用配置中的现有 bag')
     sp=sub.add_parser('lidar',help='仅启动 AVIA 点云/IMU 并录包，不需要相机；本机加 --host');sp.add_argument('--background',action='store_true',help='启动后返回，用 status/stop 查看和停止')
     sub.add_parser('calibrate',help='在主机运行免标定板外参标定，输出候选结果')
+    sp=sub.add_parser('view',help='离线播放录包：3D 点云 + 同时间轴相机；默认最近一次录制');sp.add_argument('bag',nargs='?',help='bag 文件或包含分包的录制目录');sp.add_argument('--no-open',action='store_true',help='只启动本地服务，不自动打开浏览器')
     sp=sub.add_parser('status',help='查看摘要/告警；--follow 持续查看，--raw 看原始日志');sp.add_argument('--follow',action='store_true');sp.add_argument('--raw',action='store_true')
     sp=sub.add_parser('pull',help='补收最近一次或指定任务，校验全部文件');sp.add_argument('run_id',nargs='?')
     if len(sys.argv)==1:p.print_help();return
@@ -307,7 +308,10 @@ def main():
     if a.command=='calibrate':
         for key in ['image','pcd']:
             if not c['calibration'][key] or not Path(c['calibration'][key]).expanduser().is_file():raise RuntimeError('请在 project.yaml 设置 calibration.'+key+' 输入文件')
-    if a.command=='doctor':doctor(c,a.sensors)
+    if a.command=='view':
+        from viewer.server import serve
+        serve(c,a.bag,not a.no_open)
+    elif a.command=='doctor':doctor(c,a.sensors)
     elif a.command=='build':build(c)
     elif a.command=='deploy':deploy(c)
     elif a.command=='ssh':

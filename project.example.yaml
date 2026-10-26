@@ -75,6 +75,10 @@ monitoring:
   repeat_notice_s: 10
   progress_stall_s: 30
 results_dir: results
+viewer:
+  bag: null                  # null 自动选最近录包，也可填 bag 文件或录制目录
+  max_points: 100000          # 仅显示抽样，不修改原始包
+  image_tolerance_s: 0.15     # 按 bag 记录时间找最近图像，超出则显示缺帧
 algorithm:
   overrides: {}
 

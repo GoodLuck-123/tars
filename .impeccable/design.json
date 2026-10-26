@@ -1,0 +1,251 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-26T13:16:00.062101+00:00",
+  "title": "Design System: LIVO 录包回看",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "paper",
+        "tonalRamp": [
+          "oklch(15% 0.0067 97.35)",
+          "oklch(26% 0.0067 97.35)",
+          "oklch(38% 0.0067 97.35)",
+          "oklch(49% 0.0067 97.35)",
+          "oklch(61% 0.0067 97.35)",
+          "oklch(72% 0.0067 97.35)",
+          "oklch(84% 0.0067 97.35)",
+          "oklch(95% 0.0067 97.35)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "surface",
+        "tonalRamp": [
+          "oklch(15% 0.0094 113.17)",
+          "oklch(26% 0.0094 113.17)",
+          "oklch(38% 0.0094 113.17)",
+          "oklch(49% 0.0094 113.17)",
+          "oklch(61% 0.0094 113.17)",
+          "oklch(72% 0.0094 113.17)",
+          "oklch(84% 0.0094 113.17)",
+          "oklch(95% 0.0094 113.17)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "ink",
+        "tonalRamp": [
+          "oklch(15% 0.0226 168.36)",
+          "oklch(26% 0.0226 168.36)",
+          "oklch(38% 0.0226 168.36)",
+          "oklch(49% 0.0226 168.36)",
+          "oklch(61% 0.0226 168.36)",
+          "oklch(72% 0.0226 168.36)",
+          "oklch(84% 0.0226 168.36)",
+          "oklch(95% 0.0226 168.36)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "muted",
+        "tonalRamp": [
+          "oklch(15% 0.0231 159.12)",
+          "oklch(26% 0.0231 159.12)",
+          "oklch(38% 0.0231 159.12)",
+          "oklch(49% 0.0231 159.12)",
+          "oklch(61% 0.0231 159.12)",
+          "oklch(72% 0.0231 159.12)",
+          "oklch(84% 0.0231 159.12)",
+          "oklch(95% 0.0231 159.12)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "line",
+        "tonalRamp": [
+          "oklch(15% 0.0150 132.49)",
+          "oklch(26% 0.0150 132.49)",
+          "oklch(38% 0.0150 132.49)",
+          "oklch(49% 0.0150 132.49)",
+          "oklch(61% 0.0150 132.49)",
+          "oklch(72% 0.0150 132.49)",
+          "oklch(84% 0.0150 132.49)",
+          "oklch(95% 0.0150 132.49)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "accent",
+        "tonalRamp": [
+          "oklch(15% 0.0848 158.52)",
+          "oklch(26% 0.0848 158.52)",
+          "oklch(38% 0.0848 158.52)",
+          "oklch(49% 0.0848 158.52)",
+          "oklch(61% 0.0848 158.52)",
+          "oklch(72% 0.0848 158.52)",
+          "oklch(84% 0.0848 158.52)",
+          "oklch(95% 0.0848 158.52)"
+        ]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "canvas",
+        "tonalRamp": [
+          "oklch(15% 0.0158 174.20)",
+          "oklch(26% 0.0158 174.20)",
+          "oklch(38% 0.0158 174.20)",
+          "oklch(49% 0.0158 174.20)",
+          "oklch(61% 0.0158 174.20)",
+          "oklch(72% 0.0158 174.20)",
+          "oklch(84% 0.0158 174.20)",
+          "oklch(95% 0.0158 174.20)"
+        ]
+      },
+      "focus": {
+        "role": "neutral",
+        "displayName": "focus",
+        "tonalRamp": [
+          "oklch(15% 0.0884 157.37)",
+          "oklch(26% 0.0884 157.37)",
+          "oklch(38% 0.0884 157.37)",
+          "oklch(49% 0.0884 157.37)",
+          "oklch(61% 0.0884 157.37)",
+          "oklch(72% 0.0884 157.37)",
+          "oklch(84% 0.0884 157.37)",
+          "oklch(95% 0.0884 157.37)"
+        ]
+      },
+      "error-bg": {
+        "role": "neutral",
+        "displayName": "error-bg",
+        "tonalRamp": [
+          "oklch(15% 0.0239 63.49)",
+          "oklch(26% 0.0239 63.49)",
+          "oklch(38% 0.0239 63.49)",
+          "oklch(49% 0.0239 63.49)",
+          "oklch(61% 0.0239 63.49)",
+          "oklch(72% 0.0239 63.49)",
+          "oklch(84% 0.0239 63.49)",
+          "oklch(95% 0.0239 63.49)"
+        ]
+      },
+      "error-text": {
+        "role": "neutral",
+        "displayName": "error-text",
+        "tonalRamp": [
+          "oklch(15% 0.0851 49.50)",
+          "oklch(26% 0.0851 49.50)",
+          "oklch(38% 0.0851 49.50)",
+          "oklch(49% 0.0851 49.50)",
+          "oklch(61% 0.0851 49.50)",
+          "oklch(72% 0.0851 49.50)",
+          "oklch(84% 0.0851 49.50)",
+          "oklch(95% 0.0851 49.50)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "body": {
+        "displayName": "正文",
+        "purpose": "系统中文字体。"
+      },
+      "title": {
+        "displayName": "面板标题",
+        "purpose": "三维点云及相机标题。"
+      },
+      "label": {
+        "displayName": "状态与工具说明",
+        "purpose": "工具标签、帧状态与时间差。"
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "control-background",
+        "value": "background .12s",
+        "purpose": "按钮和选择框背景变化；prefers-reduced-motion 时关闭。"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wrap-tools",
+        "value": "1100px"
+      },
+      {
+        "name": "vertical-panels",
+        "value": "680px"
+      }
+    ],
+    "notes": [
+      "Scope: viewer/ only. Sources: viewer/style.css, viewer/index.html, viewer/app.js.",
+      "Tonal ramps are synthesized preview metadata, not implemented CSS tokens.",
+      "Component snippets are static previews; playback and WebGL behavior remain in viewer/app.js."
+    ]
+  },
+  "components": [
+    {
+      "name": "默认按钮",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "逐帧、视角复位等操作。",
+      "html": "<button class=\"ds-button\">下一帧</button>",
+      "css": ".ds-button{font:14px system-ui,\"Noto Sans CJK SC\",sans-serif;height:34px;border:1px solid var(--line,#d0d6cc);border-radius:6px;padding:0 11px;background:var(--paper,#f3f2ed);color:var(--ink,#26352f);cursor:pointer;transition:background .12s}.ds-button:hover{background:#dfe7dc}.ds-button:focus-visible{outline:3px solid var(--focus,#4f906b);outline-offset:3px;}.ds-button:disabled{opacity:.5;cursor:wait}@media(prefers-reduced-motion:reduce){.ds-button{transition:none}}"
+    },
+    {
+      "name": "播放主按钮",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "播放与暂停状态由实际播放器更新。",
+      "html": "<button class=\"ds-play\" aria-pressed=\"false\">播放</button>",
+      "css": ".ds-play{font:14px system-ui,\"Noto Sans CJK SC\",sans-serif;height:34px;border:1px solid var(--line,#d0d6cc);border-radius:6px;padding:0 11px;background:var(--accent,#226343);border-color:var(--accent,#226343);color:#fff;min-width:78px;font-weight:600;cursor:pointer;transition:background .12s}.ds-play:hover{background:#184c32}.ds-play:focus-visible{outline:3px solid var(--focus,#4f906b);outline-offset:3px;}.ds-play:disabled{opacity:.5;cursor:wait}@media(prefers-reduced-motion:reduce){.ds-play{transition:none}}"
+    },
+    {
+      "name": "原生选择框",
+      "kind": "input",
+      "description": "录包、着色及播放速度使用原生选择行为。",
+      "html": "<label class=\"ds-label\">速度 <select class=\"ds-select\" aria-label=\"播放速度\"><option>1×</option><option>2×</option></select></label>",
+      "css": ".ds-label{font:14px system-ui,\"Noto Sans CJK SC\",sans-serif;color:var(--muted,#58675e)}.ds-select{font:14px system-ui,\"Noto Sans CJK SC\",sans-serif;height:34px;border:1px solid var(--line,#d0d6cc);border-radius:6px;padding:0 11px;background:var(--paper,#f3f2ed);color:var(--ink,#26352f);transition:background .12s}.ds-select:focus-visible{outline:3px solid var(--focus,#4f906b);outline-offset:3px;}@media(prefers-reduced-motion:reduce){.ds-select{transition:none}}"
+    },
+    {
+      "name": "逐帧时间轴",
+      "kind": "input",
+      "description": "原生范围输入，按点云帧定位。",
+      "html": "<input class=\"ds-timeline\" type=\"range\" min=\"0\" max=\"100\" value=\"35\" aria-label=\"播放进度，按点云帧拖动\">",
+      "css": ".ds-timeline{display:block;width:100%;margin:13px 0 10px;accent-color:var(--accent,#226343);cursor:pointer}.ds-timeline:focus-visible{outline:3px solid var(--focus,#4f906b);outline-offset:3px;}"
+    },
+    {
+      "name": "相机缺帧状态",
+      "kind": "custom",
+      "description": "当前时间无匹配图像时显示文字，不保留旧图像。",
+      "html": "<div class=\"ds-empty\"><h3>当前时刻没有匹配图像</h3><p>时间差超过允许范围，未显示旧图像。</p></div>",
+      "css": ".ds-empty{font:14px system-ui,\"Noto Sans CJK SC\",sans-serif;background:var(--surface,#e9eae3);color:var(--muted,#58675e);text-align:center;padding:28px}.ds-empty h3{font-size:16px;color:var(--ink,#26352f);font-weight:550;margin:16px 0 8px}.ds-empty p{font-size:13px;line-height:1.7;margin:0 auto;max-width:27ch}"
+    },
+    {
+      "name": "错误提示",
+      "kind": "custom",
+      "description": "错误文字通过 alert 宣告。",
+      "html": "<div class=\"ds-error\" role=\"alert\">录包读取失败</div>",
+      "css": ".ds-error{font:14px system-ui,\"Noto Sans CJK SC\",sans-serif;background:var(--error-bg,#f8e9dc);color:var(--error-text,#713d1e);padding:12px;line-height:1.6}"
+    }
+  ],
+  "narrative": {
+    "overview": "仅适用于 `viewer/` 的中文本地离线录包播放器。以真实 WebGL 三维点云、同一时间轴上的相机图像和清晰的播放状态为中心，采用紧凑、平面的原生控件界面。本文提取当前实现，不建立额外品牌概念；代码来源为 `viewer/style.css`、`viewer/index.html` 和 `viewer/app.js`。",
+    "keyCharacteristics": [
+      "中文操作文案与本地资源。",
+      "深色三维视口、浅色工具和相机区域。",
+      "共享时间轴与明确的缺帧、空数据和错误提示。"
+    ],
+    "rules": [],
+    "dos": [
+      "Do 保持点云和相机使用同一个回放时间轴。",
+      "Do 保留空数据、图像时间缺口和错误的中文文字反馈。",
+      "Do 使用系统字体、原生控件和可见键盘焦点。"
+    ],
+    "donts": [
+      "Don't 用上一张图像填充当前时间缺口。",
+      "Don't 加入外部字体、图片、图标包或装饰性阴影。",
+      "Don't 将本文件的 viewer 规则扩展到整个算法工程。"
+    ]
+  }
+}

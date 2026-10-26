@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LIVO · 录包回看</title><link rel="stylesheet" href="/style.css"></head>
+<body>
+<header><div class="brand">LIVO <span>录包回看</span></div><label class="recording-label" for="recordings">录制文件</label><select id="recordings" aria-label="选择录制文件"><option>正在读取录包…</option></select><span id="source">本地离线</span></header>
+<main>
+  <section class="cloud-panel" aria-label="三维点云">
+    <div class="panel-bar"><h1>三维点云</h1><span id="cloud-topic"></span><div class="tools"><label>着色 <select id="color"><option value="0">反射强度</option><option value="1">高度</option><option value="2">距离</option></select></label><label>点大小 <input id="point-size" aria-label="点大小" type="range" min="1" max="6" step=".5" value="2"></label><button id="reset">复位视角</button></div></div>
+    <div class="viewport"><canvas id="cloud" tabindex="0" aria-label="可交互的三维点云，鼠标左键旋转、右键平移、滚轮缩放"></canvas><div id="canvas-error" role="alert" hidden></div><div class="viewport-caption"><span class="axis-x">X</span><span class="axis-y">Y</span><span class="axis-z">Z</span><span>单位 m · 原始雷达坐标</span></div><div id="point-count">正在载入点云</div><div class="canvas-help">左键旋转 · 右键平移 · 滚轮缩放</div></div>
+  </section>
+  <section class="camera-panel" aria-label="同步相机图像"><div class="panel-bar"><h2>相机</h2><span id="camera-topic">未包含相机流</span></div><div class="camera-display"><img id="camera-image" alt="与当前点云时间对应的相机图像" hidden><div id="camera-empty"><svg viewBox="0 0 48 40" width="48" height="40" aria-hidden="true"><path d="M5 10h10l4-6h10l4 6h10v26H5Z"/><circle cx="24" cy="23" r="8"/></svg><h3>本包没有相机数据</h3><p>接入后，图像将在同一时间轴播放。</p></div></div><div id="camera-status">已预留 raw / 压缩图像接口</div></section>
+</main>
+<footer>
+  <div class="playback-top"><div class="playback-controls"><button id="previous" aria-label="上一帧">上一帧</button><button id="play" class="primary" disabled>播放</button><button id="next" aria-label="下一帧">下一帧</button><label class="speed-label">速度 <select id="speed" aria-label="播放速度"><option value=".25">0.25×</option><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label></div><output id="time">00:00.000 / 00:00.000</output></div>
+  <input id="timeline" type="range" min="0" max="0" value="0" step="1" aria-label="播放进度，按点云帧拖动">
+  <div class="playback-bottom"><span id="frame-info">正在读取索引</span><span>按 bag 记录时间对齐 · 空格播放 / 暂停 · ← → 逐帧</span></div>
+  <div id="error" role="alert" hidden></div>
+</footer>
+<script src="/app.js"></script></body></html>

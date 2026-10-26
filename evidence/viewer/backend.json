@@ -1,0 +1,81 @@
+{
+  "real_avia": {
+    "frames_checked": 304,
+    "valid_points_checked": 2130651,
+    "duration_s": 30.301300852,
+    "validation_elapsed_s": 0.373
+  },
+  "compressed": {
+    "frames": 99,
+    "samples": [
+      {
+        "index": 0,
+        "camera_delta_s": 0.010256167,
+        "size": [
+          1280,
+          1024
+        ],
+        "mime": "image/jpeg"
+      },
+      {
+        "index": 49,
+        "camera_delta_s": 0.0,
+        "size": [
+          1280,
+          1024
+        ],
+        "mime": "image/jpeg"
+      },
+      {
+        "index": 98,
+        "camera_delta_s": 0.020197502,
+        "size": [
+          1280,
+          1024
+        ],
+        "mime": "image/jpeg"
+      }
+    ],
+    "source": "existing replay bag"
+  },
+  "raw": {
+    "frames": 79,
+    "samples": [
+      {
+        "index": 0,
+        "camera_delta_s": -0.021166561,
+        "size": [
+          1280,
+          1024
+        ],
+        "mime": "image/png"
+      },
+      {
+        "index": 39,
+        "camera_delta_s": 0.023269259,
+        "size": [
+          1280,
+          1024
+        ],
+        "mime": "image/png"
+      },
+      {
+        "index": 78,
+        "camera_delta_s": -0.022593819,
+        "size": [
+          1280,
+          1024
+        ],
+        "mime": "image/png"
+      }
+    ],
+    "source": "synthetic raw bag derived from dataset JPEG"
+  },
+  "synthetic_edge_cases": {
+    "big_endian_padded_PointCloud2": true,
+    "raw_bgr_padded_rows": true,
+    "split_camera_only_bag": true,
+    "downsampling": true,
+    "image_gap": true
+  }
+}
