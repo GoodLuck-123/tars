@@ -39,7 +39,7 @@ def build(jobs=4):
         r=subprocess.run([tool,'run','-p',ENV,'python',ROOT/'buildkit/build.py',str(jobs),'host'],env=environment(),stdout=f,stderr=subprocess.STDOUT)
     if r.returncode:raise RuntimeError('Native build failed; inspect '+str(log))
     INSTALL.mkdir(parents=True,exist_ok=True);(INSTALL/'bin').mkdir(exist_ok=True)
-    targets={'fastlivo_mapping':'stage/lib/fast_livo/fastlivo_mapping','livo_image_decode':'image-decode/livo_image_decode','lidar_camera_calib':'stage/lib/livox_camera_calib/lidar_camera_calib','lidar_camera_multi_calib':'stage/lib/livox_camera_calib/lidar_camera_multi_calib','bag_to_pcd':'stage/lib/livox_camera_calib/bag_to_pcd'}
+    targets={'livox_ros_driver_node':'stage/lib/livox_ros_driver/livox_ros_driver_node','fastlivo_mapping':'stage/lib/fast_livo/fastlivo_mapping','livo_image_decode':'image-decode/livo_image_decode','lidar_camera_calib':'stage/lib/livox_camera_calib/lidar_camera_calib','lidar_camera_multi_calib':'stage/lib/livox_camera_calib/lidar_camera_multi_calib','bag_to_pcd':'stage/lib/livox_camera_calib/bag_to_pcd'}
     for name,p in targets.items():
         if not (INSTALL.parent/p).is_file():raise RuntimeError('Missing native build output: '+p)
         link=INSTALL/'bin'/name;link.unlink(missing_ok=True);link.symlink_to(INSTALL.parent/p)

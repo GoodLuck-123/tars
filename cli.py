@@ -201,15 +201,21 @@ def task_config(c,root,install,mode):
     return dict(mode=mode,workspace=root,install=install,topics=c['topics'],monitoring=c['monitoring'],runtime=rt,**{k:c['run'][k] for k in ['timeout_s','shutdown_timeout_s','drain_timeout_s','min_free_gib']})
 
 
-def prepare_capture(c,job,install,root,replay):
+def prepare_capture(c,job,install,root,replay,lidar_only=False):
     cap=c['capture'];cfg=prepare(c,job,install,root) if replay else task_config(c,root,install,'capture')
-    cfg.update(mode='capture_replay' if replay else 'capture',capture=cap,calibration_verified=cap['calibration_verified'])
+    cfg.update(mode='capture_replay' if replay else 'capture_lidar' if lidar_only else 'capture',capture=cap,calibration_verified=cap['calibration_verified'])
     cfg['runtime'].update(livo_cpus=[],cpu_governor=None)
     image_key=cfg['image_input'] if replay else 'compressed_image' if cap['image_transport']=='compressed' else 'raw_image'
     cfg['capture_topics']={k:dict(topic=c['topics'][key],type=typ) for k,key,typ in [('lidar','lidar','livox_ros_driver/CustomMsg'),('imu','imu','sensor_msgs/Imu'),('image',image_key,'sensor_msgs/CompressedImage' if image_key=='compressed_image' else 'sensor_msgs/Image')]}
+    if lidar_only:cfg['capture_topics'].pop('image')
     job.mkdir(parents=True,exist_ok=True)
     if not replay:
-        codes=cap['livox']['broadcast_codes'];raw=dict(lidar_config=[dict(broadcast_code=s,enable_connect=True,return_mode=0,coordinate=0,imu_rate=1,extrinsic_parameter_source=0,enable_high_sensitivity=False) for s in codes],timesync_config=dict(enable_timesync=False))
+        codes=cap['livox']['broadcast_codes']
+        if cap['livox'].get('ip'):
+            info=json.loads(remote(c,(ROOT/'runtime/livox_discovery.py').read_text(),[cap['livox']['ip']]))
+            if codes and info['broadcast_code'] not in codes:raise RuntimeError('Livox IP and configured broadcast codes do not match')
+            codes=[info['broadcast_code']];(job/'device.json').write_text(json.dumps(info,indent=2)+'\n');print('发现 AVIA：'+info['ip']+' / '+info['broadcast_code'],flush=True)
+        raw=dict(lidar_config=[dict(broadcast_code=s,enable_connect=True,return_mode=0,coordinate=0,imu_rate=1,extrinsic_parameter_source=0,enable_high_sensitivity=False) for s in codes],timesync_config=dict(enable_timesync=False))
         (job/'livox.json').write_text(json.dumps(raw,indent=2)+'\n')
         settings=dict(xfer_format=1,multi_topic=0,data_src=0,publish_freq=cap['livox']['publish_hz'],output_data_type=0,user_config_path=root+'/runs/'+job.name+'/livox.json',frame_id='livox_frame',enable_lidar_bag=False,enable_imu_bag=False)
         (job/'livox.yaml').write_text(yaml.safe_dump(settings));(job/'config.resolved.yaml').write_text(yaml.safe_dump(c,allow_unicode=True))
@@ -290,6 +296,7 @@ def main():
     for name,help_text in [('build','仅构建 SDK/驱动/算法；--host 构建主机工具'),('deploy','仅部署运行环境'),('ssh','进入私有 ROS 环境和当前任务'),('run','运行配置中的数据集并回传；--host 在电脑处理'),('stop','正常停止当前任务并回传')]:sub.add_parser(name,help=help_text)
     sp=sub.add_parser('doctor',help='检查环境与数据；--sensors 只检查采集端');sp.add_argument('--sensors',action='store_true',help='检查采集端环境与设备节点，不依赖示例数据集')
     sp=sub.add_parser('record',help='录制传感器数据并回传');sp.add_argument('--replay',action='store_true',help='无硬件演练，使用配置中的现有 bag')
+    sp=sub.add_parser('lidar',help='仅启动 AVIA 点云/IMU 并录包，不需要相机；本机加 --host');sp.add_argument('--background',action='store_true',help='启动后返回，用 status/stop 查看和停止')
     sub.add_parser('calibrate',help='在主机运行免标定板外参标定，输出候选结果')
     sp=sub.add_parser('status',help='查看摘要/告警；--follow 持续查看，--raw 看原始日志');sp.add_argument('--follow',action='store_true');sp.add_argument('--raw',action='store_true')
     sp=sub.add_parser('pull',help='补收最近一次或指定任务，校验全部文件');sp.add_argument('run_id',nargs='?')
@@ -317,15 +324,17 @@ def main():
         except (subprocess.CalledProcessError,ValueError,KeyError):pass
         if c.get('_host'):local(['bash','-c',cmd])
         else:subprocess.run(['ssh','-t','-p',str(c['board']['ssh_port']),c['board']['target'],'bash -c '+shlex.quote(cmd)],check=True)
-    elif a.command in {'run','record','calibrate'}:
+    elif a.command in {'run','record','calibrate','lidar'}:
         if a.command=='run' or (a.command=='record' and a.replay):doctor(c)
         root,install=deploy(c);runid=time.strftime('%Y%m%d-%H%M%S')+'-'+uuid.uuid4().hex[:6];job=Path(c['results_dir'])/runid
-        if a.command=='record':prepare_capture(c,job,install,root,a.replay)
+        if a.command in {'record','lidar'}:prepare_capture(c,job,install,root,a.replay if a.command=='record' else False,a.command=='lidar')
         elif a.command=='calibrate':prepare_calibration(c,job,install,root)
         else:prepare(c,job,install,root)
         remotejob=root+'/runs/'+runid
         remote(c,'from pathlib import Path;import sys;Path(sys.argv[1]).mkdir(exist_ok=False)',[remotejob]);sync(c,str(job)+'/',remotejob+'/')
         command=shlex.join(['/usr/bin/python3',install+'/runtime/agent.py','start',remotejob]);print(ssh(c,command,capture_output=True,text=True).stdout.strip())
+        if a.command=='lidar' and a.background:
+            print('后台启动中；使用 '+('./livo --host' if c.get('_host') else './livo')+' status --follow 确认 recording 和收数，再使用 stop 结束',flush=True);return
         time.sleep(1)
         try:s=follow(c,remotejob)
         except KeyboardInterrupt:

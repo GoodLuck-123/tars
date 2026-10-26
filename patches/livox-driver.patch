@@ -106,6 +106,24 @@ index 0b10d19..fd94b19 100644
  	${catkin_LIBRARIES}
  	${PCL_LIBRARIES}
  	${APR_LIBRARIES}
+diff --git a/livox_ros_driver/livox_ros_driver/lddc.cpp b/livox_ros_driver/livox_ros_driver/lddc.cpp
+index 55b18fd..2d8a75f 100644
+--- a/livox_ros_driver/livox_ros_driver/lddc.cpp
++++ b/livox_ros_driver/livox_ros_driver/lddc.cpp
+@@ -340,11 +340,11 @@ uint32_t Lddc::PublishPointcloudData(LidarDataQueue *queue, uint32_t packet_num,
+ 
+   ros::Publisher *p_publisher = Lddc::GetCurrentPublisher(handle);
+   if (kOutputToRos == output_type_) {
+-    p_publisher->publish(cloud);
++    p_publisher->publish(*cloud);
+   } else {
+     if (bag_ && enable_lidar_bag_) {
+       bag_->write(p_publisher->getTopic(), ros::Time(timestamp / 1000000000.0),
+-          cloud);
++          *cloud);
+     }
+   }
+   if (!lidar->data_is_pubulished) {
 diff --git a/livox_ros_driver/livox_ros_driver/lds.h b/livox_ros_driver/livox_ros_driver/lds.h
 index 2e89459..6424bcc 100644
 --- a/livox_ros_driver/livox_ros_driver/lds.h
@@ -180,3 +198,15 @@ index 2268f52..f02da3c 100644
 +  delete lddc;
    return 0;
  }
+diff --git a/livox_ros_driver/timesync/timesync.h b/livox_ros_driver/timesync/timesync.h
+index 71a1d1d..93826ef 100644
+--- a/livox_ros_driver/timesync/timesync.h
++++ b/livox_ros_driver/timesync/timesync.h
+@@ -26,6 +26,7 @@
+ #define TIMESYNC_TIMESYNC_H_
+ 
+ #include <thread>
++#include <memory>
+ #include "comm_device.h"
+ #include "comm_protocol.h"
+ #include "user_uart.h"

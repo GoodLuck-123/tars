@@ -1,0 +1,34 @@
+{
+  "run_id": "20261026-205020-7c1404",
+  "streams": {
+    "/livox/imu": {
+      "count": 6181,
+      "regressions": 0,
+      "sequence_gaps": 0,
+      "first_stamp": 485.40158297,
+      "first_record_ns": 1793019022853687150,
+      "last_stamp": 515.79954041,
+      "last_sequence": 6245,
+      "last_record_ns": 1793019053155437260,
+      "header_hz": 203.30313351474993,
+      "record_hz": 203.94861608869627
+    },
+    "/livox/lidar": {
+      "count": 304,
+      "regressions": 0,
+      "sequence_gaps": 0,
+      "first_stamp": 485.40033452,
+      "first_record_ns": 1793019022854073385,
+      "last_stamp": 515.69981584,
+      "last_sequence": 307,
+      "last_record_ns": 1793019053155374237,
+      "header_hz": 10.000171184448499,
+      "record_hz": 9.999570694338717
+    }
+  },
+  "points": 7296000,
+  "finite_points": 7296000,
+  "nonzero_points": 2130651,
+  "point_offset_regressions": 0,
+  "calibration_or_sync_accuracy_verified": false
+}

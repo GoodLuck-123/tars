@@ -15,7 +15,7 @@ def run(cfg,job,install,spawn,ros,alive,state,processes,master):
         spawn('play',args)
     else:
         ros(['rosparam','load',job/'livox.yaml']);spawn('livox',[install/'bin/livox_ros_driver_node','/livox/lidar:='+cfg['topics']['lidar'],'/livox/imu:='+cfg['topics']['imu']])
-        spawn('camera',cap['camera_command'])
+        if 'image' in topics:spawn('camera',cap['camera_command'])
     state('waiting for sensor data');deadline=time.monotonic()+cap['startup_timeout_s'];ready=False;started=None
     while True:
         alive()
@@ -31,5 +31,5 @@ def run(cfg,job,install,spawn,ros,alive,state,processes,master):
             if processes['play'].returncode:raise RuntimeError('Replay source failed')
             if not ready:raise RuntimeError('Replay ended without all sensor streams')
             time.sleep(1);break
-        if ready and cfg['mode']=='capture' and cap['duration_s'] is not None and time.monotonic()-started>=cap['duration_s']:break
+        if ready and cfg['mode']!='capture_replay' and cap['duration_s'] is not None and time.monotonic()-started>=cap['duration_s']:break
         time.sleep(.5)

@@ -15,11 +15,20 @@ cp project.example.yaml project.yaml   # 已有配置时跳过
 
 主机任务的查询、停止、回传使用同一命令加 `--host`，例如 `./livo --host status --follow`。SSH 断线后任务继续；运行命令的 Ctrl-C 请求停止并回传，`status --follow` 的 Ctrl-C 只退出查看。完整日志保留在结果里，`status --raw` 按需查看当前模式的原始日志。
 
-当前软件候选版本 `v0.2.0-rc1`；主机完整 LIVO2、压缩/raw 录包演练、停止与标定软件检查通过，详见 [验收证据](evidence/software/README.md)。
+当前候选版本 `v0.2.0-rc2`；主机完整 LIVO2、压缩/raw 录包演练、停止与标定软件检查通过，详见 [验收证据](evidence/software/README.md)。
 
-当前硬件尚未接入。`record --replay` 是软件演练，不代表真实相机、雷达或同步通过验收。示例数据为 `/home/eric/data/hku_campus_seq_03.bag`；示例内外参仅用于已有数据，精度未验证，不能直接用于之后购买的相机。
+AVIA 已在主机完成真实收数和 30 秒录包验收：点云约 10 Hz、IMU 约 204 Hz，见 [真机证据](evidence/avia-host/README.md)。相机及板端真实传感器采集仍待验收。`record --replay` 是软件演练，不代表真实相机、雷达或同步通过验收。示例数据为 `/home/eric/data/hku_campus_seq_03.bag`；示例内外参仅用于已有数据，精度未验证，不能直接用于之后购买的相机。
 
-## 硬件到位后
+## 单独运行 AVIA
+
+```bash
+./livo --host lidar                    # 本机只运行雷达/IMU，并按配置录包
+./livo --host lidar --background       # 后台启动，使用 --host status / stop 管理
+```
+
+先退出 Livox Viewer 或其他占用雷达的程序。在 project.yaml 的 capture.livox.ip 填设备 IP，入口自动发现广播码并仅连接该设备；所有记录时长仍使用 capture.duration_s。主机已支持完整 SDK/驱动原生构建。若 ping 通但发现不到设备，检查来自雷达的 UDP 入站规则，详见真机证据。后台命令返回只表示启动成功，要用 status 确认 recording 与实际收数。
+
+## 接入相机后
 
 相机型号/SDK 确定后，将其放到 `third_party/`，再接入对应 ARM64 构建及启动命令。AVIA 官方 SDK 和驱动已经在工程内，不用另行下载。仅需在 `project.yaml` 设置相机启动命令、图像话题/格式、AVIA 广播码、采集时长与录包参数：
 

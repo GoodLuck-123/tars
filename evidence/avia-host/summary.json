@@ -1,0 +1,45 @@
+{
+  "run_id": "20261026-205020-7c1404",
+  "algorithm": "complete",
+  "reason": null,
+  "exits": {
+    "monitor": 0,
+    "master": 0,
+    "probe": 0,
+    "record": 0,
+    "livox": 0
+  },
+  "elapsed_s": 34.107239270000036,
+  "resources": {
+    "monitor": {
+      "peak_rss_kib": 14716,
+      "cpu_s": 0.05,
+      "rss_kib": 14716
+    },
+    "master": {
+      "peak_rss_kib": 59072,
+      "cpu_s": 0.94,
+      "rss_kib": 59072
+    },
+    "probe": {
+      "peak_rss_kib": 53792,
+      "cpu_s": 0.99,
+      "rss_kib": 53792
+    },
+    "record": {
+      "peak_rss_kib": 56568,
+      "cpu_s": 0.8,
+      "rss_kib": 56568
+    },
+    "livox": {
+      "peak_rss_kib": 66344,
+      "cpu_s": 0.37,
+      "rss_kib": 65672
+    }
+  },
+  "monitor": {
+    "warnings": 0,
+    "errors": 0,
+    "lines": 292
+  }
+}

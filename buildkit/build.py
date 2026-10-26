@@ -54,11 +54,9 @@ def main(jobs=4,target='board'):
         run(['cmake','--build',path,'-j',jobs]+(['--target',target] if target else []))
         if install:run(['cmake','--install',path])
     build('sophus',src['sophus'],'Sophus',True)
-    if not native:
-        build('livox-sdk',src['livox-sdk'],'livox_sdk_static',True)
-        build('livox-driver',src['livox-driver']/'livox_ros_driver','livox_ros_driver_node')
+    build('livox-sdk',src['livox-sdk'],'livox_sdk_static',True)
+    build('livox-driver',src['livox-driver']/'livox_ros_driver','livox_ros_driver_node')
     messages=[('pcl_msgs',src['pcl-msgs']/'msg')]
-    if native:messages.insert(0,('livox_ros_driver',src['livox-driver']/'livox_ros_driver/msg'))
     for name,msgsrc in messages:
         d=BUILD/'messages'/name;d.mkdir(parents=True,exist_ok=True);shutil.copytree(msgsrc,d/'msg',dirs_exist_ok=True)
         write(d/'package.xml',f'<package><name>{name}</name><version>0.0.1</version><description>Unmodified upstream message definitions</description><maintainer email="local@example.invalid">livo2</maintainer><license>BSD</license><buildtool_depend>catkin</buildtool_depend><build_depend>message_generation</build_depend><build_depend>std_msgs</build_depend><build_depend>sensor_msgs</build_depend><run_depend>message_runtime</run_depend><run_depend>std_msgs</run_depend><run_depend>sensor_msgs</run_depend></package>')

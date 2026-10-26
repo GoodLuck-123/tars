@@ -1,6 +1,6 @@
 # AVIA + 单目相机平台计划
 
-更新：2026-10-24（Asia/Shanghai）。工程 `/home/eric/grad/实验/livo2` 独立 Git；论文仓库位于 `../../论文`。
+更新：2026-10-26（Asia/Shanghai）。工程 `/home/eric/grad/实验/livo2` 独立 Git；论文仓库位于 `../../论文`。
 
 ## 1. 目的、范围与当前决策
 
@@ -11,7 +11,7 @@
 - 保留：板端 LIVO2 构建/回放，供实验室复用。实时 LIVO2 不再是板端采集的验收条件。
 - 后续：用有效标定、时间同步及离线几何结果形成深度监督。平台本轮不承诺伪真值质量、网络训练效果或论文创新结论。
 
-相机与雷达目前尚未实际接入。相机型号、SDK 后续由用户放进 third_party；本轮先完成不依赖硬件的软件工作，不反复追问接线。
+AVIA 已于 2026-10-26 在主机接入并完成真实点云/IMU 录包；板端真实雷达收数及相机尚待接入。相机型号、SDK 后续由用户放进 third_party；本轮先完成不依赖硬件的软件工作，不反复追问接线。
 
 用户确认的标定工具是 [livox_camera_calib](https://github.com/hku-mars/livox_camera_calib)，当前接口为图像 + 静态 PCD 的免标定板标定。它需要有效相机内参和合适场景，不等于实时三传感器时空自标定。[LI-Init](https://github.com/hku-mars/LiDAR_IMU_Init) 用于雷达—IMU 外参、时间偏移、重力和偏置初始化；类似 VINS 初始化的角色，但不涉及相机、没有单目尺度恢复问题，本轮不增加此依赖。
 
@@ -54,7 +54,7 @@ flowchart LR
 - Python CLI 用 uv.lock；板端 supervisor 仅需系统 Python 标准库。
 - ARM64 构建采用工程私有 GCC/sysroot 和锁定的 Noetic/Focal 依赖。已验证 Ubuntu 22.04 板端原生运行；不携带替换系统 glibc，不改 apt 源、系统 Python 或 bashrc，不要求 Docker。
 - 主机 ROS/C++ 采用工程私有 micromamba 前缀 `.cache/host-env`。工具 SHA256 与 405 个环境包的完整 URL/MD5 锁定在 buildkit；与参考 VINS 的环境独立。
-- 原始 Livox-SDK 支持 AVIA，不能换成面向其他型号的 SDK2/driver2。SDK 与完整驱动在本工程交叉构建并打包；主机离线算法只构建其消息定义。
+- 原始 Livox-SDK 支持 AVIA，不能换成面向其他型号的 SDK2/driver2。SDK 与完整驱动在本工程交叉构建并打包；主机同样从可见源码构建完整 SDK/驱动，支持本地真机雷达收数。
 - 所有需查看/debug 的第三方源码在可见的 third_party Git 子模块，固定提交见 dependencies.lock。隐藏目录只放归档、环境、工具链与生成产物。
 - 少量平台补丁集中 patches，直接应用到可见源码；不重置人工修改。内容指纹覆盖构建/runtime/patch/上游源码，过期自动重建。
 - 主机上游 `-march=native` 与 PCL 预编译包的 Eigen 分配 ABI 冲突，采用统一 x86_64 编译基线，并遵循 PCL 的 C++ 对齐定义；算法数学逻辑不改。
@@ -137,3 +137,5 @@ LIVO2：数据集三路 topic/type 预检→私有 master→解码与算法订�
 - 软件版使用 annotated 候选 tag，硬件未验收不发布为真实采集完成。旧失败和修复证据保留；不把程序启动、优化收敛或文件非空当作完整结论。
 
 - 2026-10-24，v0.2.0-rc1：SDK/驱动交叉构建、压缩/raw 板端录包演练与载荷一致性、主动/重复停止、无输入失败退出、主机完整 LIVO2（180.45 秒）和标定软件 smoke 通过。相机 SDK、真实收数/同步与精度待硬件阶段；详见 [软件验收证据](evidence/software/README.md)。
+
+- 2026-10-26，v0.2.0-rc2：主机 AVIA 真机接入（192.168.1.189），修复 UFW 阻断发现广播；新增 ./livo --host lidar 和后台模式，30 秒录包/正常退出/回传校验及点云原始结构检查通过。点云约 10 Hz、IMU 约 204 Hz；设备头时间为启动后时间，相机同步与标定仍待验收。见 [真机证据](evidence/avia-host/README.md)。
