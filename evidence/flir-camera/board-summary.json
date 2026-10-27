@@ -1,0 +1,123 @@
+{
+  "run_id": "20261027-211611-60f947",
+  "phase": "finished",
+  "algorithm": "stopped",
+  "transfer": "pending",
+  "started": 1793106973.4232507,
+  "pid": 21412,
+  "master_uri": "http://127.0.0.1:41975",
+  "heartbeat": 1793107033.4375856,
+  "elapsed_s": 60.0143461130001,
+  "progress": {
+    "schema": 1,
+    "rules_version": 1,
+    "lines": 382,
+    "warnings": 0,
+    "errors": 0,
+    "visual_updates": 0,
+    "processed": 0,
+    "alerts": {},
+    "count_basis": "log records, exact cross-source line copies removed; differently formatted mirrors may repeat",
+    "event_seq": 0,
+    "heartbeat": 1793107033.3718724,
+    "sources": 12,
+    "status": "complete",
+    "pending_traces": {}
+  },
+  "resources": {
+    "monitor": {
+      "peak_rss_kib": 13444,
+      "cpu_s": 1.0,
+      "rss_kib": 13444
+    },
+    "master": {
+      "peak_rss_kib": 43188,
+      "cpu_s": 1.0,
+      "rss_kib": 43188
+    },
+    "probe": {
+      "peak_rss_kib": 61320,
+      "cpu_s": 20.78,
+      "rss_kib": 52216
+    },
+    "record": {
+      "peak_rss_kib": 42656,
+      "cpu_s": 0.43,
+      "rss_kib": 42656
+    },
+    "livox": {
+      "peak_rss_kib": 17060,
+      "cpu_s": 7.12,
+      "rss_kib": 16388
+    },
+    "camera": {
+      "peak_rss_kib": 117804,
+      "cpu_s": 34.92,
+      "rss_kib": 107984
+    }
+  },
+  "cpu_freq_khz": {
+    "policy6": 600000,
+    "policy4": 1008000,
+    "policy0": 1800000
+  },
+  "capture": {
+    "heartbeat": 1793107027.000138,
+    "observed_monotonic": 5176.088355556,
+    "streams": {
+      "imu": {
+        "messages": 10209,
+        "bytes": 3297507,
+        "first_arrival": 5125.772797333,
+        "stamp_regressions": 0,
+        "sequence_gaps": 0,
+        "first_stamp": 5709.82406136,
+        "last_stamp": 5760.10106584,
+        "last_arrival": 5176.003712172,
+        "last_sequence": 10217,
+        "type": "sensor_msgs/Imu",
+        "hz": 203.22146297193177
+      },
+      "lidar": {
+        "messages": 502,
+        "bytes": 228935594,
+        "first_arrival": 5125.906814513,
+        "stamp_regressions": 0,
+        "sequence_gaps": 0,
+        "first_stamp": 5709.89976637,
+        "last_stamp": 5759.99949047,
+        "last_arrival": 5176.004625964,
+        "last_sequence": 502,
+        "type": "livox_ros_driver/CustomMsg",
+        "hz": 10.000436855211184
+      },
+      "image": {
+        "messages": 987,
+        "bytes": 4948395564,
+        "first_arrival": 5126.749553932,
+        "stamp_regressions": 0,
+        "sequence_gaps": 0,
+        "first_stamp": 1793106977.6287282,
+        "last_stamp": 1793107026.9350135,
+        "last_arrival": 5176.054308927,
+        "last_sequence": 986,
+        "type": "sensor_msgs/Image",
+        "hz": 19.998071181977842
+      }
+    }
+  },
+  "stop_reason": "User requested stop",
+  "reason": null,
+  "exits": {
+    "monitor": 0,
+    "master": 0,
+    "probe": 0,
+    "record": 0,
+    "livox": 0,
+    "camera": 0
+  },
+  "poses": 0,
+  "map_chunks": 0,
+  "trajectory_start": null,
+  "trajectory_end": null
+}

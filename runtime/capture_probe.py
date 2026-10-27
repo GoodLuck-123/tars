@@ -24,7 +24,8 @@ def observe(job):
     while not rospy.is_shutdown():
         with lock:
             snapshot={k:{**s,'hz':(s['messages']-1)/max(.001,s['last_arrival']-s['first_arrival'])} for k,s in streams.items()}
-        write_json(job/'capture-state.json',dict(heartbeat=time.time(),streams=snapshot));time.sleep(.5)
+            observed=time.monotonic()
+        write_json(job/'capture-state.json',dict(heartbeat=time.time(),observed_monotonic=observed,streams=snapshot));time.sleep(.5)
 
 
 def verify(job):

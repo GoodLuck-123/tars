@@ -5,7 +5,7 @@
 ```bash
 cp project.example.yaml project.yaml   # 已有配置时跳过
 ./livo doctor --sensors                # 检查板端环境、驱动产物与设备节点
-./livo lidar --background              # 板端实机录点云/IMU，确认收数后返回
+./livo record --background             # 板端实机录相机/点云/IMU，确认收数后返回
 ./livo --host run                      # 电脑离线运行 LIVO2，自动准备环境
 ./livo status --follow                # 查看板端当前任务摘要和重要告警
 ./livo stop                           # 有序停止并回传
@@ -15,9 +15,9 @@ cp project.example.yaml project.yaml   # 已有配置时跳过
 
 主机任务的查询、停止、回传使用同一命令加 `--host`，例如 `./livo --host status --follow`。SSH 断线后任务继续；运行命令的 Ctrl-C 请求停止并回传，`status --follow` 的 Ctrl-C 只退出查看。完整日志保留在结果里，`status --raw` 按需查看当前模式的原始日志。
 
-当前候选版本 `v0.2.0-rc4`；主机完整 LIVO2、压缩/raw 录包演练、停止与标定软件检查通过，详见 [验收证据](evidence/software/README.md)。
+当前候选版本 `v0.2.0-rc5`；主机完整 LIVO2、压缩/raw 录包演练、停止与标定软件检查通过，详见 [验收证据](evidence/software/README.md)。
 
-AVIA 已通过板端真实采集、主机拔线后独立录制、接回后停止回传及三维回看验收：点云约 10 Hz、IMU 约 203 Hz，见 [板端验收](evidence/board-avia/README.md)。相机及三路同步仍待验收。主机先前短录见 [主机真机证据](evidence/avia-host/README.md)。`record --replay` 是软件演练，不代表真实相机、雷达或同步通过验收。示例数据为 `/home/eric/data/hku_campus_seq_03.bag`；示例内外参仅用于已有数据，精度未验证，不能直接用于之后购买的相机。
+AVIA 已通过板端真实采集、主机拔线后独立录制、接回后停止回传及三维回看验收：点云约 10 Hz、IMU 约 203 Hz，见 [板端验收](evidence/board-avia/README.md)。FLIR 相机已完成主机与板端三路录包、拔线移动和同屏回看，见 [相机验收](evidence/flir-camera/README.md)；硬触发同步和标定待传感器固定后处理。主机先前短录见 [主机真机证据](evidence/avia-host/README.md)。`record --replay` 是软件演练，不代表真实相机、雷达或同步通过验收。示例数据为 `/home/eric/data/hku_campus_seq_03.bag`；示例内外参仅用于已有数据，精度未验证，不能直接用于之后购买的相机。
 
 ## 板端独立录制 AVIA
 
@@ -76,15 +76,48 @@ capture:
 
 `project.yaml` 的 `viewer.bag` 可固定默认录包，`viewer.max_points` 控制每帧最多显示点数，`viewer.image_tolerance_s` 控制图像允许时差；默认分别为自动选最近、100000、0.15 秒。抽样及零点/无效点过滤仅影响显示，不修改原始包。无需启动 ROS、SDK 或雷达，只依赖工程 Python 环境和支持 WebGL 的浏览器，资源均在本地。`--no-open` 只打印地址，Ctrl-C 关闭播放器。今天 AVIA 实录的全部 304 帧已通过读取检查，详见 [回放验收](evidence/viewer/README.md)。
 
-## 接入相机后
+## FLIR 相机与三路采集
 
-相机型号/SDK 确定后，将其放到 `third_party/`，再接入对应 ARM64 构建及启动命令。AVIA 官方 SDK 和驱动已经在工程内，不用另行下载。仅需在 `project.yaml` 设置相机启动命令、图像话题/格式、AVIA 广播码、采集时长与录包参数：
+BFS-U3-50S5C-C 使用 USB3。首次在主机初始化权限和缓冲（需要一次 sudo）；板端 deploy 会自动完成同样的初始化，板子无需安装系统 ROS 或全套 SDK：
 
 ```bash
-./livo record                         # 启动 AVIA/相机、录制、结束、校验并回传
+bash runtime/setup_camera_usb.sh
+./livo --host preview                 # 空闲时只看相机，不录包；录制中复用图像流
+./livo --host preview --stop           # 关闭预览，录包不受影响
+./livo --host record --background      # 主机同时录原始图像、点云、IMU
+./livo --host stop                    # 停止、校验结果
+./livo view                           # 同一网页播放三维点云和彩色图像
+./livo deploy                        # 主机交叉编译驱动，打包 ARM64 SDK 后部署
+./livo doctor --sensors               # 换接板子前检查产物；换接后检查 USB3/权限/SDK
+./livo record --background            # 换接相机到板子后同时录三路
+./livo stop                          # 拔线移动、重连后执行，结束并回传
+./livo view
 ```
 
-默认录制 30 秒；`capture.duration_s: null` 表示持续采集，使用 stop 结束。录包保留驱动原始消息，不经过 LIVO2、缩放或去畸变。按体积分包；三路未到齐、时间戳倒退、持续断流、磁盘不足及进程异常会停止并保留失败证据。报告中的序列缺口来自旁路观察，不能直接解释成传感器或 recorder 丢帧率。
+独立预览独占相机；开始录制前先关闭它。录制中打开的预览不占设备、不修改曝光。所有参数仍在 project.yaml：
+
+```yaml
+capture:
+  camera:
+    type: spinnaker
+    serial: "24223920"
+    fps: 20.0
+    exposure_auto: "Off"
+    exposure_us: 10000.0       # 微秒，10000 = 10ms；你主要调整此项及镜头光圈
+    gain_auto: "Off"
+    gain_db: 12.0
+    white_balance_auto: "Off"
+    white_balance_red: 1.68262
+    white_balance_blue: 2.31433
+```
+
+这是要改的字段摘录，不要覆盖整份配置。帧率、分辨率、增益、白平衡和 Gamma 默认固定；曝光默认手动，每次启动按配置重新设置，修改后需停止并重新启动才生效。20Hz 的帧周期为 50ms，曝光不可超过帧周期；过长曝光会造成运动拖影，尽量开大光圈、缩短曝光。硬件有离散步长，例如请求 10000us，实测为 10004us，逐帧真实值与设备时间戳保存在 /camera/metadata。
+
+相机 20Hz 与 AVIA 点云 10Hz 不要求相等；它们仅为自由运行的固定速率，**没有硬触发同步**。相机 Header 使用主机接收时间，另存设备时间戳；雷达时间来源不同。网页按 bag 记录时间同时回看，仅用于检查数据链路。本轮不做硬同步、相机内参或传感器外参标定，待传感器固定后再做。
+
+录制保留 2448×2048 BayerRG8 原始图像、点云/IMU、逐帧曝光/增益元数据和未标定 CameraInfo，使用 LZ4 无损压缩。实时预览与网页仅为显示做彩色解码及 viewer.bayer_gamma（默认 2.2）转换，JPEG 也仅用于显示，不改变包内像素。帧率提高会增加原始数据量；主机的已完成包回收到 results 时共享本机文件，不再重复占用相同录包空间。
+
+capture.duration_s=null 表示持续录制，使用 stop 结束；也可设秒数。三路未到齐、时间戳倒退、持续断流、磁盘不足及进程异常会停止并保留证据。相机未连接时 doctor 明确显示 absent，运行库检查通过不等于硬件验收。源码与 SDK 来源见 [Spinnaker 说明](third_party/spinnaker/README.md)。
 
 ## 在电脑处理
 

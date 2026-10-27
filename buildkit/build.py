@@ -64,6 +64,10 @@ def main(jobs=4,target='board'):
         build(name,d)
     for name in ['vikit_common','vikit_ros']:build(name,src['vikit']/name,name)
     build('fast-livo2',src['fast-livo2'],'fastlivo_mapping');build('image-decode',ROOT/'runtime/decode')
+    from spinnaker import prepare
+    spin=prepare('amd64' if native else 'arm64')
+    common+=['-DSPINNAKER_ROOT='+str(spin)]
+    build('flir-camera',ROOT/'runtime/flir')
     if native:build('camera-calib',src['camera-calib'])
 
 

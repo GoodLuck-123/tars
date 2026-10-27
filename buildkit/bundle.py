@@ -7,7 +7,7 @@ SYSTEM={'ld-linux-aarch64.so.1','libc.so.6','libm.so.6','libpthread.so.0','libdl
 
 
 def input_fingerprint():
-    paths=[ROOT/'dependencies.lock']
+    paths=[ROOT/'dependencies.lock',ROOT/'third_party/spinnaker/sdk.lock.json']
     for directory in ['buildkit','runtime','patches']:
         paths.extend(p for p in (ROOT/directory).rglob('*') if p.is_file() and '__pycache__' not in p.parts)
     # Include editable third-party sources, not just their Git commit IDs.
@@ -41,8 +41,13 @@ def main():
     d=OUT/'ros/bin/rosversion';shutil.copy2(SDK/'usr/bin/rosversion',d);d.write_bytes(d.read_bytes().replace(b'#!/usr/bin/python3\n',b'#!/usr/bin/env python3\n',1))
     (OUT/'install.sh').write_text('#!/usr/bin/env bash\nset -euo pipefail\nroot=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)\nexec /usr/bin/python3 "$root/runtime/install.py" "$root" "${1:-$HOME/livo2-workspace}"\n')
     (OUT/'install.sh').chmod(0o755)
+    from spinnaker import prepare
+    spin=prepare('arm64')
+    copytree(spin/'lib/spinnaker-gentl',OUT/'lib/spinnaker-gentl')
+    copytree(spin/'licenses',OUT/'licenses/spinnaker')
     (OUT/'bin').mkdir();shutil.copy2(BUILD/'stage/lib/fast_livo/fastlivo_mapping',OUT/'bin/fastlivo_mapping');shutil.copy2(BUILD/'image-decode/livo_image_decode',OUT/'bin/livo_image_decode')
     shutil.copy2(BUILD/'stage/lib/livox_ros_driver/livox_ros_driver_node',OUT/'bin/livox_ros_driver_node')
+    shutil.copy2(BUILD/'flir-camera/livo_flir_camera',OUT/'bin/livo_flir_camera')
     for name in ['livox_ros_driver','pcl_msgs']:
         copytree(BUILD/'stage/lib/python3/dist-packages'/name,OUT/'ros/lib/python3/dist-packages'/name)
     copytree(ROOT/'runtime',OUT/'runtime')
@@ -53,15 +58,17 @@ export PYTHONNOUSERSITE=1 PYTHONHOME="$LIVO_INSTALL_ROOT/python"
 export PYTHONPATH="$LIVO_INSTALL_ROOT/ros/lib/python3/dist-packages:$LIVO_INSTALL_ROOT/python-extra"
 export PATH="$LIVO_INSTALL_ROOT/bin:$LIVO_INSTALL_ROOT/python/bin:$LIVO_INSTALL_ROOT/ros/bin:/usr/bin:/bin"
 export LD_LIBRARY_PATH="$LIVO_INSTALL_ROOT/lib:$LIVO_INSTALL_ROOT/ros/lib"
+export SPINNAKER_GENTL64_CTI="$LIVO_INSTALL_ROOT/lib/spinnaker-gentl/Spinnaker_GenTL.cti"
+export GENICAM_GENTL64_PATH="$LIVO_INSTALL_ROOT/lib/spinnaker-gentl"
 export CMAKE_PREFIX_PATH="$LIVO_INSTALL_ROOT/ros"
 export ROS_PACKAGE_PATH="$LIVO_INSTALL_ROOT/ros/share" ROS_ROOT="$LIVO_INSTALL_ROOT/ros/share/ros" ROS_ETC_DIR="$LIVO_INSTALL_ROOT/ros/etc/ros"
 export ROS_DISTRO=noetic ROS_VERSION=1 ROS_PYTHON_VERSION=3 ROS_IP=127.0.0.1
 ''')
-    directories=[BUILD/'stage/lib',BUILD/'sophus',SDK/'opt/ros/noetic/lib',SDK/'usr/lib/aarch64-linux-gnu',SDK/'lib/aarch64-linux-gnu',SDK/'usr/lib/aarch64-linux-gnu/blas',SDK/'usr/lib/aarch64-linux-gnu/lapack',SDK/'usr/lib']
+    directories=[spin/'lib',BUILD/'stage/lib',BUILD/'sophus',SDK/'opt/ros/noetic/lib',SDK/'usr/lib/aarch64-linux-gnu',SDK/'lib/aarch64-linux-gnu',SDK/'usr/lib/aarch64-linux-gnu/blas',SDK/'usr/lib/aarch64-linux-gnu/lapack',SDK/'usr/lib']
     pending=[]
     for p in OUT.rglob('*'):
         if p.is_file() and p.open('rb').read(4)==b'\x7fELF':pending+=needed(p)
-    lib=OUT/'lib';lib.mkdir();copied=set()
+    lib=OUT/'lib';lib.mkdir(exist_ok=True);copied=set()
     while pending:
         name=pending.pop()
         if name in SYSTEM or name in copied:continue

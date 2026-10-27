@@ -74,6 +74,13 @@
       "revision": "061fdaa647fc806e59d73a8505a05a10dfcfdaa1",
       "directory": "third_party/livox_camera_calib",
       "host_only": true
+    },
+    {
+      "name": "flir-driver-reference",
+      "repository": "https://github.com/ros-drivers/flir_camera_driver",
+      "revision": "fe5cb5690d60bbbc686765631d0b67f7d9322853",
+      "directory": "third_party/flir_camera_driver",
+      "reference_only": true
     }
   ]
 }

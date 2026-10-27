@@ -1,0 +1,21 @@
+{
+  "source": "ros-drivers/flir_camera_driver humble-devel cmake/download_spinnaker",
+  "packages": [
+    {
+      "architecture": "amd64",
+      "version": "4.2.0.88",
+      "ubuntu": "20.04",
+      "file": "spinnaker-4.2.0.88-amd64-20.04-pkg.tar.gz",
+      "url": "https://eventvisionresearch.com/Spinnaker/spinnaker-4.2.0.88-amd64-20.04-pkg.tar.gz",
+      "sha256": "9f8fe2297cb3d240f51c8940dfffbc2b406d252fbe844f39f6f485ecbeb452ee"
+    },
+    {
+      "architecture": "arm64",
+      "version": "4.2.0.88",
+      "ubuntu": "20.04",
+      "file": "spinnaker-4.2.0.88-arm64-20.04-pkg.tar.gz",
+      "url": "https://eventvisionresearch.com/Spinnaker/spinnaker-4.2.0.88-arm64-20.04-pkg.tar.gz",
+      "sha256": "07b15001343df9bd6bda6a4d4978851f7148972d95a159322cdce37eaa6bb4c6"
+    }
+  ]
+}

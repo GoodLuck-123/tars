@@ -1,0 +1,13 @@
+{
+  "run_id": "20261027-210621-114432",
+  "frames": 209,
+  "exposure_us": [
+    10004
+  ],
+  "gain_db": [
+    11.998573508256591
+  ],
+  "device_frame_id_gaps": 0,
+  "incomplete_frames": 0,
+  "device_hz": 19.997731334294475
+}

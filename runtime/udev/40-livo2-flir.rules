@@ -1,0 +1,2 @@
+# Blackfly S USB3 Vision. Restrict writes to plugdev/active desktop user.
+SUBSYSTEM=="usb", ATTR{idVendor}=="1e10", ATTR{idProduct}=="4000", GROUP="plugdev", MODE="0660", TAG+="uaccess"

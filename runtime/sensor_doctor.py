@@ -2,6 +2,7 @@
 import fcntl
 import ipaddress
 import json
+import os
 from pathlib import Path
 import platform
 import shutil
@@ -11,7 +12,7 @@ import sys
 import time
 
 
-def check(root,livox,prefix='',host_epoch=None):
+def check(root,livox,prefix='',host_epoch=None,camera=None):
     root=Path(root);prefix=Path(prefix) if prefix else root/'current';problems=[]
     report=dict(architecture=platform.machine(),workspace=str(root),release=prefix.resolve().name,problems=problems)
     report['host_offset_estimate_s']=round(time.time()-float(host_epoch),2) if host_epoch else None
@@ -60,8 +61,9 @@ def check(root,livox,prefix='',host_epoch=None):
             try:fcntl.flock(guard,fcntl.LOCK_EX|fcntl.LOCK_NB);fcntl.flock(guard,fcntl.LOCK_UN)
             except BlockingIOError:busy=True
     report['task_active']=busy
+    preview=busy and (root/'preview.json').exists()
     live=False
-    if busy:
+    if busy and not preview:
         try:
             job=Path(json.loads((root/'latest.json').read_text())['job']);state=json.loads((job/'state.json').read_text());cfg=json.loads((job/'config.json').read_text())
             task=dict(run_id=job.name,phase=state['phase'],mode=cfg.get('mode'),heartbeat_age_s=round(time.time()-state['heartbeat'],2));report['task']=task
@@ -76,6 +78,32 @@ def check(root,livox,prefix='',host_epoch=None):
                 network['verification']='live_messages' if task['receiving'] else 'task_not_receiving'
                 if not task['receiving']:problems.append('当前采集任务尚未就绪或传感器断流')
         except Exception as e:problems.append('读取当前任务失败：'+str(e))
+    if camera and camera.get('type')=='spinnaker':
+        cam=dict(serial=camera.get('serial',''),state='absent',runtime_ready=False,usb_devices=[]);report['camera']=cam
+        for path in Path('/sys/bus/usb/devices').glob('*'):
+            try:
+                if (path/'idVendor').read_text().strip()!='1e10' or (path/'idProduct').read_text().strip()!='4000':continue
+                dev=Path('/dev/bus/usb')/f"{int((path/'busnum').read_text()):03d}"/f"{int((path/'devnum').read_text()):03d}"
+                cam['usb_devices'].append(dict(serial=str(int((path/'serial').read_text().strip(),16)),speed_mbps=float((path/'speed').read_text()),writable=os.access(dev,os.W_OK),node=str(dev)))
+            except (OSError,ValueError):continue
+        try:
+            result=subprocess.run(['bash','-ec','source "$1/env.sh"; ldd "$1/bin/livo_flir_camera"; ldd "$SPINNAKER_GENTL64_CTI"','camera-doctor',str(prefix)],text=True,capture_output=True,timeout=30)
+            if result.returncode or 'not found' in result.stdout:raise RuntimeError(result.stderr or result.stdout)
+            cam['runtime_ready']=True
+            cam['usbfs_memory_mb']=int(Path('/sys/module/usbcore/parameters/usbfs_memory_mb').read_text())
+            matching=[d for d in cam['usb_devices'] if not cam['serial'] or d['serial']==cam['serial']]
+            if matching:
+                if not all(d['writable'] for d in matching):raise RuntimeError('相机 USB 无写权限，请初始化工程 udev 规则')
+                if any(d['speed_mbps']<5000 for d in matching):raise RuntimeError('相机连接为 USB2，请接 USB3 数据口/线')
+                if cam['usbfs_memory_mb']<256:raise RuntimeError('USB 缓冲过小，请运行 runtime/setup_camera_usb.sh')
+                cam['state']='previewing' if preview else 'receiving' if live and 'image' in report.get('task',{}).get('streams',{}) else 'connected'
+                if not busy:
+                    probe=subprocess.run(['bash','-ec','source "$1/env.sh"; exec "$1/bin/livo_flir_camera" --probe','camera-probe',str(prefix)],capture_output=True,text=True,timeout=20)
+                    if probe.returncode:raise RuntimeError(probe.stderr)
+                    cam['sdk_probe']=json.loads(probe.stdout)
+                    if not any(not cam['serial'] or d['serial']==cam['serial'] for d in cam['sdk_probe']['cameras']):raise RuntimeError('USB 已连接但 SDK 未识别配置中的相机')
+            else:cam['note']='运行库就绪，配置的相机尚未连接；硬件收数未验证'
+        except Exception as e:problems.append('FLIR 检查失败：'+str(e))
     if ip and not live and report.get('environment_ready'):
         try:
             from livox_discovery import discover
@@ -87,4 +115,4 @@ def check(root,livox,prefix='',host_epoch=None):
     return report
 
 
-if __name__=='__main__':print(json.dumps(check(sys.argv[1],json.loads(sys.argv[2]),sys.argv[3] if len(sys.argv)>3 else '',sys.argv[4] if len(sys.argv)>4 else None),ensure_ascii=False))
+if __name__=='__main__':print(json.dumps(check(sys.argv[1],json.loads(sys.argv[2]),sys.argv[3] if len(sys.argv)>3 else '',sys.argv[4] if len(sys.argv)>4 else None,json.loads(sys.argv[5]) if len(sys.argv)>5 else None),ensure_ascii=False))

@@ -39,13 +39,15 @@ def build(jobs=4):
         r=subprocess.run([tool,'run','-p',ENV,'python',ROOT/'buildkit/build.py',str(jobs),'host'],env=environment(),stdout=f,stderr=subprocess.STDOUT)
     if r.returncode:raise RuntimeError('Native build failed; inspect '+str(log))
     INSTALL.mkdir(parents=True,exist_ok=True);(INSTALL/'bin').mkdir(exist_ok=True)
-    targets={'livox_ros_driver_node':'stage/lib/livox_ros_driver/livox_ros_driver_node','fastlivo_mapping':'stage/lib/fast_livo/fastlivo_mapping','livo_image_decode':'image-decode/livo_image_decode','lidar_camera_calib':'stage/lib/livox_camera_calib/lidar_camera_calib','lidar_camera_multi_calib':'stage/lib/livox_camera_calib/lidar_camera_multi_calib','bag_to_pcd':'stage/lib/livox_camera_calib/bag_to_pcd'}
+    targets={'livo_flir_camera':'flir-camera/livo_flir_camera','livox_ros_driver_node':'stage/lib/livox_ros_driver/livox_ros_driver_node','fastlivo_mapping':'stage/lib/fast_livo/fastlivo_mapping','livo_image_decode':'image-decode/livo_image_decode','lidar_camera_calib':'stage/lib/livox_camera_calib/lidar_camera_calib','lidar_camera_multi_calib':'stage/lib/livox_camera_calib/lidar_camera_multi_calib','bag_to_pcd':'stage/lib/livox_camera_calib/bag_to_pcd'}
     for name,p in targets.items():
         if not (INSTALL.parent/p).is_file():raise RuntimeError('Missing native build output: '+p)
         link=INSTALL/'bin'/name;link.unlink(missing_ok=True);link.symlink_to(INSTALL.parent/p)
     shutil.copytree(ROOT/'runtime',INSTALL/'runtime',dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__'))
     stage=INSTALL.parent/'stage';python_dirs=list((stage/'lib').glob('python*/site-packages'))+list((stage/'lib').glob('python*/dist-packages'))
-    exports=dict(PATH=str(INSTALL/'bin')+':'+str(ENV/'bin')+':/usr/bin:/bin',LD_LIBRARY_PATH=str(stage/'lib')+':'+str(ENV/'lib'),PYTHONPATH=':'.join(map(str,python_dirs))+':'+str(ENV/'lib/python3.11/site-packages'),CMAKE_PREFIX_PATH=str(stage)+':'+str(ENV),ROS_PACKAGE_PATH=str(stage/'share')+':'+str(ENV/'share'),ROS_ROOT=str(ENV/'share/ros'),ROS_ETC_DIR=str(ENV/'etc/ros'),ROS_DISTRO='noetic',ROS_VERSION='1',ROS_PYTHON_VERSION='3',PYTHONNOUSERSITE='1')
+    from spinnaker import prepare
+    spin=prepare('amd64')
+    exports=dict(SPINNAKER_GENTL64_CTI=str(spin/'lib/spinnaker-gentl/Spinnaker_GenTL.cti'),GENICAM_GENTL64_PATH=str(spin/'lib/spinnaker-gentl'),PATH=str(INSTALL/'bin')+':'+str(ENV/'bin')+':/usr/bin:/bin',LD_LIBRARY_PATH=str(spin/'lib')+':'+str(stage/'lib')+':'+str(ENV/'lib'),PYTHONPATH=':'.join(map(str,python_dirs))+':'+str(ENV/'lib/python3.11/site-packages'),CMAKE_PREFIX_PATH=str(stage)+':'+str(ENV),ROS_PACKAGE_PATH=str(stage/'share')+':'+str(ENV/'share'),ROS_ROOT=str(ENV/'share/ros'),ROS_ETC_DIR=str(ENV/'etc/ros'),ROS_DISTRO='noetic',ROS_VERSION='1',ROS_PYTHON_VERSION='3',PYTHONNOUSERSITE='1')
     (INSTALL/'env.sh').write_text('unset PYTHONHOME PYTHONPATH ROS_PACKAGE_PATH AMENT_PREFIX_PATH CMAKE_PREFIX_PATH ROS_HOSTNAME\n'+''.join('export '+k+'='+shlex.quote(v)+'\n' for k,v in exports.items()))
     from bundle import input_fingerprint
     (INSTALL/'build.json').write_text(json.dumps(dict(input_fingerprint=input_fingerprint(),host_lock_sha256=sha(ROOT/'buildkit/locks/host-linux-64.txt')))+'\n')

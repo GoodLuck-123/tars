@@ -29,6 +29,16 @@ def config(path):
     if type(c['board']['sync_time']) is not bool:raise ValueError('board.sync_time must be true or false')
     c['topics'].setdefault('raw_image','/camera/image_raw')
     cap=c['capture']
+    cap.setdefault('camera',dict(type='custom'));cap.setdefault('compression','none')
+    for key,default in [('camera_info','/camera/camera_info'),('camera_metadata','/camera/metadata')]:c['topics'].setdefault(key,default)
+    if cap['compression'] not in {'none','lz4'}:raise ValueError('capture.compression must be none or lz4')
+    if cap['camera']['type'] not in {'custom','spinnaker'}:raise ValueError('capture.camera.type must be custom or spinnaker')
+    if cap['camera']['type']=='spinnaker':
+        if cap['image_transport']!='raw':raise ValueError('Spinnaker capture requires image_transport: raw')
+        import math
+        cam=cap['camera']
+        if not math.isfinite(cam['fps']) or cam['fps']<=0:raise ValueError('capture.camera.fps must be finite and positive')
+        if cam.get('exposure_auto','Continuous')=='Off' and (not math.isfinite(cam['exposure_us']) or not 0<cam['exposure_us']<=1e6/cam['fps']):raise ValueError('exposure_us 必须为正数且不超过帧周期；20Hz 时最多 50000us')
     if cap['livox'].get('ip'):cap['livox']['ip']=str(ipaddress.IPv4Address(cap['livox']['ip']))
     if cap['image_transport'] not in {'raw','compressed'}:raise ValueError('capture.image_transport must be raw or compressed')
     if not isinstance(cap['camera_command'],list) or any(not isinstance(s,str) for s in cap['camera_command']):raise ValueError('capture.camera_command must be an argument list')
@@ -76,7 +86,9 @@ def workspace(c):
 
 def sync(c,source,dest,receive=False):
     if c.get('_host'):
-        local(['rsync','-a','--partial',dest if receive else source,source if receive else dest],stdout=subprocess.DEVNULL);return
+        # Finished local runs are immutable; share their files instead of duplicating bags.
+        links=['--link-dest='+str(Path(dest).resolve())] if receive else []
+        local(['rsync','-a','--partial',*links,dest if receive else source,source if receive else dest],stdout=subprocess.DEVNULL);return
     transport=shlex.join(['ssh','-p',str(c['board']['ssh_port']),'-o','BatchMode=yes','-o','ServerAliveInterval=5','-o','ServerAliveCountMax=2'])
     target=c['board']['target']+':'+dest
     local(['rsync','-a','--partial','--protect-args','--info=progress2','-e',transport,target if receive else source,source if receive else target],stdout=subprocess.DEVNULL)
@@ -98,7 +110,7 @@ def doctor(c,sensors=False):
     if info['free_gib']<c['run']['min_free_gib']:raise RuntimeError('Board disk space below configured reserve')
     if sensors:
         root=workspace(c)
-        result=json.loads(remote(c,(ROOT/'runtime/sensor_doctor.py').read_text(),[root,json.dumps(c['capture']['livox']),str(ROOT/'.build/host/install') if c.get('_host') else '',str(time.time())]))
+        result=json.loads(remote(c,(ROOT/'runtime/sensor_doctor.py').read_text(),[root,json.dumps(c['capture']['livox']),str(ROOT/'.build/host/install') if c.get('_host') else '',str(time.time()),json.dumps(c['capture']['camera'])]))
         if result['free_gib']<c['run']['min_free_gib']:result['problems'].append('工作目录空间低于保留阈值')
         result['ok']=not result['problems']
         cache=ROOT/'.cache';cache.mkdir(exist_ok=True);(cache/('doctor-host.json' if c.get('_host') else 'doctor-board.json')).write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
@@ -108,9 +120,11 @@ def doctor(c,sensors=False):
         net=result['network'];print('雷达网络：'+str(net.get('source_ip','?'))+' ('+net.get('interface','?')+') → '+str(net['lidar_ip']),flush=True)
         if net.get('device'):print('AVIA：'+net['device']['broadcast_code']+' | '+net.get('verification',''),flush=True)
         if result.get('task'):print('当前任务：'+result['task']['run_id']+' | '+result['task']['phase']+' | '+json.dumps(result['task'].get('streams',{}),ensure_ascii=False),flush=True)
-        print('相机：'+('已配置启动命令，需真实收数验证' if c['capture']['camera_command'] else '未接入；不影响 lidar 模式'),flush=True)
+        print('相机：'+json.dumps(result.get('camera',dict(state='自定义驱动或未接入')),ensure_ascii=False),flush=True)
         if result['problems']:raise RuntimeError('；'.join(result['problems']))
-        if net.get('verification')=='discovery_only':print('已发现雷达；实际点云/IMU 和录包请用 ./livo lidar 验证',flush=True)
+        if net.get('verification')=='discovery_only':
+            command='./livo record --background' if c['capture']['camera']['type']=='spinnaker' or c['capture']['camera_command'] else './livo lidar --background'
+            print('设备发现通过；实际收数及录包请用 '+command+' 验证',flush=True)
         return
     p=Path(c['dataset']['path'])
     if not p.is_file():raise RuntimeError('Dataset not found: '+str(p))
@@ -180,6 +194,7 @@ p.rename(root/'releases'/ident);stage.rmdir()
 '''
         print(remote(c,code,[root,archive,release['id'],release['sha256']]).strip())
     remote(c,'from pathlib import Path;import sys,os;r=Path(sys.argv[1]);t=r/"current.new";t.unlink(missing_ok=True);t.symlink_to("releases/"+sys.argv[2]);os.replace(t,r/"current")',[root,release['id']])
+    if c['capture']['camera']['type']=='spinnaker':ssh(c,'sudo -n bash '+shlex.quote(dest+'/runtime/setup_camera_usb.sh'))
     print('运行包已就绪：'+release['id'],flush=True);return root,dest
 
 
@@ -189,7 +204,7 @@ from pathlib import Path
 root=Path(sys.argv[1]);busy=None;synced=False;problem=None
 with (root/'run.lock').open('a') as guard:
  try:fcntl.flock(guard,fcntl.LOCK_EX|fcntl.LOCK_NB)
- except BlockingIOError:busy=Path(json.loads((root/'latest.json').read_text())['job']).name
+ except BlockingIOError:busy='相机实时预览；用 ./livo --host preview --stop 关闭' if (root/'preview.json').exists() else Path(json.loads((root/'latest.json').read_text())['job']).name
  if not busy and sys.argv[3]=='True' and abs(time.time()-float(sys.argv[2]))>5:
   result=subprocess.run(['sudo','-n','date','-u','-s','@'+sys.argv[2]],capture_output=True,text=True)
   if result.returncode:problem='板端时钟错误且自动校时失败：'+result.stderr.strip()
@@ -254,10 +269,17 @@ def prepare_capture(c,job,install,root,replay,lidar_only=False):
     cap=c['capture'];cfg=prepare(c,job,install,root) if replay else task_config(c,root,install,'capture')
     cfg.update(mode='capture_replay' if replay else 'capture_lidar' if lidar_only else 'capture',capture=cap,calibration_verified=cap['calibration_verified'])
     cfg['runtime'].update(livo_cpus=[],cpu_governor=None)
+    if not replay and not lidar_only and cap['camera']['type']=='spinnaker':
+        cfg['capture']=dict(cap)
+        cfg['capture']['camera_command']=[install+'/bin/livo_flir_camera','image_raw:='+c['topics']['raw_image'],'metadata:='+c['topics']['camera_metadata'],'camera_info:='+c['topics']['camera_info']]
+        cfg['capture']['extra_topics']=list(dict.fromkeys([*cap['extra_topics'],c['topics']['camera_metadata'],c['topics']['camera_info']]))
     image_key=cfg['image_input'] if replay else 'compressed_image' if cap['image_transport']=='compressed' else 'raw_image'
     cfg['capture_topics']={k:dict(topic=c['topics'][key],type=typ) for k,key,typ in [('lidar','lidar','livox_ros_driver/CustomMsg'),('imu','imu','sensor_msgs/Imu'),('image',image_key,'sensor_msgs/CompressedImage' if image_key=='compressed_image' else 'sensor_msgs/Image')]}
+    cfg['preview_gamma']=c.get('viewer',{}).get('bayer_gamma',1.0)
     if lidar_only:cfg['capture_topics'].pop('image')
     job.mkdir(parents=True,exist_ok=True)
+    if not replay and not lidar_only and cap['camera']['type']=='spinnaker':
+        (job/'camera-driver.yaml').write_text(yaml.safe_dump({k:v for k,v in cap['camera'].items() if k!='type'}))
     if not replay:
         codes=cap['livox']['broadcast_codes']
         if cap['livox'].get('ip'):
@@ -353,6 +375,8 @@ def main():
     sp=sub.add_parser('doctor',help='检查环境与数据；--sensors 只检查采集端');sp.add_argument('--sensors',action='store_true',help='检查采集端环境与设备节点，不依赖示例数据集')
     sp=sub.add_parser('record',help='录制传感器数据并回传');sp.add_argument('--background',action='store_true',help='确认收数后返回，板端独立录制，使用 stop 结束并回传');sp.add_argument('--replay',action='store_true',help='无硬件演练，使用配置中的现有 bag')
     sp=sub.add_parser('lidar',help='仅启动 AVIA 点云/IMU 并录包，不需要相机；本机加 --host');sp.add_argument('--background',action='store_true',help='确认点云/IMU 收数后返回，主机断线仍录制，用 stop 结束并回传')
+    sp=sub.add_parser('preview',help='实时查看主机相机：空闲时不录包，录制中复用图像流');sp.add_argument('--no-open',action='store_true',help='只打印本机预览地址')
+    sp.add_argument('--stop',action='store_true',help='关闭本工程启动的实时预览，不停止录包')
     sub.add_parser('calibrate',help='在主机运行免标定板外参标定，输出候选结果')
     sp=sub.add_parser('view',help='离线播放录包：3D 点云 + 同时间轴相机；默认最近一次录制');sp.add_argument('bag',nargs='?',help='bag 文件或包含分包的录制目录');sp.add_argument('--no-open',action='store_true',help='只启动本地服务，不自动打开浏览器')
     sp=sub.add_parser('status',help='查看摘要/告警；--follow 持续查看，--raw 看原始日志');sp.add_argument('--follow',action='store_true');sp.add_argument('--raw',action='store_true')
@@ -360,13 +384,42 @@ def main():
     if len(sys.argv)==1:p.print_help();return
     a=p.parse_args();c=config(a.config)
     if a.host or a.command=='calibrate':c['_host']=True;c['board']['workspace']=str(ROOT/'.cache/host-workspace');c['board']['target']='local'
-    if a.command=='record' and not a.replay and not c['capture']['camera_command']:raise RuntimeError('相机尚未配置；只录 AVIA 请用 ./livo lidar。接入相机后在 project.yaml 设置 capture.camera_command。')
+    if a.command=='record' and not a.replay and not c['capture']['camera_command'] and c['capture']['camera']['type']!='spinnaker':raise RuntimeError('相机尚未配置；只录 AVIA 请用 ./livo lidar。接入相机后在 project.yaml 设置 capture.camera_command。')
     if a.command=='calibrate':
         for key in ['image','pcd']:
             if not c['calibration'][key] or not Path(c['calibration'][key]).expanduser().is_file():raise RuntimeError('请在 project.yaml 设置 calibration.'+key+' 输入文件')
     if a.command=='view':
         from viewer.server import serve
         serve(c,a.bag,not a.no_open)
+    elif a.command=='preview':
+        if not c.get('_host'):raise RuntimeError('当前实时预览请用 ./livo --host preview；板端数据使用 stop 回传后 view')
+        if a.stop:
+            import signal
+            record_path=ROOT/'.cache/camera-preview.json'
+            if not record_path.exists():print('实时预览已关闭');return
+            record=json.loads(record_path.read_text());pid=record['pid']
+            if not Path('/proc/'+str(pid)+'/cmdline').exists():print('实时预览已关闭');return
+            if str(ROOT).encode() not in Path('/proc/'+str(pid)+'/cmdline').read_bytes() or b'camera_preview.py' not in Path('/proc/'+str(pid)+'/cmdline').read_bytes():raise RuntimeError('预览进程身份不匹配')
+            os.kill(pid,signal.SIGINT);deadline=time.monotonic()+25
+            while Path('/proc/'+str(pid)).exists() and time.monotonic()<deadline:time.sleep(.1)
+            if Path('/proc/'+str(pid)).exists():raise RuntimeError('预览仍在清理设备；请稍后重试')
+            print('实时预览已关闭；录包不受影响');return
+        from native import ensure
+        install=str(ensure(c['build']['jobs']));root=Path(workspace(c));root.mkdir(parents=True,exist_ok=True)
+        try:job=latest(c);s=state(c,job)
+        except (OSError,ValueError,subprocess.CalledProcessError):s=dict(phase='finished')
+        standalone=s['phase']=='finished'
+        if standalone:
+            if c['capture']['camera']['type']!='spinnaker':raise RuntimeError('独立预览需要 capture.camera.type: spinnaker')
+            ensure_idle(c,str(root))
+            job=ROOT/'.cache/camera-preview';job.mkdir(exist_ok=True)
+            cfg=dict(install=install,workspace=str(root),capture_topics=dict(image=dict(topic=c['topics']['raw_image'])),preview_gamma=c.get('viewer',{}).get('bayer_gamma',1.0))
+            (job/'config.json').write_text(json.dumps(cfg));(job/'camera-driver.yaml').write_text(yaml.safe_dump({k:v for k,v in c['capture']['camera'].items() if k!='type'}))
+        else:cfg=json.loads((Path(job)/'config.json').read_text())
+        if 'image' not in cfg.get('capture_topics',{}):raise RuntimeError('当前任务没有相机图像')
+        cache=ROOT/'.cache/camera-preview.json';args=['python3',cfg['install']+'/runtime/camera_preview.py',str(job),str(cache)]+(['--standalone'] if standalone else [])+(['--no-open'] if a.no_open else [])
+        command='source '+shlex.quote(cfg['install']+'/env.sh')+'; '+('' if standalone else 'export ROS_MASTER_URI='+shlex.quote(s['master_uri'])+' ROS_IP=127.0.0.1; ')+'exec '+shlex.join(args)
+        ssh(c,command)
     elif a.command=='doctor':doctor(c,a.sensors)
     elif a.command=='build':build(c)
     elif a.command=='deploy':

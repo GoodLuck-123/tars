@@ -1,0 +1,63 @@
+{
+  "architecture": "aarch64",
+  "workspace": "/home/firefly/livo2-workspace",
+  "release": "5a19ed2011a06fe3",
+  "problems": [],
+  "host_offset_estimate_s": -0.03,
+  "free_gib": 70.12,
+  "driver_installed": true,
+  "video_nodes": {
+    "video7": "rkcif_scale_ch3",
+    "video5": "rkcif_scale_ch1",
+    "video3": "stream_cif_mipi_id3",
+    "video1": "stream_cif_mipi_id1",
+    "video8": "rkcif_tools_id0",
+    "video6": "rkcif_scale_ch2",
+    "video4": "rkcif_scale_ch0",
+    "video2": "stream_cif_mipi_id2",
+    "video0": "stream_cif_mipi_id0",
+    "video10": "rkcif_tools_id2",
+    "video9": "rkcif_tools_id1"
+  },
+  "manifest_verified": true,
+  "runtime_libraries": "linux-vdso.so.1 (0x0000007f8be50000)\n\tlibrosbag_storage.so => /home/firefly/livo2-workspace/current/lib/librosbag_storage.so (0x0000007f8bca0000)\n\tlibroscpp.so => /home/firefly/livo2-workspace/current/lib/libroscpp.so (0x0000007f8baf0000)\n\tlibpthread.so.0 => /lib/aarch64-linux-gnu/libpthread.so.0 (0x0000007f8bac0000)\n\tlibrosconsole.so => /home/firefly/livo2-workspace/current/lib/librosconsole.so (0x0000007f8ba40000)\n\tlibroscpp_serialization.so => /home/firefly/livo2-workspace/current/lib/libroscpp_serialization.so (0x0000007f8ba20000)\n\tlibrostime.so => /home/firefly/livo2-workspace/current/lib/librostime.so (0x0000007f8b9e0000)\n\tlibconsole_bridge.so.0.4 => /home/firefly/livo2-workspace/current/lib/libconsole_bridge.so.0.4 (0x0000007f8b9c0000)\n\tlibstdc++.so.6 => /home/firefly/livo2-workspace/current/lib/libstdc++.so.6 (0x0000007f8b7d0000)\n\tlibm.so.6 => /lib/aarch64-linux-gnu/libm.so.6 (0x0000007f8b730000)\n\tlibgcc_s.so.1 => /home/firefly/livo2-workspace/current/lib/libgcc_s.so.1 (0x0000007f8b700000)\n\tlibc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x0000007f8b550000)\n\t/lib/ld-linux-aarch64.so.1 (0x0000007f8be17000)\n\tlibclass_loader.so => /home/firefly/livo2-workspace/current/lib/libclass_loader.so (0x0000007f8b510000)\n\tlibroslib.so => /home/firefly/livo2-workspace/current/lib/libroslib.so (0x0000007f8b4e0000)\n\tlibboost_filesystem.so.1.71.0 => /home/firefly/livo2-workspace/current/lib/libboost_filesystem.so.1.71.0 (0x0000007f8b4b0000)\n\tlibtinyxml2.so.6 => /home/firefly/livo2-workspace/current/lib/libtinyxml2.so.6 (0x0000007f8b480000)\n\tlibroslz4.so => /home/firefly/livo2-workspace/current/lib/libroslz4.so (0x0000007f8b460000)\n\tlibcpp_common.so => /home/firefly/livo2-workspace/current/lib/libcpp_common.so (0x0000007f8b440000)\n\tlibbz2.so.1.0 => /home/firefly/livo2-workspace/current/lib/libbz2.so.1.0 (0x0000007f8b410000)\n\tlibxmlrpcpp.so => /home/firefly/livo2-workspace/current/lib/libxmlrpcpp.so (0x0000007f8b3e0000)\n\tlibboost_thread.so.1.71.0 => /home/firefly/livo2-workspace/current/lib/libboost_thread.so.1.71.0 (0x0000007f8b3a0000)\n\tlibboost_chrono.so.1.71.0 => /home/firefly/livo2-workspace/current/lib/libboost_chrono.so.1.71.0 (0x0000007f8b380000)\n\tlibrosconsole_log4cxx.so => /home/firefly/livo2-workspace/current/lib/librosconsole_log4cxx.so (0x0000007f8b350000)\n\tlibrosconsole_backend_interface.so => /home/firefly/livo2-workspace/current/lib/librosconsole_backend_interface.so (0x0000007f8b330000)\n\tliblog4cxx.so.10 => /home/firefly/livo2-workspace/current/lib/liblog4cxx.so.10 (0x0000007f8b140000)\n\tlibboost_regex.so.1.71.0 => /home/firefly/livo2-workspace/current/lib/libboost_regex.so.1.71.0 (0x0000007f8b040000)\n\tlibPocoFoundation.so.62 => /home/firefly/livo2-workspace/current/lib/libPocoFoundation.so.62 (0x0000007f8ae80000)\n\tlibrospack.so => /home/firefly/livo2-workspace/current/lib/librospack.so (0x0000007f8ae20000)\n\tliblz4.so.1 => /home/firefly/livo2-workspace/current/lib/liblz4.so.1 (0x0000007f8adf0000)\n\tlibapr-1.so.0 => /home/firefly/livo2-workspace/current/lib/libapr-1.so.0 (0x0000007f8ada0000)\n\tlibaprutil-1.so.0 => /home/firefly/livo2-workspace/current/lib/libaprutil-1.so.0 (0x0000007f8ad60000)\n\tlibicui18n.so.66 => /home/firefly/livo2-workspace/current/lib/libicui18n.so.66 (0x0000007f8aa60000)\n\tlibicuuc.so.66 => /home/firefly/livo2-workspace/current/lib/libicuuc.so.66 (0x0000007f8a870000)\n\tlibdl.so.2 => /lib/aarch64-linux-gnu/libdl.so.2 (0x0000007f8a850000)\n\tlibrt.so.1 => /lib/aarch64-linux-gnu/librt.so.1 (0x0000007f8a830000)\n\tlibpcre.so.3 => /home/firefly/livo2-workspace/current/lib/libpcre.so.3 (0x0000007f8a7b0000)\n\tlibz.so.1 => /home/firefly/livo2-workspace/current/lib/libz.so.1 (0x0000007f8a780000)\n\tlibboost_program_options.so.1.71.0 => /home/firefly/livo2-workspace/current/lib/libboost_program_options.so.1.71.0 (0x0000007f8a6e0000)\n\tlibpython3.8.so.1.0 => /home/firefly/livo2-workspace/current/lib/libpython3.8.so.1.0 (0x0000007f8a180000)\n\tlibuuid.so.1 => /home/firefly/livo2-workspace/current/lib/libuuid.so.1 (0x0000007f8a160000)\n\tlibcrypt.so.1 => /home/firefly/livo2-workspace/current/lib/libcrypt.so.1 (0x0000007f8a110000)\n\tlibexpat.so.1 => /home/firefly/livo2-workspace/current/lib/libexpat.so.1 (0x0000007f8a0d0000)\n\tlibicudata.so.66 => /home/firefly/livo2-workspace/current/lib/libicudata.so.66 (0x0000007f88600000)\n\tlibutil.so.1 => /lib/aarch64-linux-gnu/libutil.so.1 (0x0000007f885e0000)",
+  "environment_ready": true,
+  "network": {
+    "lidar_ip": "192.168.1.189",
+    "source_ip": "192.168.1.51",
+    "interface": "enx6c1ff7295dee",
+    "source_cidr": "192.168.1.51/24",
+    "link_up": true,
+    "ping_reachable": true,
+    "device": {
+      "ip": "192.168.1.189",
+      "broadcast_code": "3JEDNAL001PY891",
+      "device_type": 7
+    },
+    "verification": "discovery_only"
+  },
+  "task_active": false,
+  "camera": {
+    "serial": "24223920",
+    "state": "connected",
+    "runtime_ready": true,
+    "usb_devices": [
+      {
+        "serial": "24223920",
+        "speed_mbps": 5000.0,
+        "writable": true,
+        "node": "/dev/bus/usb/006/002"
+      }
+    ],
+    "usbfs_memory_mb": 1024,
+    "sdk_probe": {
+      "cameras": [
+        {
+          "serial": "24223920",
+          "model": "Blackfly S BFS-U3-50S5C"
+        }
+      ]
+    }
+  },
+  "ok": true
+}

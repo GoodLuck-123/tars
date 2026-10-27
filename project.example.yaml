@@ -65,6 +65,8 @@ topics:
   compressed_image: /camera/image_color/compressed
   raw_image: /camera/image_raw          # 原始采集输入，与下方去畸变输出分开
   image: /livo2/image
+  camera_info: /camera/camera_info
+  camera_metadata: /camera/metadata
 run:
   timeout_s: 1800
   shutdown_timeout_s: 30
@@ -80,6 +82,7 @@ viewer:
   bag: null                  # null 自动选最近录包，也可填 bag 文件或录制目录
   max_points: 100000          # 仅显示抽样，不修改原始包
   image_tolerance_s: 0.15     # 按 bag 记录时间找最近图像，超出则显示缺帧
+  bayer_gamma: 2.2           # 仅用于原始 Bayer 的屏幕显示；不修改录包像素
 algorithm:
   overrides: {}
 
@@ -89,9 +92,29 @@ runtime:
   opencv_threads: 1
   cpu_governor: performance  # 任务期间临时启用，结束/停止/异常后恢复；需板端 sudo -n，null 为不修改
 
-# 硬件采集；相机型号/SDK 到位后接入命令。无硬件用 record --replay。
+# 硬件采集：内置 FLIR USB3；其他相机通过 camera_command 接入。无硬件用 record --replay。
 capture:
-  camera_command: []
+  camera_command: []          # 自定义相机 SDK 的入口；内置 spinnaker 无需填写
+  compression: lz4            # 原始数据无损压缩，可选 none / lz4
+  camera:
+    type: spinnaker
+    serial: "24223920"
+    fps: 20.0
+    pixel_format: BayerRG8    # 原始彩色 Bayer，回看时转 RGB，不改变录制数据
+    width: 0                 # 0 使用相机完整幅面
+    height: 0
+    offset_x: 0
+    offset_y: 0
+    exposure_auto: "Off"      # 默认全部手动；需要自动时才设 Continuous
+    exposure_us: 10000.0      # 微秒：10000 = 10ms；按光照调整，须短于帧周期
+    auto_exposure_max_us: 30000.0 # 室内上限 30ms；快速运动时调小并开大镜头光圈
+    auto_gain_max_db: 18.0
+    gamma_enabled: false     # 记录线性 Bayer，显示用 viewer.bayer_gamma
+    gain_auto: "Off"
+    gain_db: 12.0             # 固定增益，避免录制中亮度漂移
+    white_balance_auto: "Off"
+    white_balance_red: 1.68262
+    white_balance_blue: 2.31433
   image_transport: raw
   duration_s: 30
   replay_duration_s: 10

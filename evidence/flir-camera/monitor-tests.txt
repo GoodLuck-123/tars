@@ -1,0 +1,11 @@
+test_high_volume_is_silent_but_errors_are_visible (test_monitor.MonitorTests) ... ok
+test_only_exact_cross_source_lines_are_deduplicated (test_monitor.MonitorTests) ... ok
+test_progress_is_processing_not_player_output (test_monitor.MonitorTests) ... ok
+test_repeats_count_without_flood (test_monitor.MonitorTests) ... ok
+test_ros_mirrors_and_multiline_root_cause (test_monitor.MonitorTests) ... ok
+test_rotation_partial_lines_and_restart (test_monitor.MonitorTests) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.012s
+
+OK

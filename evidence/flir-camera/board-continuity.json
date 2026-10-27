@@ -1,0 +1,83 @@
+{
+  "run_id": "20261027-211611-60f947",
+  "host_cable_down": 1793106990.8198726,
+  "host_cable_up": 1793107014.8230953,
+  "offline_s": 24.003222703933716,
+  "interval_basis": "bag record time and host NIC carrier, coarse target offset below 0.1s; not hardware synchronization",
+  "streams": {
+    "/livox/imu": {
+      "messages": 10537,
+      "offline_messages": 4883,
+      "sequence_gaps": 0,
+      "stamp_regressions": 0,
+      "record_regressions": 0,
+      "max_record_gap_s": 0.108939261,
+      "last_seq": 10582,
+      "last_header_ns": 5761900035000,
+      "last_record_ns": 1793107028714335918,
+      "first_record_ns": 1793106976908502546,
+      "hz": 203.37478068048017
+    },
+    "/livox/lidar": {
+      "messages": 518,
+      "offline_messages": 240,
+      "sequence_gaps": 0,
+      "stamp_regressions": 0,
+      "record_regressions": 0,
+      "max_record_gap_s": 0.120253095,
+      "last_seq": 520,
+      "last_header_ns": 5761799754570,
+      "last_record_ns": 1793107028711888542,
+      "first_record_ns": 1793106977012082140,
+      "hz": 10.000037446561887
+    },
+    "/camera/metadata": {
+      "messages": 997,
+      "offline_messages": 480,
+      "sequence_gaps": 0,
+      "stamp_regressions": 0,
+      "record_regressions": 0,
+      "max_record_gap_s": 0.083087758,
+      "last_record_ns": 1793107027660136645,
+      "first_record_ns": 1793106977847381432,
+      "hz": 19.994878736201017
+    },
+    "/camera/camera_info": {
+      "messages": 997,
+      "offline_messages": 480,
+      "sequence_gaps": 0,
+      "stamp_regressions": 0,
+      "record_regressions": 0,
+      "max_record_gap_s": 0.083133841,
+      "last_seq": 1000,
+      "last_header_ns": 1793107027635024726,
+      "last_record_ns": 1793107027660331187,
+      "first_record_ns": 1793106977847466890,
+      "hz": 19.99483494989435
+    },
+    "/camera/image_raw": {
+      "messages": 997,
+      "offline_messages": 480,
+      "sequence_gaps": 0,
+      "stamp_regressions": 0,
+      "record_regressions": 0,
+      "max_record_gap_s": 0.081639425,
+      "last_seq": 1000,
+      "last_header_ns": 1793107027635024726,
+      "last_record_ns": 1793107027659782853,
+      "first_record_ns": 1793106977857156350,
+      "hz": 19.99894523514745
+    }
+  },
+  "camera": {
+    "exposure_us": [
+      10004
+    ],
+    "gain_db": [
+      11.998573508256591
+    ],
+    "device_frame_id_gaps": 0,
+    "incomplete_frames": 0,
+    "device_timestamp_regressions": 0
+  }
+}

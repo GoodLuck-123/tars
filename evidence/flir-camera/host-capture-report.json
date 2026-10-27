@@ -1,0 +1,30 @@
+{
+  "mode": "capture",
+  "hardware_verified": true,
+  "verified_streams": [
+    "lidar",
+    "imu",
+    "image"
+  ],
+  "calibration_verified": false,
+  "bags": [
+    {
+      "file": "sensors_0.bag",
+      "bytes": 937789228
+    }
+  ],
+  "counts": {
+    "/camera/camera_info": 209,
+    "/camera/image_raw": 209,
+    "/camera/metadata": 209,
+    "/livox/imu": 2533,
+    "/livox/lidar": 124
+  },
+  "types": {
+    "/camera/camera_info": "sensor_msgs/CameraInfo",
+    "/camera/image_raw": "sensor_msgs/Image",
+    "/camera/metadata": "std_msgs/String",
+    "/livox/imu": "sensor_msgs/Imu",
+    "/livox/lidar": "livox_ros_driver/CustomMsg"
+  }
+}

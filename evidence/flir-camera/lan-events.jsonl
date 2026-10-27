@@ -1,0 +1,6 @@
+{"host_time": 1793106621.7628074, "interface": "enp10s0", "carrier": "1"}
+{"host_time": 1793106649.7674909, "interface": "enp10s0", "carrier": "0"}
+{"host_time": 1793106668.7700958, "interface": "enp10s0", "carrier": "1"}
+{"host_time": 1793106990.8198726, "interface": "enp10s0", "carrier": "0"}
+{"host_time": 1793107014.8230953, "interface": "enp10s0", "carrier": "1"}
+{"host_time": 1793107130.843004, "event": "watch_stopped"}

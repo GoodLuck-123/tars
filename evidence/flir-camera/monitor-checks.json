@@ -1,0 +1,14 @@
+{
+  "old_snapshot_healthy": {
+    "passed": true,
+    "result": "continued normally"
+  },
+  "fresh_snapshot_real_dropout": {
+    "passed": true,
+    "result": "Sensor stream stopped: imu"
+  },
+  "observer_expired": {
+    "passed": true,
+    "result": "Capture monitor heartbeat expired; sensor state unknown"
+  }
+}

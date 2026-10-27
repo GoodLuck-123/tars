@@ -93,14 +93,20 @@ class Recording:
             if data.startswith(b'\xff\xd8'):return data,'image/jpeg'
             if data.startswith(b'\x89PNG'):return data,'image/png'
             raise ValueError('暂不支持该压缩图像格式：'+msg.format)
-        enc=msg.encoding.lower();channels={'rgb8':3,'bgr8':3,'rgba8':4,'bgra8':4,'mono8':1,'8uc1':1,'mono16':1,'16uc1':1}
+        enc=msg.encoding.lower();bayer=enc.startswith('bayer_') and enc.endswith('8');channels={'rgb8':3,'bgr8':3,'rgba8':4,'bgra8':4,'mono8':1,'8uc1':1,'mono16':1,'16uc1':1}
+        if bayer:channels[enc]=1
         if enc not in channels:raise ValueError('暂不支持相机编码：'+msg.encoding)
         n=channels[enc];depth=2 if enc in {'mono16','16uc1'} else 1
         arr=np.ndarray((msg.height,msg.width,n),dtype=('>' if msg.is_bigendian else '<')+'u'+str(depth),buffer=msg.data,strides=(msg.step,n*depth,depth))
         if depth==2:arr=(arr>>8).astype(np.uint8)
         if enc.startswith('bgr'):arr=arr[:,:,[2,1,0,3] if n==4 else [2,1,0]]
+        if bayer:
+            import cv2
+            pattern=enc[6:-1].upper();code=getattr(cv2,'COLOR_Bayer'+pattern+'2RGB');arr=cv2.cvtColor(arr[:,:,0],code);n=3
+            gamma=self.settings.get('bayer_gamma',1.0)
+            if gamma!=1:arr=cv2.LUT(arr,np.rint((np.arange(256)/255.)**(1/gamma)*255).astype(np.uint8))
         image=Image.fromarray(arr[:,:,0] if n==1 else arr)
-        out=BytesIO();image.save(out,format='PNG');return out.getvalue(),'image/png'
+        out=BytesIO();image.save(out,format='JPEG' if bayer else 'PNG',**({'quality':90} if bayer else {}));return out.getvalue(),'image/jpeg' if bayer else 'image/png'
 
     @lru_cache(maxsize=12)
     def frame(self,index):
@@ -126,7 +132,7 @@ def catalog(c,selected):
 
 def serve(c,path=None,open_browser=True):
     settings=c.get('viewer',{});settings={'max_points':100000,'image_tolerance_s':.15,**settings}
-    if type(settings['max_points']) is not int or settings['max_points']<1 or not math.isfinite(settings['image_tolerance_s']) or settings['image_tolerance_s']<0:raise ValueError('viewer 参数必须为有效正数')
+    if type(settings['max_points']) is not int or settings['max_points']<1 or not math.isfinite(settings['image_tolerance_s']) or settings['image_tolerance_s']<0 or not math.isfinite(settings.get('bayer_gamma',1.0)) or settings.get('bayer_gamma',1.0)<=0:raise ValueError('viewer 参数必须为有效正数')
     if path is None:
         path=settings.get('bag')
         if not path:
