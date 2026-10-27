@@ -1,0 +1,9 @@
+检查主机与板端…
+{"architecture": "aarch64", "python": "3.10.12", "free_gib": 71.42035675048828, "rsync": "/usr/bin/rsync"}
+目标：firefly@192.168.1.51 | 运行包：73c84007d22af222
+目标端与主机时钟差（粗测）：-0.07 秒
+SDK/驱动及私有 ROS：通过构建记录与运行库检查
+雷达网络：192.168.1.51 (enx6c1ff7295dee) → 192.168.1.189
+AVIA：3JEDNAL001PY891 | live_messages
+当前任务：20261027-202025-885b4b | recording | {"imu": {"messages": 14672, "hz": 203.05, "age_s": 0.47, "type": "sensor_msgs/Imu", "stamp_regressions": 0}, "lidar": {"messages": 724, "hz": 10.01, "age_s": 0.47, "type": "livox_ros_driver/CustomMsg", "stamp_regressions": 0}}
+相机：未接入；不影响 lidar 模式

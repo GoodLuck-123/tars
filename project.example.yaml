@@ -1,7 +1,8 @@
 board:
-  target: firefly@10.106.0.220
+  target: firefly@192.168.1.51   # 板子 SSH 地址；所有命令复用此处
   workspace: ~/livo2-workspace
   ssh_port: 22
+  sync_time: true             # 空闲部署/启动时修正明显时钟误差；需要板端 sudo -n，不是精密传感器同步
 build:
   jobs: 4
   seed_caches: []
@@ -101,7 +102,7 @@ capture:
   extra_topics: [/camera/camera_info]
   calibration_verified: false
   livox:
-    ip: null                   # 已知 IP 时先发现并仅连接该设备；例如 192.168.1.189
+    ip: 192.168.1.189           # AVIA 固定 IP；主机/板端都复用此处，仅连接该设备
     broadcast_codes: []
     publish_hz: 10
 # 主机标定：原始图像 + 对应静态 PCD；结果作为候选，不自动覆盖外参。

@@ -49,6 +49,7 @@ def run(job,lockfd):
         code='import json,sys;from pathlib import Path;[(Path(p).write_text(v)) for p,v in json.loads(sys.argv[1]).items()]'
         subprocess.run(['sudo','-n','/usr/bin/python3','-c',code,json.dumps(values)],check=True,timeout=10)
     def state(phase,**kw):
+        if capture_mode:kw.setdefault('progress',monitor())
         status.update(phase=phase,heartbeat=time.time(),elapsed_s=time.monotonic()-started,**kw);write_json(job/'state.json',status)
     def spawn(name,args,ros=True):
         log=(job/'logs'/f'{name}.log').open('ab');handles.append(log)

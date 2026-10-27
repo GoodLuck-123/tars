@@ -1,0 +1,23 @@
+{
+  "mode": "capture_lidar",
+  "hardware_verified": true,
+  "verified_streams": [
+    "lidar",
+    "imu"
+  ],
+  "calibration_verified": false,
+  "bags": [
+    {
+      "file": "sensors_0.bag",
+      "bytes": 149415021
+    }
+  ],
+  "counts": {
+    "/livox/imu": 6537,
+    "/livox/lidar": 322
+  },
+  "types": {
+    "/livox/imu": "sensor_msgs/Imu",
+    "/livox/lidar": "livox_ros_driver/CustomMsg"
+  }
+}

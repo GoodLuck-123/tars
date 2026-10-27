@@ -1,0 +1,103 @@
+{
+  "run_id": "20261027-202025-885b4b",
+  "phase": "finished",
+  "algorithm": "stopped",
+  "transfer": "pending",
+  "started": 1793103626.8808012,
+  "pid": 11267,
+  "master_uri": "http://127.0.0.1:50131",
+  "heartbeat": 1793103708.9684112,
+  "elapsed_s": 82.08762024800012,
+  "progress": {
+    "schema": 1,
+    "rules_version": 1,
+    "lines": 288,
+    "warnings": 0,
+    "errors": 0,
+    "visual_updates": 0,
+    "processed": 0,
+    "alerts": {},
+    "count_basis": "log records, exact cross-source line copies removed; differently formatted mirrors may repeat",
+    "event_seq": 0,
+    "heartbeat": 1793103708.920038,
+    "sources": 11,
+    "status": "complete",
+    "pending_traces": {}
+  },
+  "resources": {
+    "monitor": {
+      "peak_rss_kib": 13456,
+      "cpu_s": 3.15,
+      "rss_kib": 13456
+    },
+    "master": {
+      "peak_rss_kib": 42732,
+      "cpu_s": 1.3,
+      "rss_kib": 42732
+    },
+    "probe": {
+      "peak_rss_kib": 42768,
+      "cpu_s": 7.1,
+      "rss_kib": 42320
+    },
+    "record": {
+      "peak_rss_kib": 42652,
+      "cpu_s": 0.57,
+      "rss_kib": 42652
+    },
+    "livox": {
+      "peak_rss_kib": 17384,
+      "cpu_s": 22.73,
+      "rss_kib": 16144
+    }
+  },
+  "cpu_freq_khz": {
+    "policy6": 408000,
+    "policy4": 408000,
+    "policy0": 1416000
+  },
+  "capture": {
+    "heartbeat": 1793103704.0685177,
+    "streams": {
+      "imu": {
+        "messages": 15183,
+        "bytes": 4904109,
+        "first_arrival": 1778.354898066,
+        "stamp_regressions": 0,
+        "sequence_gaps": 0,
+        "first_stamp": 2362.46475383,
+        "last_stamp": 2437.30469461,
+        "last_arrival": 1853.109364452,
+        "last_sequence": 15204,
+        "type": "sensor_msgs/Imu",
+        "hz": 203.09154401031626
+      },
+      "lidar": {
+        "messages": 749,
+        "bytes": 341579203,
+        "first_arrival": 1778.356711066,
+        "stamp_regressions": 0,
+        "sequence_gaps": 0,
+        "first_stamp": 2362.400400032,
+        "last_stamp": 2437.19978635,
+        "last_arrival": 1853.11035466,
+        "last_sequence": 749,
+        "type": "livox_ros_driver/CustomMsg",
+        "hz": 10.00620122361549
+      }
+    }
+  },
+  "stop_reason": "User requested stop",
+  "reason": null,
+  "exits": {
+    "monitor": 0,
+    "master": 0,
+    "probe": 0,
+    "record": 0,
+    "livox": 0
+  },
+  "poses": 0,
+  "map_chunks": 0,
+  "trajectory_start": null,
+  "trajectory_end": null
+}

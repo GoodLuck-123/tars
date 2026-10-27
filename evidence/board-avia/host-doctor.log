@@ -1,0 +1,9 @@
+检查主机与板端…
+{"architecture": "x86_64", "python": "3.10.12", "free_gib": 22.722450256347656, "rsync": "/usr/bin/rsync"}
+目标：local | 运行包：install
+目标端与主机时钟差（粗测）：0.02 秒
+SDK/驱动及私有 ROS：通过构建记录与运行库检查
+雷达网络：192.168.1.50 (enp10s0) → 192.168.1.189
+AVIA：3JEDNAL001PY891 | discovery_only
+相机：未接入；不影响 lidar 模式
+已发现雷达；实际点云/IMU 和录包请用 ./livo lidar 验证

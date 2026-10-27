@@ -1,6 +1,7 @@
 """One entry point for local builds and managed RK3588 dataset jobs."""
 import argparse
 import hashlib
+import ipaddress
 import json
 import os
 from pathlib import Path
@@ -24,8 +25,11 @@ def config(path):
     c=yaml.safe_load(path.read_text())
     defaults=yaml.safe_load((ROOT/'project.example.yaml').read_text())
     for section in ['capture','calibration']:c.setdefault(section,defaults[section])
+    c['board'].setdefault('sync_time',True)
+    if type(c['board']['sync_time']) is not bool:raise ValueError('board.sync_time must be true or false')
     c['topics'].setdefault('raw_image','/camera/image_raw')
     cap=c['capture']
+    if cap['livox'].get('ip'):cap['livox']['ip']=str(ipaddress.IPv4Address(cap['livox']['ip']))
     if cap['image_transport'] not in {'raw','compressed'}:raise ValueError('capture.image_transport must be raw or compressed')
     if not isinstance(cap['camera_command'],list) or any(not isinstance(s,str) for s in cap['camera_command']):raise ValueError('capture.camera_command must be an argument list')
     for k in ['replay_duration_s','buffer_mib','split_mib','startup_timeout_s','stall_timeout_s']:
@@ -94,8 +98,20 @@ def doctor(c,sensors=False):
     if info['free_gib']<c['run']['min_free_gib']:raise RuntimeError('Board disk space below configured reserve')
     if sensors:
         root=workspace(c)
-        result=remote(c,'from pathlib import Path;import json,sys;root=Path(sys.argv[1]);print(json.dumps(dict(video_nodes={p.parent.name:p.read_text().strip() for p in Path("/sys/class/video4linux").glob("video*/name")},livox_driver_installed=(root/"current/bin/livox_ros_driver_node").is_file()),ensure_ascii=False))',[root])
-        print(result.strip());print('设备节点仅供识别；真实相机、雷达收数及同步仍需硬件验收',flush=True);return
+        result=json.loads(remote(c,(ROOT/'runtime/sensor_doctor.py').read_text(),[root,json.dumps(c['capture']['livox']),str(ROOT/'.build/host/install') if c.get('_host') else '',str(time.time())]))
+        if result['free_gib']<c['run']['min_free_gib']:result['problems'].append('工作目录空间低于保留阈值')
+        result['ok']=not result['problems']
+        cache=ROOT/'.cache';cache.mkdir(exist_ok=True);(cache/('doctor-host.json' if c.get('_host') else 'doctor-board.json')).write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
+        print('目标：'+c['board']['target']+' | 运行包：'+result['release'],flush=True)
+        print('目标端与主机时钟差（粗测）：'+str(result['host_offset_estimate_s'])+' 秒',flush=True)
+        print('SDK/驱动及私有 ROS：'+('通过构建记录与运行库检查' if result.get('environment_ready') else '未就绪'),flush=True)
+        net=result['network'];print('雷达网络：'+str(net.get('source_ip','?'))+' ('+net.get('interface','?')+') → '+str(net['lidar_ip']),flush=True)
+        if net.get('device'):print('AVIA：'+net['device']['broadcast_code']+' | '+net.get('verification',''),flush=True)
+        if result.get('task'):print('当前任务：'+result['task']['run_id']+' | '+result['task']['phase']+' | '+json.dumps(result['task'].get('streams',{}),ensure_ascii=False),flush=True)
+        print('相机：'+('已配置启动命令，需真实收数验证' if c['capture']['camera_command'] else '未接入；不影响 lidar 模式'),flush=True)
+        if result['problems']:raise RuntimeError('；'.join(result['problems']))
+        if net.get('verification')=='discovery_only':print('已发现雷达；实际点云/IMU 和录包请用 ./livo lidar 验证',flush=True)
+        return
     p=Path(c['dataset']['path'])
     if not p.is_file():raise RuntimeError('Dataset not found: '+str(p))
     from rosbags.rosbag1 import Reader
@@ -165,6 +181,39 @@ p.rename(root/'releases'/ident);stage.rmdir()
         print(remote(c,code,[root,archive,release['id'],release['sha256']]).strip())
     remote(c,'from pathlib import Path;import sys,os;r=Path(sys.argv[1]);t=r/"current.new";t.unlink(missing_ok=True);t.symlink_to("releases/"+sys.argv[2]);os.replace(t,r/"current")',[root,release['id']])
     print('运行包已就绪：'+release['id'],flush=True);return root,dest
+
+
+def ensure_idle(c,root):
+    code="""import fcntl,json,subprocess,sys,time
+from pathlib import Path
+root=Path(sys.argv[1]);busy=None;synced=False;problem=None
+with (root/'run.lock').open('a') as guard:
+ try:fcntl.flock(guard,fcntl.LOCK_EX|fcntl.LOCK_NB)
+ except BlockingIOError:busy=Path(json.loads((root/'latest.json').read_text())['job']).name
+ if not busy and sys.argv[3]=='True' and abs(time.time()-float(sys.argv[2]))>5:
+  result=subprocess.run(['sudo','-n','date','-u','-s','@'+sys.argv[2]],capture_output=True,text=True)
+  if result.returncode:problem='板端时钟错误且自动校时失败：'+result.stderr.strip()
+  else:synced=True
+print(json.dumps(dict(busy=busy,synced=synced,problem=problem)))
+"""
+    result=json.loads(remote(c,code,[root,time.time(),not c.get('_host') and c['board'].get('sync_time',True)]))
+    if result['busy']:raise RuntimeError('已有任务运行：'+result['busy']+'；请先用 status 查看，或 stop 停止')
+    if result['problem']:raise RuntimeError(result['problem'])
+    if result['synced']:print('板端时钟已按主机校正；仅空闲时校时，录制期间不调整',flush=True)
+
+
+def wait_capture(c,job):
+    deadline=time.monotonic()+c['capture']['startup_timeout_s']+30
+    while time.monotonic()<deadline:
+        try:s=state(c,job)
+        except subprocess.CalledProcessError:time.sleep(.5);continue
+        if s['phase']=='recording':
+            print(Path(job).name+' | '+status_line(s),flush=True)
+            print('传感器收数已就绪；任务独立运行，主机断网不影响录制。用 status 查看，stop 结束并回传。',flush=True);return
+        if s['phase']=='finished':
+            follow(c,job);pull(c,job);raise RuntimeError(s.get('reason') or '采集未进入 recording')
+        time.sleep(.5)
+    raise RuntimeError('等待采集就绪超时；任务可能仍在启动，请用 status 查看，不要重复启动')
 
 
 def prepare(c,job,install,root):
@@ -257,8 +306,12 @@ def status_line(s):
     m=s.get('progress',{})
     if s.get('capture'):
         streams=s['capture'].get('streams',{})
-        return f"{s['phase']} | {s.get('elapsed_s',0):.1f}s | "+' | '.join(f"{k} {v['messages']} 条 {v['hz']:.1f}Hz" for k,v in streams.items())+f" | WARN {m.get('warnings',0)} ERROR {m.get('errors',0)}"
-    return f"{s['phase']} | {s.get('elapsed_s',0):.1f}s | 处理 {m.get('processed',0)} | 视觉更新 {m.get('visual_updates',0)} | WARN {m.get('warnings',0)} ERROR {m.get('errors',0)}"
+        text=f"{s['phase']} | {s.get('elapsed_s',0):.1f}s | "+' | '.join(f"{k} {v['messages']} 条 {v['hz']:.1f}Hz" for k,v in streams.items())
+    else:text=f"{s['phase']} | {s.get('elapsed_s',0):.1f}s | 处理 {m.get('processed',0)} | 视觉更新 {m.get('visual_updates',0)}"
+    text+=f" | WARN {m.get('warnings',0)} ERROR {m.get('errors',0)}"
+    if s['phase']=='finished':text+=' | 结果 '+s.get('algorithm','unknown')+(' | '+s['reason'] if s.get('reason') else '')
+    elif s.get('heartbeat') and time.time()-s['heartbeat']>10:text+=' | 任务心跳过期，请检查板端日志'
+    return text
 
 
 def follow(c,job):
@@ -278,6 +331,9 @@ def follow(c,job):
 
 
 def pull(c,job):
+    if state(c,job)['phase']!='finished':raise RuntimeError('任务仍在运行；请先 ./livo stop 正常结束并回传，避免复制未完成的 bag')
+    ready=remote(c,'from pathlib import Path;import sys;print((Path(sys.argv[1])/"files.json").exists())',[job]).strip()
+    if ready!='True' and follow(c,job) is None:raise RuntimeError('等待结果清单时连接中断；请重新 pull')
     out=Path(c['results_dir'])/Path(job).name;out.mkdir(parents=True,exist_ok=True)
     print('回传结果…',flush=True);sync(c,str(out)+'/',job+'/',True)
     manifest=json.loads((out/'files.json').read_text())
@@ -289,14 +345,14 @@ def pull(c,job):
 
 
 def main():
-    p=argparse.ArgumentParser(prog='./livo',description='LIVO：板端采集 / 主机 LIVO2 与免标定板标定',epilog='现在可用：./livo record --replay；./livo --host run。用户参数统一编辑 project.yaml。')
+    p=argparse.ArgumentParser(prog='./livo',description='LIVO：板端采集 / 主机 LIVO2 与免标定板标定',epilog='雷达：./livo lidar --background → ./livo stop → ./livo view。所有设备地址和用户参数统一编辑 project.yaml。')
     p.add_argument('--config',default=str(ROOT/'project.yaml'),help='选择完整配置文件，默认 project.yaml')
     p.add_argument('--host',action='store_true',help='在主机私有环境运行；默认连接板端')
     sub=p.add_subparsers(dest='command',required=True)
     for name,help_text in [('build','仅构建 SDK/驱动/算法；--host 构建主机工具'),('deploy','仅部署运行环境'),('ssh','进入私有 ROS 环境和当前任务'),('run','运行配置中的数据集并回传；--host 在电脑处理'),('stop','正常停止当前任务并回传')]:sub.add_parser(name,help=help_text)
     sp=sub.add_parser('doctor',help='检查环境与数据；--sensors 只检查采集端');sp.add_argument('--sensors',action='store_true',help='检查采集端环境与设备节点，不依赖示例数据集')
-    sp=sub.add_parser('record',help='录制传感器数据并回传');sp.add_argument('--replay',action='store_true',help='无硬件演练，使用配置中的现有 bag')
-    sp=sub.add_parser('lidar',help='仅启动 AVIA 点云/IMU 并录包，不需要相机；本机加 --host');sp.add_argument('--background',action='store_true',help='启动后返回，用 status/stop 查看和停止')
+    sp=sub.add_parser('record',help='录制传感器数据并回传');sp.add_argument('--background',action='store_true',help='确认收数后返回，板端独立录制，使用 stop 结束并回传');sp.add_argument('--replay',action='store_true',help='无硬件演练，使用配置中的现有 bag')
+    sp=sub.add_parser('lidar',help='仅启动 AVIA 点云/IMU 并录包，不需要相机；本机加 --host');sp.add_argument('--background',action='store_true',help='确认点云/IMU 收数后返回，主机断线仍录制，用 stop 结束并回传')
     sub.add_parser('calibrate',help='在主机运行免标定板外参标定，输出候选结果')
     sp=sub.add_parser('view',help='离线播放录包：3D 点云 + 同时间轴相机；默认最近一次录制');sp.add_argument('bag',nargs='?',help='bag 文件或包含分包的录制目录');sp.add_argument('--no-open',action='store_true',help='只启动本地服务，不自动打开浏览器')
     sp=sub.add_parser('status',help='查看摘要/告警；--follow 持续查看，--raw 看原始日志');sp.add_argument('--follow',action='store_true');sp.add_argument('--raw',action='store_true')
@@ -304,7 +360,7 @@ def main():
     if len(sys.argv)==1:p.print_help();return
     a=p.parse_args();c=config(a.config)
     if a.host or a.command=='calibrate':c['_host']=True;c['board']['workspace']=str(ROOT/'.cache/host-workspace');c['board']['target']='local'
-    if a.command=='record' and not a.replay and not c['capture']['camera_command']:raise RuntimeError('相机尚未配置；硬件到位后在 project.yaml 设置 capture.camera_command。当前可用 record --replay 演练')
+    if a.command=='record' and not a.replay and not c['capture']['camera_command']:raise RuntimeError('相机尚未配置；只录 AVIA 请用 ./livo lidar。接入相机后在 project.yaml 设置 capture.camera_command。')
     if a.command=='calibrate':
         for key in ['image','pcd']:
             if not c['calibration'][key] or not Path(c['calibration'][key]).expanduser().is_file():raise RuntimeError('请在 project.yaml 设置 calibration.'+key+' 输入文件')
@@ -313,7 +369,10 @@ def main():
         serve(c,a.bag,not a.no_open)
     elif a.command=='doctor':doctor(c,a.sensors)
     elif a.command=='build':build(c)
-    elif a.command=='deploy':deploy(c)
+    elif a.command=='deploy':
+        root=workspace(c)
+        remote(c,'from pathlib import Path;import sys;Path(sys.argv[1]).mkdir(parents=True,exist_ok=True)',[root]);ensure_idle(c,root)
+        deploy(c)
     elif a.command=='ssh':
         root=workspace(c)
         if c.get('_host'):
@@ -330,6 +389,8 @@ def main():
         else:subprocess.run(['ssh','-t','-p',str(c['board']['ssh_port']),c['board']['target'],'bash -c '+shlex.quote(cmd)],check=True)
     elif a.command in {'run','record','calibrate','lidar'}:
         if a.command=='run' or (a.command=='record' and a.replay):doctor(c)
+        root=workspace(c)
+        remote(c,'from pathlib import Path;import sys;Path(sys.argv[1]).mkdir(parents=True,exist_ok=True)',[root]);ensure_idle(c,root)
         root,install=deploy(c);runid=time.strftime('%Y%m%d-%H%M%S')+'-'+uuid.uuid4().hex[:6];job=Path(c['results_dir'])/runid
         if a.command in {'record','lidar'}:prepare_capture(c,job,install,root,a.replay if a.command=='record' else False,a.command=='lidar')
         elif a.command=='calibrate':prepare_calibration(c,job,install,root)
@@ -337,8 +398,8 @@ def main():
         remotejob=root+'/runs/'+runid
         remote(c,'from pathlib import Path;import sys;Path(sys.argv[1]).mkdir(exist_ok=False)',[remotejob]);sync(c,str(job)+'/',remotejob+'/')
         command=shlex.join(['/usr/bin/python3',install+'/runtime/agent.py','start',remotejob]);print(ssh(c,command,capture_output=True,text=True).stdout.strip())
-        if a.command=='lidar' and a.background:
-            print('后台启动中；使用 '+('./livo --host' if c.get('_host') else './livo')+' status --follow 确认 recording 和收数，再使用 stop 结束',flush=True);return
+        if a.command in {'lidar','record'} and a.background:
+            wait_capture(c,remotejob);return
         time.sleep(1)
         try:s=follow(c,remotejob)
         except KeyboardInterrupt:
@@ -352,8 +413,10 @@ def main():
         job=latest(c)
         if a.raw:
             cfg=json.loads(remote(c,'from pathlib import Path;import sys;print((Path(sys.argv[1])/"config.json").read_text())',[job]));mode=cfg.get('mode','dataset')
-            log='record' if mode.startswith('capture') else 'calibration' if mode=='calibrate' else 'livo'
-            ssh(c,'tail -n 80 '+shlex.quote(job+'/logs/'+log+'.log'))
+            names=['livox','camera','record'] if mode.startswith('capture') and mode!='capture_replay' else ['record'] if mode=='capture_replay' else ['calibration'] if mode=='calibrate' else ['livo']
+            logs=json.loads(remote(c,'import json,sys;from pathlib import Path;p=Path(sys.argv[1])/"logs";print(json.dumps([str(p/(n+".log")) for n in sys.argv[2:] if (p/(n+".log")).exists()]))',[job,*names]))
+            if logs:ssh(c,'tail -n 40 '+shlex.join(logs))
+            else:print('日志尚未生成')
         elif a.follow:follow(c,job)
         else:
             s=state(c,job);print(Path(job).name+' | '+status_line(s))
@@ -361,7 +424,10 @@ def main():
     elif a.command=='stop':
         job=latest(c)
         if state(c,job)['phase']!='finished':remote(c,'from pathlib import Path;import sys;(Path(sys.argv[1])/"stop").touch()',[job])
-        follow(c,job);pull(c,job)
+        s=follow(c,job)
+        if s is None:raise RuntimeError('连接中断；板端仍会执行停止，请重连后再次 stop 或 pull')
+        pull(c,job)
+        if s['algorithm']=='failed':raise RuntimeError(s.get('reason') or '任务失败，已保留并回传证据')
     elif a.command=='pull':pull(c,latest(c,a.run_id))
 
 

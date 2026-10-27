@@ -1,0 +1,10 @@
+{"job": "20261027-201851-db4e50", "driver_pid": 8711, "fault": "intentional SIGTERM"}
+saving | 35.3s | imu 6548 条 203.2Hz | lidar 322 条 10.0Hz | WARN 0 ERROR 0
+finished | 39.4s | imu 6548 条 203.2Hz | lidar 322 条 10.0Hz | WARN 0 ERROR 0 | 结果 failed | livox exited unexpectedly: -15
+回传结果…
+结果已校验：/home/eric/grad/实验/livo2/results/20261027-201851-db4e50
+finished | 39.4s | imu 6548 条 203.2Hz | lidar 322 条 10.0Hz | WARN 0 ERROR 0 | 结果 failed | livox exited unexpectedly: -15
+回传结果…
+结果已校验：/home/eric/grad/实验/livo2/results/20261027-201851-db4e50
+错误：livox exited unexpectedly: -15
+Fault cleanup, indexed bag, return transfer and failed stop exit verified

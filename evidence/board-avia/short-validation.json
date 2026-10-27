@@ -1,0 +1,31 @@
+{
+  "run_id": "20261027-201205-0aad49",
+  "counts": {
+    "/livox/imu": 6277,
+    "/livox/lidar": 309
+  },
+  "header_timing": {
+    "/livox/imu": {
+      "first": 1864.70497128,
+      "last": 1895.61098573,
+      "regressions": 0,
+      "max_gap_s": 0.0050796900000023015,
+      "hz": 203.06727061664253
+    },
+    "/livox/lidar": {
+      "first": 1864.70028861,
+      "last": 1895.49979985,
+      "regressions": 0,
+      "max_gap_s": 0.10065385999996579,
+      "hz": 10.000158690829885
+    }
+  },
+  "cloud_frames_checked": 309,
+  "nonzero_finite_points": 5398786,
+  "transfer": {
+    "transfer": "complete",
+    "files": 29,
+    "verified_at": 1793103204.9802828
+  },
+  "note": "First board short recording predates offline board clock correction; header stamps are device boot time."
+}

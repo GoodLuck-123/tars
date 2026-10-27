@@ -1,0 +1,10 @@
++ cmake -S /home/eric/grad/实验/livo2/third_party/Livox-SDK -B /home/eric/grad/实验/livo2/.build/livox-sdk -DCMAKE_BUILD_TYPE=Release -DCATKIN_ENABLE_TESTING=OFF -DPYTHON_EXECUTABLE=/usr/bin/python3 -DCATKIN_DEVEL_PREFIX=/home/eric/grad/实验/livo2/.build/stage -DCMAKE_INSTALL_PREFIX=/home/eric/grad/实验/livo2/.build/stage -DCMAKE_PREFIX_PATH=/home/eric/grad/实验/livo2/.build/stage;/home/eric/grad/实验/livo2/.cache/sysroot/opt/ros/noetic;/home/eric/grad/实验/livo2/.cache/sysroot/usr -DEigen3_DIR=/home/eric/grad/实验/livo2/.cache/sysroot/usr/share/eigen3/cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPKG_CONFIG_EXECUTABLE=/usr/bin/pkg-config -DSophus_DIR=/home/eric/grad/实验/livo2/.build/sophus -DCMAKE_TOOLCHAIN_FILE=/home/eric/grad/实验/livo2/buildkit/aarch64.cmake
+-- main project dir: /home/eric/grad/实验/livo2/third_party/Livox-SDK
++ cmake --build /home/eric/grad/实验/livo2/.build/livox-sdk -j 4 --target livox_sdk_static
+Consolidate compiler generated dependencies of target livox_sdk_static
+[100%] Built target livox_sdk_static
+-- Up-to-date: /home/eric/grad/实验/livo2/.build/stage/lib/liblivox_sdk_static.a
++ cmake -S /home/eric/grad/实验/livo2/third_party/livox_ros_driver/livox_ros_driver -B /home/eric/grad/实验/livo2/.build/livox-driver -DCMAKE_BUILD_TYPE=Release -DCATKIN_ENABLE_TESTING=OFF -DPYTHON_EXECUTABLE=/usr/bin/python3 -DCATKIN_DEVEL_PREFIX=/home/eric/grad/实验/livo2/.build/stage -DCMAKE_INSTALL_PREFIX=/home/eric/grad/实验/livo2/.build/stage -DCMAKE_PREFIX_PATH=/home/eric/grad/实验/livo2/.build/stage;/home/eric/grad/实验/livo2/.cache/sysroot/opt/ros/noetic;/home/eric/grad/实验/livo2/.cache/sysroot/usr -DEigen3_DIR=/home/eric/grad/实验/livo2/.cache/sysroot/usr/share/eigen3/cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPKG_CONFIG_EXECUTABLE=/usr/bin/pkg-config -DSophus_DIR=/home/eric/grad/实验/livo2/.build/sophus -DCMAKE_TOOLCHAIN_FILE=/home/eric/grad/实验/livo2/buildkit/aarch64.cmake
++ cmake --build /home/eric/grad/实验/livo2/.build/livox-driver -j 4 --target livox_ros_driver_node
+Consolidate compiler generated dependencies of target livox_ros_driver_node
+[100%] Built target livox_ros_driver_node

@@ -1,0 +1,104 @@
+{
+  "run_id": "20261027-202025-885b4b",
+  "host_unplug": {
+    "start_epoch": 1793103656.4734604,
+    "end_epoch": 1793103679.4959173,
+    "duration_s": 23.022456884384155,
+    "link_events": [
+      {
+        "host_time": 1793103635.452661,
+        "interface": "enp10s0",
+        "carrier": "1"
+      },
+      {
+        "host_time": 1793103656.4734604,
+        "interface": "enp10s0",
+        "carrier": "0"
+      },
+      {
+        "host_time": 1793103679.4959173,
+        "interface": "enp10s0",
+        "carrier": "1"
+      },
+      {
+        "host_time": 1793103698.514079,
+        "event": "watch_stopped"
+      }
+    ]
+  },
+  "streams": {
+    "/livox/imu": {
+      "messages": 15235,
+      "header_hz": 202.8496545570847,
+      "header_regressions": 0,
+      "sequence_gaps": 0,
+      "max_header_gap_s": 0.010000660000059725,
+      "max_record_gap_s": 0.12485432624816895,
+      "record_start_epoch": 1793103629.6145966,
+      "record_end_epoch": 1793103704.622632,
+      "during_host_unplug_messages": 4663,
+      "unplug_max_record_gap_s": 0.11815381050109863,
+      "unplug_max_header_gap_s": 0.005093199999919307
+    },
+    "/livox/lidar": {
+      "messages": 751,
+      "header_hz": 10.00006451774959,
+      "header_regressions": 0,
+      "sequence_gaps": 0,
+      "max_header_gap_s": 0.10066046000019924,
+      "max_record_gap_s": 0.1290125846862793,
+      "record_start_epoch": 1793103629.6176395,
+      "record_end_epoch": 1793103704.6198575,
+      "during_host_unplug_messages": 230,
+      "unplug_max_record_gap_s": 0.1290125846862793,
+      "unplug_max_header_gap_s": 0.10066046000019924
+    }
+  },
+  "points": {
+    "total": 18024000,
+    "nonzero_finite": 6265063
+  },
+  "viewer_offline_frame": 383,
+  "viewer_offline_time_s": 38.32922601699829,
+  "capture": {
+    "mode": "capture_lidar",
+    "hardware_verified": true,
+    "verified_streams": [
+      "lidar",
+      "imu"
+    ],
+    "calibration_verified": false,
+    "bags": [
+      {
+        "file": "sensors_0.bag",
+        "bytes": 348458849
+      }
+    ],
+    "counts": {
+      "/livox/imu": 15235,
+      "/livox/lidar": 751
+    },
+    "types": {
+      "/livox/imu": "sensor_msgs/Imu",
+      "/livox/lidar": "livox_ros_driver/CustomMsg"
+    }
+  },
+  "summary": {
+    "algorithm": "stopped",
+    "started": 1793103626.8808012,
+    "elapsed_s": 82.08762024800012,
+    "reason": null,
+    "exits": {
+      "monitor": 0,
+      "master": 0,
+      "probe": 0,
+      "record": 0,
+      "livox": 0
+    }
+  },
+  "transfer": {
+    "transfer": "complete",
+    "files": 30,
+    "verified_at": 1793103715.810778
+  }
+}

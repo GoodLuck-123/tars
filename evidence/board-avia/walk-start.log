@@ -1,0 +1,5 @@
+运行包已就绪：73c84007d22af222
+发现 AVIA：192.168.1.189 / 3JEDNAL001PY891
+{"job": "/home/firefly/livo2-workspace/runs/20261027-202025-885b4b", "pid": 11267}
+20261027-202025-885b4b | recording | 3.0s | imu 90 条 199.2Hz | lidar 6 条 11.2Hz | WARN 0 ERROR 0
+传感器收数已就绪；任务独立运行，主机断网不影响录制。用 status 查看，stop 结束并回传。

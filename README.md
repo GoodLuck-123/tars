@@ -5,7 +5,7 @@
 ```bash
 cp project.example.yaml project.yaml   # 已有配置时跳过
 ./livo doctor --sensors                # 检查板端环境、驱动产物与设备节点
-./livo record --replay                 # 现在即可用：用现有 bag 演练板端录包、停止和回传
+./livo lidar --background              # 板端实机录点云/IMU，确认收数后返回
 ./livo --host run                      # 电脑离线运行 LIVO2，自动准备环境
 ./livo status --follow                # 查看板端当前任务摘要和重要告警
 ./livo stop                           # 有序停止并回传
@@ -15,11 +15,46 @@ cp project.example.yaml project.yaml   # 已有配置时跳过
 
 主机任务的查询、停止、回传使用同一命令加 `--host`，例如 `./livo --host status --follow`。SSH 断线后任务继续；运行命令的 Ctrl-C 请求停止并回传，`status --follow` 的 Ctrl-C 只退出查看。完整日志保留在结果里，`status --raw` 按需查看当前模式的原始日志。
 
-当前候选版本 `v0.2.0-rc3`；主机完整 LIVO2、压缩/raw 录包演练、停止与标定软件检查通过，详见 [验收证据](evidence/software/README.md)。
+当前候选版本 `v0.2.0-rc4`；主机完整 LIVO2、压缩/raw 录包演练、停止与标定软件检查通过，详见 [验收证据](evidence/software/README.md)。
 
-AVIA 已在主机完成真实收数和 30 秒录包验收：点云约 10 Hz、IMU 约 204 Hz，见 [真机证据](evidence/avia-host/README.md)。相机及板端真实传感器采集仍待验收。`record --replay` 是软件演练，不代表真实相机、雷达或同步通过验收。示例数据为 `/home/eric/data/hku_campus_seq_03.bag`；示例内外参仅用于已有数据，精度未验证，不能直接用于之后购买的相机。
+AVIA 已通过板端真实采集、主机拔线后独立录制、接回后停止回传及三维回看验收：点云约 10 Hz、IMU 约 203 Hz，见 [板端验收](evidence/board-avia/README.md)。相机及三路同步仍待验收。主机先前短录见 [主机真机证据](evidence/avia-host/README.md)。`record --replay` 是软件演练，不代表真实相机、雷达或同步通过验收。示例数据为 `/home/eric/data/hku_campus_seq_03.bag`；示例内外参仅用于已有数据，精度未验证，不能直接用于之后购买的相机。
 
-## 单独运行 AVIA
+## 板端独立录制 AVIA
+
+只需维护 `project.yaml` 的两处设备地址，所有 CLI 自动复用，不用改源码、SSH 脚本或内部 ROS 配置：
+
+```yaml
+board:
+  target: firefly@192.168.1.51
+  # 其余 board 字段保留
+capture:
+  duration_s: null       # 持续录制；也可设秒数，到时自动结束
+  livox:
+    ip: 192.168.1.189
+    # 其余 capture / livox 字段保留
+```
+
+以上仅展示已有配置中要改的字段，不要用它覆盖整份配置。主机/板端去雷达的源 IP、网卡自动按路由选择；主机有线静态地址由系统维护，不在工程内重复配置。其他设备今后也统一在 project.yaml 接入。
+
+```bash
+./livo deploy                         # SDK/驱动、私有 ROS 等 ARM64 包推上板子
+./livo doctor --sensors                # 空闲查环境/发现；运行中查实际点云和 IMU
+./livo lidar --background              # 等到真实收数后返回，即可拔电脑网线
+# 带着板子、雷达、交换机采集，保留它们的供电和互连；电脑不需参与
+./livo status                         # 重新接回电脑网线后查看状态
+./livo stop                           # 正常结束并自动校验回传；可重复执行
+./livo view                           # 电脑打开最近一次录包的三维回放
+```
+
+`lidar` 已包括点云/IMU 原始录包，不需要另开 recorder。后台运行不依赖 SSH、主机或外网。`capture.duration_s:null` 时仍受 `run.timeout_s`（默认 1800 秒）和剩余空间保护约束；需要更长录制就在同一配置里调整。前台 `./livo lidar` 也可用，Ctrl-C 请求正常停止和回传。
+
+`doctor --sensors` 会校验部署清单、私有 Python/ROS、驱动动态库、到 AVIA 的源地址/网卡、广播码；录制期间复用现有任务的实时消息检查，不抢占驱动 UDP 端口。相机未配置不会阻止 lidar 验收。雷达已连接另一个采集端时可能不广播，应在实际采集端检查，或先停止另一个客户端。
+
+`board.sync_time:true` 默认在部署/启动前**持有空闲任务锁**时将大于 5 秒的板端时钟误差按主机修正，需要板端 `sudo -n date` 权限；录制期间不会校时。此操作只纠正系统日期，不是曝光、LiDAR 或 IMU 的精密时间同步。板子无需联网校时。
+
+`status --follow` 给低频计数/频率和聚合 WARN/ERROR，`status --raw` 按需查看驱动/相机/recorder 原始日志。重复启动会拒绝且不干扰当前采集；驱动退出或断流会结束并保存失败证据，`stop` 返回失败退出码。正在写入的包不能 pull，先 stop；断线后已经结束的任务可用 pull 补收。
+
+## 在主机单独运行 AVIA
 
 ```bash
 ./livo --host lidar                    # 本机只运行雷达/IMU，并按配置录包

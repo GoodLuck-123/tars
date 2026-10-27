@@ -1,0 +1,4 @@
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+ROS_DISTRO=noetic ROS_IP=127.0.0.1
+/home/firefly/livo2-workspace/current/bin/livox_ros_driver_node
+private ROS imports OK

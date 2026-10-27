@@ -1,0 +1,8 @@
+检查主机与板端…
+{"architecture": "aarch64", "python": "3.10.12", "free_gib": 72.71091842651367, "rsync": "/usr/bin/rsync"}
+目标：firefly@192.168.1.51 | 运行包：937a6069ba5f9d3f
+SDK/驱动及私有 ROS：通过构建记录与运行库检查
+雷达网络：192.168.1.51 (enx6c1ff7295dee) → 192.168.1.189
+AVIA：3JEDNAL001PY891 | discovery_only
+相机：未接入；不影响 lidar 模式
+已发现雷达；实际点云/IMU 和录包请用 ./livo lidar 验证
