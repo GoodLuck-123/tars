@@ -2,6 +2,8 @@
 
 在 RK3588 上录制原始图像、AVIA 点云和 IMU，自动传回电脑；在电脑离线运行 FAST-LIVO2 和免标定板标定。入口只有 `./livo`，用户参数只有 `project.yaml`。
 
+可复用的工程设计范式见 [算法与传感器部署 skill](skills/edge-experiment-platform/SKILL.md)，用于后续类似项目的整体设计与接入。
+
 ```bash
 cp project.example.yaml project.yaml   # 已有配置时跳过
 ./livo doctor --sensors                # 检查板端环境、驱动产物与设备节点

@@ -1,0 +1,4 @@
+interface:
+  display_name: "算法与传感器部署范式"
+  short_description: "以单入口、单配置和主机构建，统一板端算法回放、传感器采集与结果回传"
+  default_prompt: "使用 $edge-experiment-platform，为当前算法或传感器设计简洁的部署、运行、录包和结果回传闭环，复用现有工程能力。"
