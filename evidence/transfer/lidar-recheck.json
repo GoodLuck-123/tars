@@ -1,0 +1,146 @@
+{
+  "run_id": "20261029-194637-befef2",
+  "cloud_frames": 151,
+  "points": 3624000,
+  "valid_points": 3550565,
+  "valid_ratio": 0.9797364790286975,
+  "frames_with_valid_points": 151,
+  "image_frames": 255,
+  "frames_checked": [
+    {
+      "index": 16,
+      "time_s": 1.590987452,
+      "points_bytes": 374192,
+      "image_bytes": 494659,
+      "camera": {
+        "state": "ready",
+        "delta_s": 0.013377584,
+        "mime": "image/jpeg"
+      },
+      "total_points": 24000,
+      "valid_points": 23387,
+      "shown_points": 23387,
+      "bounds": [
+        [
+          1.6720000505447388,
+          -2.294279956817627,
+          -2.5582800674438477
+        ],
+        [
+          6.5742798614501945,
+          2.1892799377441396,
+          1.6369999647140503
+        ]
+      ],
+      "downsample_stride": 1
+    },
+    {
+      "index": 79,
+      "time_s": 7.892695877,
+      "points_bytes": 375584,
+      "image_bytes": 495988,
+      "camera": {
+        "state": "ready",
+        "delta_s": 0.010488042,
+        "mime": "image/jpeg"
+      },
+      "total_points": 24000,
+      "valid_points": 23474,
+      "shown_points": 23474,
+      "bounds": [
+        [
+          1.715460000038147,
+          -2.1610000133514404,
+          -2.63108003616333
+        ],
+        [
+          6.570540132522584,
+          2.1549999713897705,
+          1.656000018119812
+        ]
+      ],
+      "downsample_stride": 1
+    },
+    {
+      "index": 142,
+      "time_s": 14.191786885,
+      "points_bytes": 378976,
+      "image_bytes": 498356,
+      "camera": {
+        "state": "ready",
+        "delta_s": 0.020187335,
+        "mime": "image/jpeg"
+      },
+      "total_points": 24000,
+      "valid_points": 23686,
+      "shown_points": 23686,
+      "bounds": [
+        [
+          1.77669997215271,
+          -2.055999994277954,
+          -2.686000108718872
+        ],
+        [
+          6.6848999500274635,
+          2.197300004959106,
+          1.5732999682426445
+        ]
+      ],
+      "downsample_stride": 1
+    }
+  ],
+  "distance_m_sample_percentiles": {
+    "min": 1.1538643836975098,
+    "p10": 2.4111009359359743,
+    "median": 4.134399652481079,
+    "p90": 5.373702716827393,
+    "max": 8.234550476074219
+  },
+  "capture_report": {
+    "mode": "capture",
+    "hardware_verified": true,
+    "verified_streams": [
+      "lidar",
+      "imu",
+      "image"
+    ],
+    "calibration_verified": false,
+    "bags": [
+      {
+        "file": "sensors_0.bag",
+        "bytes": 1074486022
+      },
+      {
+        "file": "sensors_1.bag",
+        "bytes": 258530269
+      }
+    ],
+    "counts": {
+      "/camera/camera_info": 255,
+      "/camera/image_raw": 255,
+      "/camera/metadata": 255,
+      "/livox/imu": 3063,
+      "/livox/lidar": 151
+    },
+    "types": {
+      "/camera/camera_info": "sensor_msgs/CameraInfo",
+      "/camera/image_raw": "sensor_msgs/Image",
+      "/camera/metadata": "std_msgs/String",
+      "/livox/imu": "sensor_msgs/Imu",
+      "/livox/lidar": "livox_ros_driver/CustomMsg"
+    }
+  },
+  "transfer": {
+    "transfer": "complete",
+    "files": 32,
+    "verified_at": 1793274439.1043217,
+    "remote_bag_cleanup": {
+      "deleted_bags": 2,
+      "freed_bytes": 1333016291,
+      "verified_manifest_sha256": "9a6cc56ddcdbc2d7fac1ad98dbabf8f51c188ae211ad6501b6a0abede8452b3a",
+      "cleaned_at": 1793274441.2977145
+    }
+  },
+  "all_files_sha256_match": true,
+  "limitation": "同一版本、同一参数复测恢复；结合用户反馈，原位置过近或遮挡是最符合现有证据的原因，未做固定距离对照，不能精确区分。"
+}
