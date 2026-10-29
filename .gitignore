@@ -5,6 +5,12 @@
 /outputs/
 /runs/
 /build/
+# Sensor recordings may also be copied outside results/.
+*.bag
+*.bag.active
+*.lvx
+*.pcap
+*.pcapng
 .venv/
 __pycache__/
 *.pyc
@@ -16,4 +22,3 @@ __pycache__/
 dist/
 results/
 project.yaml
-__pycache__/

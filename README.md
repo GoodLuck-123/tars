@@ -1,6 +1,8 @@
-# AVIA + 单目相机采集与主机处理
+# TARS
 
-在 RK3588 上录制原始图像、AVIA 点云和 IMU，自动传回电脑；在电脑离线运行 FAST-LIVO2 和免标定板标定。入口只有 `./livo`，用户参数只有 `project.yaml`。
+面向边缘设备的激光雷达、IMU 与相机采集及离线算法实验平台，名字取自《星际穿越》中的机器人 TARS。
+
+当前支持在 RK3588 上录制 FLIR 原始图像、Livox AVIA 点云和 IMU，独立采集后自动校验回传；在电脑离线运行 FAST-LIVO2、免标定板标定与点云/图像同屏回放。入口只有 `./livo`，用户参数只有 `project.yaml`。
 
 可复用的工程设计范式见 [算法与传感器部署 skill](skills/edge-experiment-platform/SKILL.md)，用于后续类似项目的整体设计与接入。
 
