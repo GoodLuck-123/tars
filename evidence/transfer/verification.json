@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-29",
+  "run_id": "20261029-194312-915ce5",
+  "release": "c307a1c7383af361",
+  "manifest_verified_files": 31,
+  "initial_remote_cleanup": {
+    "deleted_bags": 1,
+    "freed_bytes": 486368597,
+    "verified_manifest_sha256": "adc07d970cc8f5cf4301d9a124ba678678ef389d082dafe1e35be5ae38811f89",
+    "cleaned_at": 1793274219.833872
+  },
+  "repeated_pull": {
+    "transfer": "complete",
+    "files": 31,
+    "verified_at": 1793274253.5948048,
+    "remote_bag_cleanup": {
+      "deleted_bags": 0,
+      "freed_bytes": 0,
+      "verified_manifest_sha256": "adc07d970cc8f5cf4301d9a124ba678678ef389d082dafe1e35be5ae38811f89",
+      "cleaned_at": 1793274254.0796993
+    }
+  },
+  "message_counts": {
+    "/livox/imu": 1505,
+    "/livox/lidar": 74,
+    "/camera/metadata": 105,
+    "/camera/camera_info": 105,
+    "/camera/image_raw": 105
+  },
+  "viewer_decode": {
+    "camera_frames_checked": [
+      12,
+      38,
+      63
+    ],
+    "camera_states": [
+      "ready",
+      "ready",
+      "ready"
+    ],
+    "total_lidar_points": 1776000,
+    "valid_lidar_points": 0
+  },
+  "board_remaining_bags": 0,
+  "checks": {
+    "transfer_cases": 12,
+    "existing_monitor_cases": 6
+  },
+  "limitation": "本段雷达坐标全零；只验证消息录制、传输完整性与自动删除，不作为有效场景点云或标定验收。"
+}

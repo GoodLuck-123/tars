@@ -160,4 +160,4 @@ LIVO2 自动识别配置话题中的 raw / 压缩图像，在电脑端缩放和�
 
 第三方源码是固定提交的 Git 子模块，构建直接使用可见目录。平台补丁由外层仓库追踪；子模块因这些补丁显示修改是预期状态。人工改源码后自动按内容指纹重建，不重置编辑。新克隆仓库运行 `git submodule update --init --recursive`。
 
-板端包为 `dist/livo2-<id>-arm64.tar.gz`（约 149 MiB，不含数据集）。可解压后执行 `install/install.sh ~/livo2-workspace` 独立安装，常规入口会自动部署。结果逐文件 SHA256 校验，保留远端副本。详细设计、阶段状态和剩余硬件验收见 [PLAN.md](PLAN.md)。
+板端包为 `dist/livo2-<id>-arm64.tar.gz`（约 149 MiB，不含数据集）。可解压后执行 `install/install.sh ~/livo2-workspace` 独立安装，常规入口会自动部署。`stop` / `pull` 回传后逐文件校验 SHA-256 并落盘，默认自动删除该任务的板端录包，保留日志、配置和清单。传输中断或校验失败时不删除；清理阶段断线可再次 `pull`。需要保留双份时，在 `project.yaml` 设置 `transfer.delete_remote_bags_after_verify: false`。主机 `--host` 模式不清理原始任务。历史任务也可逐个 `./livo pull <run-id>`，完整回传校验后才清理，需预留主机空间。详细设计、阶段状态和剩余硬件验收见 [PLAN.md](PLAN.md)。

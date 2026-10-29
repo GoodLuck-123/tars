@@ -78,6 +78,8 @@ monitoring:
   repeat_notice_s: 10
   progress_stall_s: 30
 results_dir: results
+transfer:
+  delete_remote_bags_after_verify: true # 全部结果通过 SHA-256 校验并落盘后删除板端录包；false 保留双份
 viewer:
   bag: null                  # null 自动选最近录包，也可填 bag 文件或录制目录
   max_points: 100000          # 仅显示抽样，不修改原始包

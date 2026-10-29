@@ -25,6 +25,8 @@ def config(path):
     c=yaml.safe_load(path.read_text())
     defaults=yaml.safe_load((ROOT/'project.example.yaml').read_text())
     for section in ['capture','calibration']:c.setdefault(section,defaults[section])
+    c.setdefault('transfer',{}).setdefault('delete_remote_bags_after_verify',True)
+    if type(c['transfer']['delete_remote_bags_after_verify']) is not bool:raise ValueError('transfer.delete_remote_bags_after_verify must be true or false')
     c['board'].setdefault('sync_time',True)
     if type(c['board']['sync_time']) is not bool:raise ValueError('board.sync_time must be true or false')
     c['topics'].setdefault('raw_image','/camera/image_raw')
@@ -361,8 +363,23 @@ def pull(c,job):
     manifest=json.loads((out/'files.json').read_text())
     for name,expected in manifest.items():
         p=out/name
-        if not p.is_relative_to(out) or sha(p)!=expected:raise RuntimeError('Result checksum mismatch: '+name)
+        if not p.resolve().is_relative_to(out.resolve()) or sha(p)!=expected:raise RuntimeError('Result checksum mismatch: '+name)
+        if name.endswith(('.bag','.bag.active')):
+            with p.open('rb') as stream:os.fsync(stream.fileno())
+    # Persist directory entries too before authorizing removal of the board copy.
+    for directory in {out,*(p.parent for p in out.rglob('*') if p.is_file())}:
+        fd=os.open(directory,os.O_RDONLY)
+        try:os.fsync(fd)
+        finally:os.close(fd)
     receipt=dict(transfer='complete',files=len(manifest),verified_at=time.time());(out/'transfer.json').write_text(json.dumps(receipt,indent=2)+'\n')
+    if not c.get('_host') and c['transfer']['delete_remote_bags_after_verify']:
+        try:
+            cleaned=json.loads(remote(c,(ROOT/'runtime/transfer_cleanup.py').read_text(),[workspace(c),job,sha(out/'files.json')]))
+        except (OSError,ValueError,subprocess.CalledProcessError) as e:
+            raise RuntimeError('主机结果已校验；板端录包清理未确认，请重新 ./livo pull '+Path(job).name) from e
+        receipt['remote_bag_cleanup']=cleaned
+        (out/'transfer.json').write_text(json.dumps(receipt,indent=2)+'\n')
+        print(f"板端录包已清理：{cleaned['deleted_bags']} 个，释放 {cleaned['freed_bytes']/2**30:.2f} GiB；日志与任务记录保留",flush=True)
     print('结果已校验：'+str(out),flush=True);return out
 
 
