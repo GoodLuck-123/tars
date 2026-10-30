@@ -14,6 +14,8 @@ int main(int argc, char** argv) {
   if (!nh.getParam("/decoder/K", k) || !nh.getParam("/decoder/D", d) || k.size()!=9) { ROS_FATAL("Missing decoder calibration"); return 2; }
   int width=nh.param("/decoder/width",1280), height=nh.param("/decoder/height",1024);
   int ow=nh.param("/decoder/output_width",width), oh=nh.param("/decoder/output_height",height);
+  const std::string output_encoding=nh.param<std::string>("/decoder/output_encoding", "bgr8");
+  if (output_encoding!="bgr8" && output_encoding!="mono8") { ROS_FATAL("Unsupported decoder output encoding: %s", output_encoding.c_str()); return 2; }
   if (std::min({width,height,ow,oh})<1) { ROS_FATAL("Invalid decoder dimensions"); return 2; }
   cv::Mat map1, map2;
   auto pub = nh.advertise<sensor_msgs::Image>("image", 20);
@@ -28,7 +30,8 @@ int main(int argc, char** argv) {
       ROS_INFO("Decoded %dx%d, rectified output %dx%d; full distortion model applied", image.cols, image.rows,ow,oh);
     }
     cv::Mat rectified; cv::remap(image, rectified, map1, map2, cv::INTER_LINEAR);
-    pub.publish(cv_bridge::CvImage(header, "bgr8", rectified).toImageMsg());
+    if (output_encoding=="mono8" && rectified.channels()==3) cv::cvtColor(rectified, rectified, cv::COLOR_BGR2GRAY);
+    pub.publish(cv_bridge::CvImage(header, output_encoding, rectified).toImageMsg());
   };
   ros::Subscriber sub;
   if (nh.param<std::string>("/decoder/input_transport", "compressed")=="raw") {
@@ -42,7 +45,7 @@ int main(int argc, char** argv) {
   } else {
     sub=nh.subscribe<sensor_msgs::CompressedImage>("compressed",20,[&](const sensor_msgs::CompressedImageConstPtr& msg) {
       try {
-        int mode=(ow*2==width && oh*2==height) ? cv::IMREAD_REDUCED_COLOR_2 : cv::IMREAD_COLOR;
+        int mode=output_encoding=="mono8" ? cv::IMREAD_GRAYSCALE : ((ow*2==width && oh*2==height) ? cv::IMREAD_REDUCED_COLOR_2 : cv::IMREAD_COLOR);
         publish(cv::imdecode(msg->data,mode),msg->header);
       } catch (const cv::Exception& e) { ROS_ERROR("Image decode failed: %s",e.what()); }
     });

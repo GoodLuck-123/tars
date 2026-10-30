@@ -60,6 +60,8 @@ def config(path):
     if c['dataset']['start_s']<0 or (c['dataset']['duration_s'] is not None and c['dataset']['duration_s']<=0):raise ValueError('Invalid dataset interval')
     if len(c['camera']['intrinsics'])!=4 or len(c['camera']['distortion']) not in {4,5,8,12,14}:raise ValueError('Invalid camera model parameters')
     if c['camera']['scale']<=0 or min(c['camera']['width'],c['camera']['height'])<=0:raise ValueError('Invalid camera dimensions or scale')
+    c['camera'].setdefault('output_encoding','bgr8')
+    if c['camera']['output_encoding'] not in {'bgr8','mono8'}:raise ValueError('camera.output_encoding must be bgr8 or mono8')
     import numpy as np
     for key in ['R_camera_lidar','R_imu_lidar']:
         r=np.asarray(c['extrinsics'][key],dtype=float).reshape(3,3)
@@ -253,7 +255,7 @@ def prepare(c,job,install,root):
     for section,values in c['algorithm']['overrides'].items():upstream.setdefault(section,{}).update(values)
     fx,fy,cx,cy=c['camera']['intrinsics'];w,h=c['camera']['width'],c['camera']['height'];scale=c['camera']['scale'];ow,oh=int(w*scale),int(h*scale)
     if min(ow,oh)<1:raise ValueError('Scaled camera dimensions must be positive')
-    upstream['decoder']=dict(K=[fx,0,cx,0,fy,cy,0,0,1],D=c['camera']['distortion'],width=w,height=h,output_width=ow,output_height=oh,input_transport=image_transport)
+    upstream['decoder']=dict(K=[fx,0,cx,0,fy,cy,0,0,1],D=c['camera']['distortion'],width=w,height=h,output_width=ow,output_height=oh,input_transport=image_transport,output_encoding=c['camera']['output_encoding'])
     cam=dict(cam_model='Pinhole',cam_width=ow,cam_height=oh,scale=1.0,cam_fx=fx*ow/w,cam_fy=fy*oh/h,cam_cx=cx*ow/w,cam_cy=cy*oh/h,cam_d0=0.0,cam_d1=0.0,cam_d2=0.0,cam_d3=0.0)
     job.mkdir(parents=True)
     for name,value in [('config.json',cfg),('input.json',input_info)]: (job/name).write_text(json.dumps(value,indent=2)+'\n')

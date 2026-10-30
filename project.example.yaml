@@ -16,6 +16,7 @@ camera:
   width: 1280
   height: 1024
   scale: 0.5
+  output_encoding: bgr8       # 实验可切为 mono8；算法主体始终接收灰度图
   intrinsics:
   - 863.4241
   - 863.4171
