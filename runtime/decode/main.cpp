@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     sub=nh.subscribe<sensor_msgs::Image>("raw",20,[&](const sensor_msgs::ImageConstPtr& msg) {
       try {
         if (int(msg->width)!=width || int(msg->height)!=height) { ROS_ERROR("Raw image dimensions do not match camera configuration"); return; }
-        cv::Mat input=cv_bridge::toCvShare(msg,"passthrough")->image, normalized;
+        cv::Mat input=cv_bridge::toCvShare(msg)->image, normalized;
         const std::string& encoding=msg->encoding;
         if (encoding=="bayer_rggb8" || encoding=="bayer_bggr8" || encoding=="bayer_grbg8" || encoding=="bayer_gbrg8") {
           if (output_encoding=="mono8") normalized=input;
