@@ -1,0 +1,16 @@
+{
+  "branch": "codex/livo2-rk3588-realtime",
+  "configuration": {"camera_output_encoding":"mono8","algorithm_overrides":{"preprocess":{"point_filter_num":2}},"cpu_affinity":[4,5,6,7],"cpu_governor":"performance"},
+  "short_runs": [
+    {"run_id":"20261030-115626-c2b13d","elapsed_s":39.45931809,"visual_updates":441,"poses":442,"lio_mean_s":0.0428495181,"lio_p95_s":0.075373,"icp_mean_s":0.0369414389,"vio_mean_s":0.0074306009,"peak_livo_rss_mib":443.82,"queues":[0,1]},
+    {"run_id":"20261030-115932-3d093f","elapsed_s":39.42034004,"visual_updates":441,"poses":442,"lio_mean_s":0.0417792896,"lio_p95_s":0.0731884,"icp_mean_s":0.0360014729,"vio_mean_s":0.0071248118,"peak_livo_rss_mib":443.97,"queues":[0,1]}
+  ],
+  "full_run": {
+    "run_id":"20261030-120440-8638ce","input_duration_s":173.75,"elapsed_s":184.346805314,"visual_updates":2575,"visual_update_hz":14.8201438849,"poses":2575,"map_chunks":27,"lio_mean_s":0.0431547456,"lio_p95_s":0.0746376,"icp_mean_s":0.0366267037,"vio_mean_s":0.0077714528,"peak_livo_rss_mib":2201.14,"queues":[1,0],"unprocessed_tail_s":0.0927722454
+  },
+  "stress_run": {
+    "run_id":"20261030-121223-25164d","replay_rate":1.2,"wall_elapsed_s":34.3820665,"trajectory_sensor_span_s":29.48611498,"visual_updates":441,"visual_sensor_hz":14.9561921,"lio_mean_s":0.0395371606,"lio_p95_s":0.0617334,"icp_mean_s":0.0338845023,"vio_mean_s":0.0074773016,"peak_livo_rss_mib":455.54,"queues":[0,1]
+  },
+  "reference": {"baseline_run_id":"20261030-113818-c6f9b3","lio_mean_s":0.0671406448,"icp_mean_s":0.0580504072,"peak_livo_rss_mib":642.13},
+  "conclusion": "mono8 plus point_filter_num=2 keeps the original FAST-LIVO2 estimator and improves the measured RK3588 processing margin. The full sequence finishes without sustained queue growth; the source dataset provides about 14.8-15.0 Hz visual input. Point reduction may affect accuracy and must be evaluated after sensors are rigidly mounted."
+}

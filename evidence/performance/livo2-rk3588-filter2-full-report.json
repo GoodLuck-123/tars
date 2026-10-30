@@ -1,0 +1,25 @@
+{
+  "run_id": "20261030-120440-8638ce",
+  "elapsed_s": 184.346805314,
+  "input_duration_s": 173.75,
+  "visual_updates": 2575,
+  "visual_update_hz": 14.820143884892087,
+  "processed": 5158,
+  "poses": 2575,
+  "map_chunks": 27,
+  "queues": [
+    1,
+    0
+  ],
+  "unprocessed_tail_s": 0.09277224540710449,
+  "lio_mean_s": 0.04315474563106796,
+  "lio_p95_s": 0.0746376,
+  "lio_max_s": 0.106584,
+  "icp_mean_s": 0.03662670368932039,
+  "vio_mean_s": 0.0077714528155339805,
+  "livo_cpu_s": 219.63,
+  "peak_livo_rss_mib": 2201.13671875,
+  "decode_cpu_s": 56.71,
+  "warnings": 1,
+  "errors": 1
+}

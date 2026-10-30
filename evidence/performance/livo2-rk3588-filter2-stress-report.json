@@ -1,0 +1,19 @@
+{
+  "run_id": "20261030-121223-25164d",
+  "wall_elapsed_s": 34.382066496000334,
+  "trajectory_sensor_span_s": 29.486114978790283,
+  "visual_updates": 441,
+  "processed": 893,
+  "poses": 442,
+  "queues": [
+    0,
+    1
+  ],
+  "lio_mean_s": 0.03953716063348416,
+  "lio_p95_s": 0.06173340000000001,
+  "icp_mean_s": 0.03388450226244344,
+  "vio_mean_s": 0.007477301587301587,
+  "peak_livo_rss_mib": 455.5390625,
+  "error_messages": 1,
+  "visual_sensor_hz": 14.95619210320575
+}
