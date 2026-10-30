@@ -1,0 +1,34 @@
+{
+  "branch": "codex/livo2-rk3588-realtime",
+  "run_id": "20261030-123901-873f36",
+  "release": "3222549ed3c63791",
+  "configuration": {
+    "camera_roi": [1280,1024],
+    "decoder_output": "mono8",
+    "point_filter_num": 2,
+    "cpu_affinity": [4,5,6,7],
+    "cpu_governor": "performance",
+    "timestamp_bridge": {"lidar_topic":"/livo2/live/lidar","imu_topic":"/livo2/live/imu","raw_topics_preserved":true}
+  },
+  "streams": {
+    "camera": {"messages":405,"hz":19.995863779355155},
+    "lidar": {"messages":216,"hz":10.022968726038451},
+    "imu": {"messages":4372,"hz":203.72766720055284},
+    "timestamp_regressions": {"camera":0,"lidar":0,"imu":0}
+  },
+  "algorithm": {
+    "visual_updates":404,
+    "progress_records":810,
+    "lio_mean_s":0.0102490099,
+    "lio_p95_s":0.02206625,
+    "icp_mean_s":0.0088824554,
+    "vio_mean_s":0.0065368465,
+    "peak_rss_mib":300.99,
+    "cpu_s":12.81,
+    "queues_at_end":[1,0]
+  },
+  "task": {"warnings":2,"errors":0,"all_processes_exit_0":true,"raw_bag_sha256_verified":true,"board_bag_deleted_after_verify":true},
+  "warnings": ["Reset ImuProcess (累计 2)"],
+  "accuracy": {"verified":false,"note":"Sensors were static and not rigidly calibrated; this is a throughput/link validation only."},
+  "conclusion": "The real AVIA+FLIR+IMU path runs FAST-LIVO2 on RK3588 with a unified timestamp bridge and no sustained queue growth. The 20-second run produced 404 visual updates at the camera's 20 Hz input, with all processes exiting cleanly."
+}
