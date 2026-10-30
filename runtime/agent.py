@@ -150,7 +150,7 @@ def run(job,lockfd):
         state('saving')
         # Stop producers before the algorithm. Master remains available for shutdown.
         stop_order=['play','camera','livox','decode','livo','record','probe','calibration']
-        if cfg.get('mode')=='capture_live':stop_order=['play','livo','decode','camera','livox','record','probe','calibration']
+        if cfg.get('mode')=='capture_live':stop_order=['play','livo','decode','bridge','camera','livox','record','probe','calibration']
         for name in stop_order:
             try:stop(name)
             except Exception as e:failure=(failure+'; ' if failure else '')+str(e)
@@ -178,7 +178,7 @@ def run(job,lockfd):
                 except ValueError:pass
         if not capture_mode and not calibration_mode and (not poses or not pcds):failure=(failure+'; ' if failure else '')+'Missing trajectory or map'
         if any(not all(math.isfinite(v) for v in row) for row in poses):failure=(failure+'; ' if failure else '')+'Non-finite trajectory'
-        if poses and not requested_stop and cfg['expected_end_s']-poses[-1][0]>cfg['tail_tolerance_s']:failure=(failure+'; ' if failure else '')+'Trajectory does not cover sequence end'
+        if poses and not requested_stop and cfg.get('expected_end_s') is not None and cfg['expected_end_s']-poses[-1][0]>cfg['tail_tolerance_s']:failure=(failure+'; ' if failure else '')+'Trajectory does not cover sequence end'
         exits={name:p.returncode for name,p in processes.items()}
         # ROS's normal SIGINT shutdown may return 0 or -SIGINT for helper tools.
         if not capture_mode and not calibration_mode and exits.get('livo')!=0:failure=(failure+'; ' if failure else '')+'LIVO did not exit cleanly'

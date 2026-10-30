@@ -254,9 +254,9 @@ def prepare(c,job,install,root):
     return cfg
 
 
-def write_algorithm_config(c,cfg,job,root,image_transport):
+def write_algorithm_config(c,cfg,job,root,image_transport,topics=None):
     """Generate one LIVO2 config for replay and live sensor modes."""
-    upstream=yaml.safe_load((ROOT/'third_party/FAST-LIVO2/config/avia.yaml').read_text());upstream['common'].update(img_topic=c['topics']['image'],lid_topic=c['topics']['lidar'],imu_topic=c['topics']['imu'])
+    topics=topics or c['topics'];upstream=yaml.safe_load((ROOT/'third_party/FAST-LIVO2/config/avia.yaml').read_text());upstream['common'].update(img_topic=topics['image'],lid_topic=topics['lidar'],imu_topic=topics['imu'])
     upstream['runtime']=dict(opencv_threads=c['runtime']['opencv_threads'])
     upstream['time_offset'].update(img_time_offset=0.0,imu_time_offset=0.0)
     e=c['extrinsics'];upstream['extrin_calib']=dict(extrinsic_T=e['t_imu_lidar'],extrinsic_R=e['R_imu_lidar'],Rcl=e['R_camera_lidar'],Pcl=e['t_camera_lidar'])
@@ -285,7 +285,8 @@ def prepare_live(c,job,install,root):
         codes=[info['broadcast_code']];(job/'device.json').write_text(json.dumps(info,indent=2)+'\n');print('发现 AVIA：'+info['ip']+' / '+info['broadcast_code'],flush=True)
     (job/'livox.json').write_text(json.dumps(dict(lidar_config=[dict(broadcast_code=s,enable_connect=True,return_mode=0,coordinate=0,imu_rate=1,extrinsic_parameter_source=0,enable_high_sensitivity=False) for s in codes],timesync_config=dict(enable_timesync=False)),indent=2)+'\n')
     (job/'livox.yaml').write_text(yaml.safe_dump(dict(xfer_format=1,multi_topic=0,data_src=0,publish_freq=cap['livox']['publish_hz'],output_data_type=0,user_config_path=root+'/runs/'+job.name+'/livox.json',frame_id='livox_frame',enable_lidar_bag=False,enable_imu_bag=False)))
-    write_algorithm_config(c,cfg,job,root,'raw');(job/'config.resolved.yaml').write_text(yaml.safe_dump(c,allow_unicode=True,sort_keys=False));return cfg
+    cfg['algorithm_topics']={'lidar':'/livo2/live/lidar','imu':'/livo2/live/imu','image':c['topics']['image']}
+    write_algorithm_config(c,cfg,job,root,'raw',cfg['algorithm_topics']);(job/'config.json').write_text(json.dumps(cfg,indent=2)+'\n');(job/'config.resolved.yaml').write_text(yaml.safe_dump(c,allow_unicode=True,sort_keys=False));return cfg
 
 
 def task_config(c,root,install,mode):

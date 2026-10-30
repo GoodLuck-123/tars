@@ -38,7 +38,7 @@ def verify(job):
                 counts[topic]=counts.get(topic,0)+info.message_count;types[topic]=info.msg_type
     for spec in cfg['capture_topics'].values():
         if counts.get(spec['topic'],0)<1 or types.get(spec['topic'])!=spec['type']:raise RuntimeError('Missing/wrong recorded stream: '+spec['topic'])
-    report=dict(mode=cfg['mode'],hardware_verified=cfg['mode'] in {'capture','capture_lidar'},verified_streams=list(cfg['capture_topics']),calibration_verified=cfg.get('calibration_verified',False),bags=[dict(file=p.name,bytes=p.stat().st_size) for p in bags],counts=counts,types=types)
+    report=dict(mode=cfg['mode'],hardware_verified=cfg['mode'] in {'capture','capture_lidar','capture_live'},verified_streams=list(cfg['capture_topics']),calibration_verified=cfg.get('calibration_verified',False),bags=[dict(file=p.name,bytes=p.stat().st_size) for p in bags],counts=counts,types=types)
     write_json(job/'capture-report.json',report)
 
 
