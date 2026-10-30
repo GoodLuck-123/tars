@@ -104,8 +104,8 @@ capture:
     serial: "24223920"
     fps: 20.0
     pixel_format: BayerRG8    # 原始彩色 Bayer，回看时转 RGB，不改变录制数据
-    width: 0                 # 0 使用相机完整幅面
-    height: 0
+    width: 0                 # record 可用 0；live 算法模式请填实际 ROI 宽高
+    height: 0                # 例如 1280x1024，必须与板端解码器输入一致
     offset_x: 0
     offset_y: 0
     exposure_auto: "Off"      # 默认全部手动；需要自动时才设 Continuous

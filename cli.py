@@ -247,6 +247,15 @@ def prepare(c,job,install,root):
         start=r.start_time/1e9+c['dataset']['start_s'];end=min(r.end_time/1e9,start+c['dataset']['duration_s']) if c['dataset']['duration_s'] is not None else r.end_time/1e9
         input_info=dict(path=str(p),sha256=ident,start_s=start,end_s=end,topics=[dict(topic=x.topic,type=x.msgtype,count=x.msgcount) for x in r.connections])
     cfg=task_config(c,root,install,'dataset');cfg.update(bag=bag,rate=c['dataset']['rate'],start_s=c['dataset']['start_s'],duration_s=c['dataset']['duration_s'],expected_end_s=end,tail_tolerance_s=c['dataset']['tail_tolerance_s'],image_input=image_key,image_transport=image_transport)
+    job.mkdir(parents=True)
+    for name,value in [('config.json',cfg),('input.json',input_info)]: (job/name).write_text(json.dumps(value,indent=2)+'\n')
+    write_algorithm_config(c,cfg,job,root,image_transport)
+    (job/'config.resolved.yaml').write_text(yaml.safe_dump(c,allow_unicode=True,sort_keys=False))
+    return cfg
+
+
+def write_algorithm_config(c,cfg,job,root,image_transport):
+    """Generate one LIVO2 config for replay and live sensor modes."""
     upstream=yaml.safe_load((ROOT/'third_party/FAST-LIVO2/config/avia.yaml').read_text());upstream['common'].update(img_topic=c['topics']['image'],lid_topic=c['topics']['lidar'],imu_topic=c['topics']['imu'])
     upstream['runtime']=dict(opencv_threads=c['runtime']['opencv_threads'])
     upstream['time_offset'].update(img_time_offset=0.0,imu_time_offset=0.0)
@@ -257,15 +266,31 @@ def prepare(c,job,install,root):
     if min(ow,oh)<1:raise ValueError('Scaled camera dimensions must be positive')
     upstream['decoder']=dict(K=[fx,0,cx,0,fy,cy,0,0,1],D=c['camera']['distortion'],width=w,height=h,output_width=ow,output_height=oh,input_transport=image_transport,output_encoding=c['camera']['output_encoding'])
     cam=dict(cam_model='Pinhole',cam_width=ow,cam_height=oh,scale=1.0,cam_fx=fx*ow/w,cam_fy=fy*oh/h,cam_cx=cx*ow/w,cam_cy=cy*oh/h,cam_d0=0.0,cam_d1=0.0,cam_d2=0.0,cam_d3=0.0)
-    job.mkdir(parents=True)
-    for name,value in [('config.json',cfg),('input.json',input_info)]: (job/name).write_text(json.dumps(value,indent=2)+'\n')
-    for name,value in [('algorithm.yaml',upstream),('camera.yaml',cam),('config.resolved.yaml',c)]: (job/name).write_text(yaml.safe_dump(value,allow_unicode=True,sort_keys=False))
-    return cfg
+    (job/'algorithm.yaml').write_text(yaml.safe_dump(upstream,allow_unicode=True,sort_keys=False));(job/'camera.yaml').write_text(yaml.safe_dump(cam,allow_unicode=True,sort_keys=False))
+
+
+def prepare_live(c,job,install,root):
+    cap=c['capture']
+    if cap['camera']['type']!='spinnaker':raise ValueError('live mode currently requires capture.camera.type: spinnaker')
+    if not cap['camera'].get('width') or not cap['camera'].get('height'):raise ValueError('live mode requires capture.camera.width and height; set the actual acquisition ROI in project.yaml')
+    cfg=task_config(c,root,install,'capture_live');cfg.update(mode='capture_live',capture=cap,calibration_verified=cap['calibration_verified'])
+    cfg['capture_topics']={k:dict(topic=c['topics'][key],type=typ) for k,key,typ in [('lidar','lidar','livox_ros_driver/CustomMsg'),('imu','imu','sensor_msgs/Imu'),('image','raw_image','sensor_msgs/Image')]}
+    cfg['capture']['camera_command']=[install+'/bin/livo_flir_camera','image_raw:='+c['topics']['raw_image'],'metadata:='+c['topics']['camera_metadata'],'camera_info:='+c['topics']['camera_info']]
+    cfg['capture']['extra_topics']=list(dict.fromkeys([*cap['extra_topics'],c['topics']['camera_metadata'],c['topics']['camera_info']]))
+    job.mkdir(parents=True,exist_ok=True)
+    (job/'camera-driver.yaml').write_text(yaml.safe_dump({k:v for k,v in cap['camera'].items() if k!='type'}));(job/'config.json').write_text(json.dumps(cfg,indent=2)+'\n')
+    codes=cap['livox']['broadcast_codes'];info=json.loads(remote(c,(ROOT/'runtime/livox_discovery.py').read_text(),[cap['livox']['ip']])) if cap['livox'].get('ip') else None
+    if info:
+        if codes and info['broadcast_code'] not in codes:raise RuntimeError('Livox IP and configured broadcast codes do not match')
+        codes=[info['broadcast_code']];(job/'device.json').write_text(json.dumps(info,indent=2)+'\n');print('发现 AVIA：'+info['ip']+' / '+info['broadcast_code'],flush=True)
+    (job/'livox.json').write_text(json.dumps(dict(lidar_config=[dict(broadcast_code=s,enable_connect=True,return_mode=0,coordinate=0,imu_rate=1,extrinsic_parameter_source=0,enable_high_sensitivity=False) for s in codes],timesync_config=dict(enable_timesync=False)),indent=2)+'\n')
+    (job/'livox.yaml').write_text(yaml.safe_dump(dict(xfer_format=1,multi_topic=0,data_src=0,publish_freq=cap['livox']['publish_hz'],output_data_type=0,user_config_path=root+'/runs/'+job.name+'/livox.json',frame_id='livox_frame',enable_lidar_bag=False,enable_imu_bag=False)))
+    write_algorithm_config(c,cfg,job,root,'raw');(job/'config.resolved.yaml').write_text(yaml.safe_dump(c,allow_unicode=True,sort_keys=False));return cfg
 
 
 def task_config(c,root,install,mode):
     rt=dict(c['runtime'])
-    if c.get('_host') or mode!='dataset':rt.update(livo_cpus=[],cpu_governor=None)
+    if c.get('_host') or mode not in {'dataset','capture_live'}:rt.update(livo_cpus=[],cpu_governor=None)
     return dict(mode=mode,workspace=root,install=install,topics=c['topics'],monitoring=c['monitoring'],runtime=rt,**{k:c['run'][k] for k in ['timeout_s','shutdown_timeout_s','drain_timeout_s','min_free_gib']})
 
 
@@ -390,7 +415,8 @@ def main():
     p.add_argument('--config',default=str(ROOT/'project.yaml'),help='选择完整配置文件，默认 project.yaml')
     p.add_argument('--host',action='store_true',help='在主机私有环境运行；默认连接板端')
     sub=p.add_subparsers(dest='command',required=True)
-    for name,help_text in [('build','仅构建 SDK/驱动/算法；--host 构建主机工具'),('deploy','仅部署运行环境'),('ssh','进入私有 ROS 环境和当前任务'),('run','运行配置中的数据集并回传；--host 在电脑处理'),('stop','正常停止当前任务并回传')]:sub.add_parser(name,help=help_text)
+    for name,help_text in [('build','仅构建 SDK/驱动/算法；--host 构建主机工具'),('deploy','仅部署运行环境'),('ssh','进入私有 ROS 环境和当前任务'),('run','运行配置中的数据集并回传；--host 在电脑处理'),('live','板端真实传感器运行 FAST-LIVO2 并同时录包'),('stop','正常停止当前任务并回传')]:sub.add_parser(name,help=help_text)
+    sub.choices['live'].add_argument('--background',action='store_true',help='确认三路传感器收数后返回，板端算法和录包独立运行')
     sp=sub.add_parser('doctor',help='检查环境与数据；--sensors 只检查采集端');sp.add_argument('--sensors',action='store_true',help='检查采集端环境与设备节点，不依赖示例数据集')
     sp=sub.add_parser('record',help='录制传感器数据并回传');sp.add_argument('--background',action='store_true',help='确认收数后返回，板端独立录制，使用 stop 结束并回传');sp.add_argument('--replay',action='store_true',help='无硬件演练，使用配置中的现有 bag')
     sp=sub.add_parser('lidar',help='仅启动 AVIA 点云/IMU 并录包，不需要相机；本机加 --host');sp.add_argument('--background',action='store_true',help='确认点云/IMU 收数后返回，主机断线仍录制，用 stop 结束并回传')
@@ -459,18 +485,19 @@ def main():
         except (subprocess.CalledProcessError,ValueError,KeyError):pass
         if c.get('_host'):local(['bash','-c',cmd])
         else:subprocess.run(['ssh','-t','-p',str(c['board']['ssh_port']),c['board']['target'],'bash -c '+shlex.quote(cmd)],check=True)
-    elif a.command in {'run','record','calibrate','lidar'}:
+    elif a.command in {'run','record','calibrate','lidar','live'}:
         if a.command=='run' or (a.command=='record' and a.replay):doctor(c)
         root=workspace(c)
         remote(c,'from pathlib import Path;import sys;Path(sys.argv[1]).mkdir(parents=True,exist_ok=True)',[root]);ensure_idle(c,root)
         root,install=deploy(c);runid=time.strftime('%Y%m%d-%H%M%S')+'-'+uuid.uuid4().hex[:6];job=Path(c['results_dir'])/runid
-        if a.command in {'record','lidar'}:prepare_capture(c,job,install,root,a.replay if a.command=='record' else False,a.command=='lidar')
+        if a.command=='live':prepare_live(c,job,install,root)
+        elif a.command in {'record','lidar'}:prepare_capture(c,job,install,root,a.replay if a.command=='record' else False,a.command=='lidar')
         elif a.command=='calibrate':prepare_calibration(c,job,install,root)
         else:prepare(c,job,install,root)
         remotejob=root+'/runs/'+runid
         remote(c,'from pathlib import Path;import sys;Path(sys.argv[1]).mkdir(exist_ok=False)',[remotejob]);sync(c,str(job)+'/',remotejob+'/')
         command=shlex.join(['/usr/bin/python3',install+'/runtime/agent.py','start',remotejob]);print(ssh(c,command,capture_output=True,text=True).stdout.strip())
-        if a.command in {'lidar','record'} and a.background:
+        if a.command in {'lidar','record','live'} and a.background:
             wait_capture(c,remotejob);return
         time.sleep(1)
         try:s=follow(c,remotejob)

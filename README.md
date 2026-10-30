@@ -10,6 +10,7 @@
 cp project.example.yaml project.yaml   # 已有配置时跳过
 ./livo doctor --sensors                # 检查板端环境、驱动产物与设备节点
 ./livo record --background             # 板端实机录相机/点云/IMU，确认收数后返回
+./livo live --background               # 板端实传感器运行 FAST-LIVO2，同时录制原始数据
 ./livo --host run                      # 电脑离线运行 LIVO2，自动准备环境
 ./livo status --follow                # 查看板端当前任务摘要和重要告警
 ./livo stop                           # 有序停止并回传
@@ -57,6 +58,8 @@ capture:
 `board.sync_time:true` 默认在部署/启动前**持有空闲任务锁**时将大于 5 秒的板端时钟误差按主机修正，需要板端 `sudo -n date` 权限；录制期间不会校时。此操作只纠正系统日期，不是曝光、LiDAR 或 IMU 的精密时间同步。板子无需联网校时。
 
 `status --follow` 给低频计数/频率和聚合 WARN/ERROR，`status --raw` 按需查看驱动/相机/recorder 原始日志。重复启动会拒绝且不干扰当前采集；驱动退出或断流会结束并保存失败证据，`stop` 返回失败退出码。正在写入的包不能 pull，先 stop；断线后已经结束的任务可用 pull 补收。
+
+实时性探索分支还提供 `./livo live --background`：板端同时启动 AVIA、FLIR、FAST-LIVO2 和 rosbag，主机断线不影响任务；重连后用 `./livo status`、`./livo stop`。该模式要求 `capture.camera.width/height` 写成实际采集 ROI，算法输入可通过 `camera.output_encoding: mono8` 使用灰度链路；当前硬件外参、同步和位姿精度仍未验收。算法日志、队列、频率、CPU/RSS、WARN/ERROR 和原始包会进入同一任务结果，方便后续 debug 界面复用。
 
 ## 在主机单独运行 AVIA
 

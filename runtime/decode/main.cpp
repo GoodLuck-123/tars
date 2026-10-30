@@ -38,7 +38,20 @@ int main(int argc, char** argv) {
     sub=nh.subscribe<sensor_msgs::Image>("raw",20,[&](const sensor_msgs::ImageConstPtr& msg) {
       try {
         if (int(msg->width)!=width || int(msg->height)!=height) { ROS_ERROR("Raw image dimensions do not match camera configuration"); return; }
-        publish(cv_bridge::toCvShare(msg,"bgr8")->image,msg->header);
+        cv::Mat input=cv_bridge::toCvShare(msg,"passthrough")->image, normalized;
+        const std::string& encoding=msg->encoding;
+        if (encoding=="bayer_rggb8" || encoding=="bayer_bggr8" || encoding=="bayer_grbg8" || encoding=="bayer_gbrg8") {
+          if (output_encoding=="mono8") normalized=input;
+          else {
+            int code=encoding=="bayer_rggb8" ? cv::COLOR_BayerRG2BGR : encoding=="bayer_bggr8" ? cv::COLOR_BayerBG2BGR : encoding=="bayer_grbg8" ? cv::COLOR_BayerGR2BGR : cv::COLOR_BayerGB2BGR;
+            cv::cvtColor(input,normalized,code);
+          }
+        } else if (encoding=="mono8") {
+          if (output_encoding=="mono8") normalized=input; else cv::cvtColor(input,normalized,cv::COLOR_GRAY2BGR);
+        } else {
+          normalized=cv_bridge::toCvShare(msg,"bgr8")->image;
+        }
+        publish(normalized,msg->header);
       } catch (const cv_bridge::Exception& e) { ROS_ERROR("Image conversion failed: %s",e.what()); }
         catch (const cv::Exception& e) { ROS_ERROR("Image rectify failed: %s",e.what()); }
     });

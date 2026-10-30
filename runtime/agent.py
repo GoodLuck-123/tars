@@ -149,7 +149,9 @@ def run(job,lockfd):
     finally:
         state('saving')
         # Stop producers before the algorithm. Master remains available for shutdown.
-        for name in ['play','camera','livox','decode','livo','record','probe','calibration']:
+        stop_order=['play','camera','livox','decode','livo','record','probe','calibration']
+        if cfg.get('mode')=='capture_live':stop_order=['play','livo','decode','camera','livox','record','probe','calibration']
+        for name in stop_order:
             try:stop(name)
             except Exception as e:failure=(failure+'; ' if failure else '')+str(e)
         if capture_mode:

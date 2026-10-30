@@ -19,6 +19,10 @@ def run(cfg,job,install,spawn,ros,alive,state,processes,master):
         if 'image' in topics:
             if (job/'camera-driver.yaml').exists():ros(['rosparam','load',job/'camera-driver.yaml','/livo_camera'])
             spawn('camera',cap['camera_command'])
+        if cfg['mode']=='capture_live':
+            ros(['rosparam','load',job/'algorithm.yaml']);ros(['rosparam','load',job/'camera.yaml','/laserMapping'])
+            spawn('decode',[install/'bin/livo_image_decode','raw:='+cfg['topics']['raw_image'],'image:='+cfg['topics']['image']])
+            spawn('livo',[install/'bin/fastlivo_mapping'])
     state('waiting for sensor data');deadline=time.monotonic()+cap['startup_timeout_s'];ready=False;started=None
     while True:
         alive()
