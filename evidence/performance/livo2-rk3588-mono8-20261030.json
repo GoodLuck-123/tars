@@ -1,0 +1,11 @@
+{
+  "branch": "codex/livo2-rk3588-realtime",
+  "module_commit": "5670daa",
+  "runs": [
+    {"run_id":"20261030-115000-6dc3a9","elapsed_s":46.53278455100008,"visual_updates":442,"poses":443,"lio_mean_s":0.0646848962,"lio_p95_s":0.0960864,"icp_mean_s":0.0559010384,"vio_mean_s":0.0075238303,"decode_cpu_s":11.57,"livo_cpu_s":53.23,"peak_livo_rss_mib":588.94,"queues":[0,1]},
+    {"run_id":"20261030-115254-afaa5e","elapsed_s":45.994654371000024,"visual_updates":441,"poses":442,"lio_mean_s":0.0649896131,"lio_p95_s":0.0979036,"icp_mean_s":0.0561153597,"vio_mean_s":0.0076748141,"decode_cpu_s":11.71,"livo_cpu_s":53.56,"peak_livo_rss_mib":590.25,"queues":[0,1]}
+  ],
+  "baseline_reference": {"run_id":"20261030-113818-c6f9b3","elapsed_s":48.021240949000116,"visual_updates":441,"lio_mean_s":0.0671406448,"icp_mean_s":0.0580504072,"peak_livo_rss_mib":642.13},
+  "input": {"dataset_sha256":"f46c44f583525b52167da8b3b00d3c6973e24e4811d62b9bba5e0caebb4f0f0f","duration_s":30.0,"camera_output_encoding":"mono8"},
+  "conclusion": "The selectable mono8 decoder is repeatably positive on the same RK3588 dataset segment. It reduces decode-side color work without changing FAST-LIVO2 source or camera geometry. It remains an experiment configuration, not a tars/main default."
+}
